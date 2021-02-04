@@ -83,10 +83,11 @@ public class OSMExtractor {
             // Filter to only nodes that are associated to a way.
             File csv = new File("raw.csv");
             try (PrintWriter pw = new PrintWriter(csv)) {
-                wayIdToNodes.forEach((k,v) -> {
-                    v.forEach( id -> {
-                        String latlon = nodeIdToLatlong.get(id);
-                        pw.write(latlon + ",\n");
+                pw.write("lat,lon,wayID,\n");
+                wayIdToNodes.forEach((wayID, nodes) -> {
+                    nodes.forEach( nodeID -> {
+                        String latlon = nodeIdToLatlong.get(nodeID);
+                        pw.write(latlon + "," + wayID + ",\n");
                         // System.out.println(latlon + ",");
                     });
                 });
