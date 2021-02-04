@@ -42,9 +42,9 @@ public class OSMExtractor {
                     // We hit a node, save its lat, long separated by a comma
                     // <node id="..." lat="..." lon="..."> has attributes id, lat, lon.
                     // We just save all nodes, and then filter them later
-                    String id = n.getAttributes().getNamedItem("id").getNodeValue();
-                    String lat = n.getAttributes().getNamedItem("lat").getNodeValue();
-                    String lon = n.getAttributes().getNamedItem("lon").getNodeValue();
+                    String id = getAttribute(n, "id");
+                    String lat = getAttribute(n, "lat");
+                    String lon = getAttribute(n, "lon");
                     nodeIdToLatlong.put(id, lat + "," + lon);
                 }
                 if ("way".equals(type)) {
@@ -54,7 +54,7 @@ public class OSMExtractor {
                     //   <tag k="..." v="...">
                     // </way>
                     // So way has attribute id, and a list of children that contains an "nd" and a "tag".
-                    String id = n.getAttributes().getNamedItem("id").getNodeValue();
+                    String id = getAttribute(n, "id");
                     NodeList children = n.getChildNodes();
                     Collection<String> childIDs = new ArrayList<>();
 
@@ -64,10 +64,10 @@ public class OSMExtractor {
                     for (int j = 0; j < children.getLength(); j++) {
                         Node child = children.item(j);
                         if ("nd".equals(child.getNodeName())){
-                            childIDs.add(child.getAttributes().getNamedItem("ref").getNodeValue());
+                            childIDs.add(getAttribute(child, "ref"));
                         }
                         if ("tag".equals(child.getNodeName())) {
-                            String k = child.getAttributes().getNamedItem("k").getNodeValue();
+                            String k = getAttribute(child, "k");
                             if ("highway".equals(k)) {
                                 isHighway = true;
                             }
@@ -98,6 +98,15 @@ public class OSMExtractor {
             System.out.println(e);
         }
 
+    }
+
+
+    private static String getAttribute(Node n, String key) {
+        Node keyNode = n.getAttributes().getNamedItem(key);
+        if (keyNode != null) {
+            return keyNode.getNodeValue();
+        }
+        return "";
     }
 }
 
