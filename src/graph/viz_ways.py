@@ -44,15 +44,68 @@ df = pd.read_csv("raw.csv")
 print(df.head())
 
 def hashAndColorfy(id):
-    hashed = hashlib.md5( str(id).encode() ).hexdigest()
-    h = abs( int(hashed, 16) ) 
-    return ((int(str(h)[:3])%256)/256, (int(str(h)[4:7])%256)/256, (int(str(h)[8:11])%256)/256)
+        hashed = hashlib.md5( str(id).encode() ).hexdigest()
+        h = abs( int(hashed, 16) ) 
+        return ((int(str(h)[:3])%256)/256, (int(str(h)[4:7])%256)/256, (int(str(h)[8:11])%256)/256)
 
-df["wayID"] = df["wayID"].map(lambda id : hashAndColorfy(id) )
 
-print(df.head())
 
-# plot the whole DF
-axes.scatter(df["lon"], df["lat"], s=2, c=df["wayID"], alpha=1)
+def printPoints():
+    df["wayID"] = df["wayID"].map(lambda id : hashAndColorfy(id) )
+    
+    print(df.head())
 
-plt.show()
+    # plot the whole DF
+    axes.scatter(df["lon"], df["lat"], s=2, c=df["wayID"], alpha=1)
+
+    plt.show()
+
+
+def printLines():
+    # Overall idea: currently in the csv, nodes come in ordered from the "way"s.
+    # So just check the wayID, and when it changes we know we hit a new way.
+    lines = pd.DataFrame(data=None, columns=["x1", "y1", "x2", "y2", "color"])
+    prev_wayID = None
+    prev_x = prev_y = None
+
+    print(lines.head())
+
+    for i in range(df.shape[0]):
+        if df["wayID"][i] != prev_wayID:
+            # new way, start over again
+            prev_x, prev_y = df["lon"][i], df["lat"][i]
+            prev_wayID = df["wayID"][i]
+            continue
+        else:
+            # Same road, continue
+            curr_x, curr_y = df["lon"][i], df["lat"][i]
+            color = hashAndColorfy(df["wayID"][i])
+            new_row = {"x1": prev_x, "y1": prev_y, "x2": curr_x, "y2": curr_y, "color": color}
+            lines = lines.append(new_row, ignore_index=True)
+            prev_x, prev_y = curr_x, curr_y
+
+    print("---> after filling:")
+    print(lines.head())
+
+    #   DRAW!
+    for i in range(lines.shape[0]):
+        # x is an array of [x1, x2], y an array of [y1, y2]
+        x, y = [lines["x1"][i], lines["x2"][i]], [lines["y1"][i], lines["y2"][i]]
+        plt.plot(x, y, alpha=0.7, linewidth=0.5, c=lines["color"][i])#, marker="o")
+        
+    plt.axis('off')
+    plt.gca().set_position([0, 0, 1, 1])
+    plt.savefig("lines.svg")
+
+
+
+    plt.show()
+
+
+
+#printPoints()
+printLines()
+
+
+
+
