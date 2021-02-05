@@ -27,9 +27,14 @@ public class OSMExtractor {
             //                        and  wayID -> [nodeID1, nodeID2,...]
             Map<String, String> nodeIdToLatlong = new HashMap<>();
             Map<String, Collection<String>> wayIdToNodes = new HashMap<>();
+            Map<String, Integer> refsPerNode = new HashMap<>();
 
             // Filter to XML tags of type node and way
             Collection<String> wantedTypes = Arrays.asList(new String[]{"node", "way"});
+            Collection<String> carTypes = Arrays.asList(new String[]{"motorway", "trunk", "primary", "secondary", "tertiary", "unclassified", "residential",
+                                                                     "motorway_link", "trunk_link", "primary_link", "secondary_link", "tertiary_link",
+                                                                     "living_street", "service"});
+            // above: the list of "highway" tag values that are for car travel. Excluding walking streets, but that should be okay.
             for (int i = 0; i < osm.getLength(); i++) {
                 Node n = osm.item(i);
                 String type = n.getNodeName();
@@ -58,22 +63,25 @@ public class OSMExtractor {
                     NodeList children = n.getChildNodes();
                     Collection<String> childIDs = new ArrayList<>();
 
-                    // Save for later whether this way has a "highway" tag.
-                    boolean isHighway = false;
+                    // Save for later whether this way has a "highway" tag and is a "car" type road.
+                    boolean isCarAccessible = false;
 
                     for (int j = 0; j < children.getLength(); j++) {
                         Node child = children.item(j);
                         if ("nd".equals(child.getNodeName())){
-                            childIDs.add(getAttribute(child, "ref"));
+                            String nodeID = getAttribute(child, "ref");
+                            childIDs.add(nodeID);
+                            refsPerNode.put(nodeID, refsPerNode.getOrDefault(nodeID, 0) + 1);
                         }
                         if ("tag".equals(child.getNodeName())) {
                             String k = getAttribute(child, "k");
-                            if ("highway".equals(k)) {
-                                isHighway = true;
+                            String v = getAttribute(child, "v");
+                            if ("highway".equals(k) && carTypes.contains(v)) {
+                                isCarAccessible = true;
                             }
                         }
                     }
-                    if (isHighway) {
+                    if (isCarAccessible) {
                         wayIdToNodes.put(id, childIDs);
                     }
                 }
@@ -84,13 +92,17 @@ public class OSMExtractor {
             File csv = new File("raw.csv");
             try (PrintWriter pw = new PrintWriter(csv)) {
                 pw.write("lat,lon,wayID,\n");
+                
                 wayIdToNodes.forEach((wayID, nodes) -> {
                     nodes.forEach( nodeID -> {
-                        String latlon = nodeIdToLatlong.get(nodeID);
-                        pw.write(latlon + "," + wayID + ",\n");
-                        // System.out.println(latlon + ",");
+                        // if we only want "intersection", enable if statement:
+                        //if (refsPerNode.getOrDefault(nodeID, 0) > 1) {
+                            String latlon = nodeIdToLatlong.get(nodeID);
+                            pw.write(latlon + "," + wayID + ",\n");
+                        //}
                     });
                 });
+                
             } catch(Exception e) {
                 System.out.println("--> " + e);
             }
