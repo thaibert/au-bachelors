@@ -1,6 +1,6 @@
 package pathfinding.standard;
 
-import pathfinding.framework;
+import pathfinding.framework.*;
 
 public class Dijkstra implements PathfindingAlgo {
  
@@ -11,7 +11,7 @@ public class Dijkstra implements PathfindingAlgo {
      * I think at least
     */
 
-    public void solve(G: Graph, w: Weight, s: StartingPoint){
+    public void solve(){
         
 
 
