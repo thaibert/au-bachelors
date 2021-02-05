@@ -58,26 +58,35 @@ public class OSMExtractor {
                     //   <nd ref="...">
                     //   <tag k="..." v="...">
                     // </way>
-                    // So way has attribute id, and a list of children that contains an "nd" and a "tag".
+                    // So way has attribute id, and a list of child nodes including an "nd" and a "tag".
                     String id = getAttribute(n, "id");
                     NodeList children = n.getChildNodes();
                     Collection<String> childIDs = new ArrayList<>();
 
-                    // Save for later whether this way has a "highway" tag and is a "car" type road.
+                    // Save for later whether this way has a "highway" tag and is a "car type road".
                     boolean isCarAccessible = false;
 
-                    for (int j = 0; j < children.getLength(); j++) {
+                    // First check for "tag"s
+                    for (int j = children.getLength()-1; j >=0 ; j--) {
                         Node child = children.item(j);
-                        if ("nd".equals(child.getNodeName())){
-                            String nodeID = getAttribute(child, "ref");
-                            childIDs.add(nodeID);
-                            refsPerNode.put(nodeID, refsPerNode.getOrDefault(nodeID, 0) + 1);
-                        }
                         if ("tag".equals(child.getNodeName())) {
                             String k = getAttribute(child, "k");
                             String v = getAttribute(child, "v");
                             if ("highway".equals(k) && carTypes.contains(v)) {
                                 isCarAccessible = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    for (int j = 0; j < children.getLength(); j++) {
+                        Node child = children.item(j);
+                        if ("nd".equals(child.getNodeName())){
+                            String nodeID = getAttribute(child, "ref");
+                            childIDs.add(nodeID);
+                            if (isCarAccessible) {
+                                // Only count how many roads ref this node
+                                refsPerNode.put(nodeID, refsPerNode.getOrDefault(nodeID, 0) + 1);
                             }
                         }
                     }
@@ -89,17 +98,35 @@ public class OSMExtractor {
 
             // Output the collected lat/lon data from nodes to a csv.
             // Filter to only nodes that are associated to a way.
-            File csv = new File("raw.csv");
-            try (PrintWriter pw = new PrintWriter(csv)) {
+
+            System.out.println("-> Writing all-roads.csv");
+            File csv1 = new File("all-roads.csv");
+            try (PrintWriter pw = new PrintWriter(csv1)) {
                 pw.write("lat,lon,wayID,\n");
                 
                 wayIdToNodes.forEach((wayID, nodes) -> {
                     nodes.forEach( nodeID -> {
-                        // if we only want "intersection", enable if statement:
-                        //if (refsPerNode.getOrDefault(nodeID, 0) > 1) {
                             String latlon = nodeIdToLatlong.get(nodeID);
                             pw.write(latlon + "," + wayID + ",\n");
-                        //}
+                    });
+                });
+                
+            } catch(Exception e) {
+                System.out.println("--> " + e);
+            }
+
+            System.out.println("-> Writing intersections.csv");
+            File csv2 = new File("intersections.csv");
+            try (PrintWriter pw = new PrintWriter(csv2)) {
+                pw.write("lat,lon,wayID,\n");
+                
+                wayIdToNodes.forEach((wayID, nodes) -> {
+                    nodes.forEach( nodeID -> {
+                        // Filtering on ways ref'ing this node filter for intersections!
+                            if (refsPerNode.getOrDefault(nodeID, 0) > 1) {
+                            String latlon = nodeIdToLatlong.get(nodeID);
+                            pw.write(latlon + "," + wayID + ",\n");
+                        }
                     });
                 });
                 

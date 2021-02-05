@@ -40,8 +40,9 @@ def coordinatesOnFigure(long, lat, SW=SW, NE=NE, xmax=xmax, ymin=ymin):
 
 
 
-df = pd.read_csv("raw.csv")
-print(df.head())
+all_roads = pd.read_csv("all-roads.csv")
+intersect = pd.read_csv("intersections.csv")
+
 
 def hashAndColorfy(id):
         hashed = hashlib.md5( str(id).encode() ).hexdigest()
@@ -50,62 +51,61 @@ def hashAndColorfy(id):
 
 
 
-def printPoints():
-    df["wayID"] = df["wayID"].map(lambda id : hashAndColorfy(id) )
-    
-    print(df.head())
+def plotPoints():
+    print("--> plotting points")
+    intersect["wayID"] = intersect["wayID"].map(lambda id : hashAndColorfy(id) )
+    print("  --> points colored")
 
-    # plot the whole DF
-    axes.scatter(df["lon"], df["lat"], s=2, c=df["wayID"], alpha=1)
-
-    plt.show()
+    # plot the whole data frame
+    axes.scatter(intersect["lon"], intersect["lat"], alpha=0.7, s=2, c=intersect["wayID"], alpha=1)
 
 
-def printLines():
+
+def plotLines():
+    print("--> plotting lines")
     # Overall idea: currently in the csv, nodes come in ordered from the "way"s.
     # So just check the wayID, and when it changes we know we hit a new way.
     lines = pd.DataFrame(data=None, columns=["x1", "y1", "x2", "y2", "color"])
     prev_wayID = None
     prev_x = prev_y = None
 
-    print(lines.head())
-
-    for i in range(df.shape[0]):
-        if df["wayID"][i] != prev_wayID:
+    print("  --> calculating points")
+    for i in range(all_roads.shape[0]):
+        if all_roads["wayID"][i] != prev_wayID:
             # new way, start over again
-            prev_x, prev_y = df["lon"][i], df["lat"][i]
-            prev_wayID = df["wayID"][i]
+            prev_x, prev_y = all_roads["lon"][i], all_roads["lat"][i]
+            prev_wayID = all_roads["wayID"][i]
             continue
         else:
             # Same road, continue
-            curr_x, curr_y = df["lon"][i], df["lat"][i]
-            color = hashAndColorfy(df["wayID"][i])
+            curr_x, curr_y = all_roads["lon"][i], all_roads["lat"][i]
+            color = hashAndColorfy(all_roads["wayID"][i])
+
             new_row = {"x1": prev_x, "y1": prev_y, "x2": curr_x, "y2": curr_y, "color": color}
-            lines = lines.append(new_row, ignore_index=True)
+            lines = lines.append(new_row, ignore_index=True) ## TODO SUPER SLOW
+            
             prev_x, prev_y = curr_x, curr_y
 
-    print("---> after filling:")
-    print(lines.head())
 
-    #   DRAW!
+    # DRAW!
+    print("  --> drawing lines")
     for i in range(lines.shape[0]):
         # x is an array of [x1, x2], y an array of [y1, y2]
         x, y = [lines["x1"][i], lines["x2"][i]], [lines["y1"][i], lines["y2"][i]]
-        plt.plot(x, y, alpha=0.7, linewidth=0.5, c=lines["color"][i])#, marker="o")
-        
-    plt.axis('off')
-    plt.gca().set_position([0, 0, 1, 1])
-    plt.savefig("lines.svg")
+        plt.plot(x, y, alpha=0.7, linewidth=0.5, c=lines["color"][i]) ##
 
 
 
-    plt.show()
+plotPoints()
+plotLines()
 
+print("--> saving as svg")
+plt.axis('off')
+plt.gca().set_position([0, 0, 1, 1])
+plt.savefig("combined.svg")
 
+plt.show()
 
-#printPoints()
-printLines()
-
-
+print("--> DONE")
 
 
