@@ -46,4 +46,40 @@ public class SimpleGraph implements Graph {
         return neighborsMap.get(v);
     }
 
+    @Override
+    public void addVertex(Vertex v) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void addEdge(Vertex u, Vertex v) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public Collection<Vertex> getAllVertices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection<Vertex> getNeighboursOf(Vertex v) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean saveToFile(String filename) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean loadFromFile(String filename) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }
