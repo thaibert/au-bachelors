@@ -7,7 +7,6 @@ import java.io.*;
 
 public class Viz_ways extends Canvas{
     
-
     // NE = (10.2050, 56.1850)
     // SE = (10.2050, 56.1600)
     // SW = (10.1700, 56.1600)
@@ -16,15 +15,36 @@ public class Viz_ways extends Canvas{
     final static double MAX_LONG = 10.2050;
     final static double MIN_LAT = 56.1600;
     final static double MAX_LAT = 56.1850;
-    final static int window_x = 504*3;
-    final static int window_y = 648*3;
+    final static int window_x = 700;
+    final static int window_y = 900;
     final static int radius = 6;
 
     public void paint(Graphics g){
         setBackground(Color.white);
         
+        /*
         paintNodes(g);
         paintEdges(g);
+        */
+        drawGraph(g);
+
+    }
+
+    private void drawGraph(Graphics g) {
+        Graph graph = new GraphPopulator().populateGraph("intersections.csv");
+        graph.getAllVertices().forEach(v -> {
+            String lat = Double.toString(v.getLatitude());
+            String lon = Double.toString(v.getLongitude());
+            int[] v_coords = convertToXAndY( new String[]{lat, lon} );
+            g.drawOval(v_coords[0]-radius/2, v_coords[1]-radius/2, radius, radius);
+
+            graph.getNeighboursOf(v).forEach(n -> {
+                String n_lat = Double.toString(n.getLatitude());
+                String n_lon = Double.toString(n.getLongitude());
+                int[] n_coords = convertToXAndY(new String[]{n_lat, n_lon});
+                g.drawLine(v_coords[0], v_coords[1], n_coords[0], n_coords[1]);
+            });
+        });
 
     }
 
