@@ -55,7 +55,7 @@ public class Viz_ways extends Canvas{
                 int[] coordinates = convertToXAndY(args);
                 
                 g.drawOval(coordinates[0]-radius/2, coordinates[1]-radius/2, radius, radius);
-                System.out.printf("X coordinate: %d Y coordinate: %d \n",coordinates[0], coordinates[1]);
+                //System.out.printf("X coordinate: %d Y coordinate: %d \n",coordinates[0], coordinates[1]);
                 currentLine = reader.readLine();
             }
             reader.close(); // TODO should probably be in a final block
@@ -121,8 +121,8 @@ public class Viz_ways extends Canvas{
 
         //System.out.printf("temp dlon: %f, dlat: %f\n", d_long, d_lat);
 
-        double tempx = (lon-MIN_LONG)/d_long * window_x;
-        double tempy = (lat-MIN_LAT)/d_lat * window_y;
+        //double tempx = (lon-MIN_LONG)/d_long * window_x;
+        //double tempy = (lat-MIN_LAT)/d_lat * window_y;
 
         //System.out.printf("lon-min_long: %f, lat-min_lat: %f \n", lon-MIN_LONG, lat-MIN_LAT);
 
