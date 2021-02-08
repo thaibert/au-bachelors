@@ -20,12 +20,32 @@ public class Vertex {
         return latitude;
     }
 
-    public void equals() {
-
+    /*
+    * I think this is covering all the possibilities, but maybe there's something i missed 
+    */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true; 
+        }
+        if (obj == null) {
+            return false;
+        }
+        final Vertex other = (Vertex) obj;
+        if ((longitude != other.longitude) || (latitude != other.latitude)) {
+            return false;
+        }
+        return true;
     }
 
+    @Override
     public int hashCode() {
-        return 0;
+        final int prime = 37; // I saw on https://stackoverflow.com/questions/2265503/why-do-i-need-to-override-the-equals-and-hashcode-methods-in-java 
+                              // That they used prime in auto generated code, so now we do as well ¯\_(ツ)_/¯
+        int longHash = Double.hashCode(longitude);
+        int latHash = Double.hashCode(latitude);
+
+        return (prime + longHash + latHash); 
     }
 
 
