@@ -7,7 +7,7 @@ public class Vertex {
     private double latitude;
 
 
-    public Vertex(double longitude, double latitude) {
+    public Vertex(double latitude, double longitude) {
         this.longitude = longitude;
         this.latitude = latitude;
     }
