@@ -15,7 +15,7 @@ public class Graph {
 
     public void addVertex(double longitude, double latitude) {
         Vertex v = new Vertex(longitude, latitude);
-        // For now i'll assume we never have 2 vertexes at the same long/lat, as that is measured down to 11 ish mm
+        // For now i'll assume we never have 2 vertexes at the same long/lat, as that is measured down to 11 mm ish
         neighborsMap.putIfAbsent(v, new ArrayList<>());
     }
 
