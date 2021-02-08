@@ -8,7 +8,10 @@ import java.util.*;
 
 public class OSMExtractor {
     public static void main(String[] args) {
+        parseXMLToCSV("map.osm");
+    }
 
+    public static boolean parseXMLToCSV(String xmlFilename) {
         try{
             // Create "document builder" and use it to parse an XML file 
             // The XML file is in the same level as src/
@@ -16,7 +19,7 @@ public class OSMExtractor {
             DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
 
-            File file = new File("map.osm");
+            File file = new File(xmlFilename);
             InputStream input = new FileInputStream(file);
             Document doc = builder.parse(input);
             System.out.println("--------------------");
@@ -131,15 +134,16 @@ public class OSMExtractor {
                         }
                     });
                 });
-                
+
             } catch(Exception e) {
                 System.out.println("--> " + e);
+                return false;
             }
-
+            return true;
         } catch(Exception e) {
             System.out.println(e);
+            return false;
         }
-
     }
 
 
