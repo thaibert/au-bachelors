@@ -83,8 +83,12 @@ public class GraphPopulator {
                     continue;
                 }
 
-                graph.addEdge(prevVertex, currVertex);
-                graph.addEdge(currVertex, prevVertex);
+                double dist_lat = Math.pow(currVertex.getLatitude() - prevVertex.getLatitude(), 2);
+                double dist_lon = Math.pow(currVertex.getLongitude()- prevVertex.getLongitude(),2);
+                double dist = dist_lat + dist_lon; // should really be sqrt(d_lat+d_lon), but may be slow? todo
+
+                graph.addEdge(prevVertex, currVertex, dist);
+                graph.addEdge(currVertex, prevVertex, dist);
 
                 prevVertex = currVertex;
                 prevWayID = wayID;

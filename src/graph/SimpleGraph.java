@@ -1,13 +1,14 @@
 package graph;
 
 import java.util.*;
+import java.util.stream.*;
 
 public class SimpleGraph implements Graph {
     
-    private Map<Vertex, Collection<Vertex>> neighborsMap;
+    private Map<Vertex, Collection<Neighbor>> neighborsMap;
 
     public SimpleGraph(){
-        this.neighborsMap = new HashMap<Vertex, Collection<Vertex>>();
+        this.neighborsMap = new HashMap<>();
     }
 
     @Override
@@ -20,8 +21,10 @@ public class SimpleGraph implements Graph {
 
     //** Add an edge from u -> v */
     @Override
-    public void addEdge(Vertex u, Vertex v) {
-        neighborsMap.get(u).add(v);
+    public void addEdge(Vertex u, Vertex v, double distance) {
+        // TODO USE DISTANCE!
+        Neighbor n = new Neighbor(v, distance);
+        neighborsMap.get(u).add(n);
     }
 
     @Override
@@ -31,7 +34,8 @@ public class SimpleGraph implements Graph {
 
     @Override
     public Collection<Vertex> getNeighboursOf(Vertex v) {
-        return neighborsMap.getOrDefault(v, new ArrayList<>());
+        Collection<Neighbor> neighbors = neighborsMap.getOrDefault(v, new ArrayList<>());
+        return neighbors.stream().map( n -> n.v).collect(Collectors.toSet());
     }
 
     @Override
@@ -46,4 +50,16 @@ public class SimpleGraph implements Graph {
         return false;
     }
 
+
+    private class Neighbor {
+        public Vertex v;
+        public double distance;
+
+        public Neighbor(Vertex v, double distance) {
+            this.v = v;
+            this.distance = distance;
+        }
+    }
 }
+
+
