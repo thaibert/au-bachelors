@@ -19,8 +19,11 @@ public class GraphVisualiser extends Canvas {
     final static int window_y = 900;
     final static int radius = 6;
 
+    public GraphVisualiser() {
+        setBackground(Color.WHITE);
+    }
+
     public void paint(Graphics g) {
-        setBackground(Color.white);
         drawGraph(g);
     }
 
