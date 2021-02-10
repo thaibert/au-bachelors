@@ -13,7 +13,7 @@ public class Dijkstra implements PathfindingAlgo {
      * I think at least
     */
 
-    public List<Vertex> shortestPath(Vertex a, Vertex b){
+    public List<Vertex> shortestPath(Graph G, Vertex a, Vertex b){
         
 
 
