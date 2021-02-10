@@ -48,5 +48,9 @@ public class Vertex {
         return (prime + longHash + latHash); 
     }
 
+    public String toString() {
+        return getLatitude() + "," + getLongitude();
+    }
+
 
 }

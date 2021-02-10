@@ -8,4 +8,8 @@ public class Neighbor {
         this.v = v;
         this.distance = distance;
     }
+
+    public String toString() {
+        return v.toString() + "," + distance;
+    }
 }

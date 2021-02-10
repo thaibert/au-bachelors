@@ -8,22 +8,22 @@ import java.util.*;
 
 public class OSMExtractor {
     public static void main(String[] args) {
-        parseXMLToCSV("map.osm");
+        parseXMLToCSV("aarhus-silkeborg.osm");
     }
 
     public static boolean parseXMLToCSV(String xmlFilename) {
         try{
             // Create "document builder" and use it to parse an XML file 
             // The XML file is in the same level as src/
+            System.out.println("--> Extracting OSM data");
+            System.out.println("  --> Parsing OSM file");
             DocumentBuilderFactory factory =
             DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
 
             File file = new File(xmlFilename);
             InputStream input = new FileInputStream(file);
-            Document doc = builder.parse(input);
-            System.out.println("--------------------");
-            
+            Document doc = builder.parse(input);            
 
             // everything is contained in an <osm> ... </osm> tag
             NodeList osm = doc.getChildNodes().item(0).getChildNodes();
@@ -40,7 +40,12 @@ public class OSMExtractor {
                                                                      "motorway_link", "trunk_link", "primary_link", "secondary_link", "tertiary_link",
                                                                      "living_street", "service"});
             // above: the list of "highway" tag values that are for car travel. Excluding walking streets, but that should be okay.
+            System.out.println("  --> Filtering to relevant data");
+            int tenPercent = osm.getLength()/10;
             for (int i = 0; i < osm.getLength(); i++) {
+                if (i % tenPercent == 0) {
+                    System.out.println("      " + (100*i)/osm.getLength() + "%");
+                }
                 Node n = osm.item(i);
                 String type = n.getNodeName();
                 if ( ! wantedTypes.contains(type)) {
@@ -104,8 +109,8 @@ public class OSMExtractor {
             // Output the collected lat/lon data from nodes to a csv.
             // Filter to only nodes that are associated to a way.
 
-            System.out.println("-> Writing all-roads.csv");
-            File csv1 = new File("all-roads.csv");
+            System.out.println("  --> Writing all-roads.csv");
+            File csv1 = new File("aarhus-silkeborg-all-roads.csv");
             try (PrintWriter pw = new PrintWriter(csv1)) {
                 pw.write("lat,lon,wayID,\n");
                 
@@ -120,8 +125,8 @@ public class OSMExtractor {
                 System.out.println("--> " + e);
             }
 
-            System.out.println("-> Writing intersections.csv");
-            File csv2 = new File("intersections.csv");
+            System.out.println("  --> Writing intersections.csv");
+            File csv2 = new File("aarhus-silkeborg-intersections.csv");
             try (PrintWriter pw = new PrintWriter(csv2)) {
                 pw.write("lat,lon,wayID,\n");
                 

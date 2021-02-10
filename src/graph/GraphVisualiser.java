@@ -94,8 +94,6 @@ public class GraphVisualiser extends Canvas {
 
         g.setColor(Color.ORANGE);
 
-        System.out.println(this.shortestPath);
-
         Vertex prev = this.shortestPath.get(0);
         for (int i = 1; i < this.shortestPath.size(); i++) {
             Vertex v = this.shortestPath.get(i);
