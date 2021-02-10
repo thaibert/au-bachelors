@@ -14,7 +14,15 @@ public class Dijkstra implements PathfindingAlgo {
     */
 
     public List<Vertex> shortestPath(Graph G, Vertex a, Vertex b){
-        
+        //  Psudokode from the book
+        //  Initialize-Single-Source(G, s) (s = source)
+        //  S = Ø
+        //  Q = G.V
+        //  While Q != Ø
+        //      u = Extract-Min(Q)    
+        //      S = S U {u}
+        //      for each vertex v in G.Adj[u]
+        //          Relax(u,v,w)   
 
 
 
@@ -23,6 +31,7 @@ public class Dijkstra implements PathfindingAlgo {
         return new ArrayList<>();
     }
 
+
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("intersections.csv");
 
@@ -30,7 +39,7 @@ public class Dijkstra implements PathfindingAlgo {
         Vertex b = new Vertex(2,2);
 
         Dijkstra d = new Dijkstra();
-        List<Vertex> shortest = d.shortestPath(a, b);
+        List<Vertex> shortest = d.shortestPath(graph, a, b);
 
         GraphVisualiser vis = new GraphVisualiser(graph);
         vis.drawPath(shortest);
