@@ -1,6 +1,8 @@
 package pathfinding.standard;
 
 import pathfinding.framework.*;
+import graph.*;
+import java.util.*;
 
 public class Dijkstra implements PathfindingAlgo {
  
@@ -11,14 +13,14 @@ public class Dijkstra implements PathfindingAlgo {
      * I think at least
     */
 
-    public void solve(){
+    public List<Vertex> shortestPath(Vertex a, Vertex b){
         
 
 
 
 
 
-        
+        return null;
     }
 
 
