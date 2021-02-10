@@ -77,6 +77,7 @@ public class Dijkstra implements PathfindingAlgo {
             i++;
         }
         out.add(a);
+        System.out.println("        " + out.size() + " nodes");
         return out;
     }
 
