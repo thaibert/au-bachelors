@@ -26,16 +26,14 @@ public class GraphPopulator {
             System.out.println("--------------------");
 
             BufferedReader reader = new BufferedReader(input);
-            reader.readLine();
-            String currentLine = reader.readLine();
-            while (currentLine != null) { //TODO when should this stop, also remember to close reader
+            String currentLine = reader.readLine(); // Read first line to skip CSV header line
+
+            while (null != (currentLine = reader.readLine())) {
                 String[] args = currentLine.split(",");
                 double lat = Double.valueOf(args[0]);
                 double lon = Double.valueOf(args[1]);
 
                 graph.addVertex(new Vertex(lat, lon));
-
-                currentLine = reader.readLine();
             }
             reader.close(); // TODO should probably be in a final block
         } catch(Exception e) {
@@ -50,32 +48,30 @@ public class GraphPopulator {
             InputStreamReader input = new InputStreamReader(temp);
             System.out.println("--------------------");
 
-            Vertex prevVertex = null;
-            String prevWayID = "";
-
             BufferedReader reader = new BufferedReader(input);
-            reader.readLine();
-            String currentLine = reader.readLine();
-            while (currentLine != null) { //TODO when should this stop, also remember to close reader
+            String currentLine = reader.readLine(); // Read first line to skip CSV header line
+
+            Vertex prevVertex = null;
+            Vertex currVertex = null;
+            String prevWayID = "";
+            String currWayID = "";
+
+
+
+            while (null != (currentLine = reader.readLine())) {
+                // Setup "prev" values at the start rather than the end. Then we don't forget :)
+                prevVertex = currVertex;
+                prevWayID = currWayID;
+
                 String[] args = currentLine.split(",");
                 double lat = Double.valueOf(args[0]);
                 double lon = Double.valueOf(args[1]);
-                String wayID = args[2];
+                currWayID = args[2];
 
-                Vertex currVertex = new Vertex(lat, lon);
+                currVertex = new Vertex(lat, lon);
 
-                if (! prevWayID.equals(wayID)) {
-                    currentLine = reader.readLine();
-                    prevWayID = wayID;
-                    prevVertex = currVertex;
-                    continue;
-                }
-
-                if (! prevWayID.equals(wayID)) {
-                    // Hit a new ID, skip
-                    currentLine = reader.readLine();
-                    prevWayID = wayID;
-                    prevVertex = currVertex;
+                if (! prevWayID.equals(currWayID)) {
+                    // Hit a new ID; skip to next node in same way so we can construct an edge
                     continue;
                 }
 
@@ -85,10 +81,6 @@ public class GraphPopulator {
 
                 graph.addEdge(prevVertex, currVertex, dist);
                 graph.addEdge(currVertex, prevVertex, dist);
-
-                prevVertex = currVertex;
-                prevWayID = wayID;
-                currentLine = reader.readLine();
             }
             reader.close(); // TODO should probably be in a final block
         } catch(Exception e) {
