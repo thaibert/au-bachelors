@@ -38,8 +38,8 @@ public class GraphVisualiser extends Canvas {
 
             // Draw edges
             graph.getNeighboursOf(v).forEach(n -> {
-                String n_lat = Double.toString(n.getLatitude());
-                String n_lon = Double.toString(n.getLongitude());
+                String n_lat = Double.toString(n.v.getLatitude());
+                String n_lon = Double.toString(n.v.getLongitude());
                 int[] n_coords = convertToXAndY(new String[] { n_lat, n_lon });
                 g.drawLine(v_coords[0], v_coords[1], n_coords[0], n_coords[1]);
             });

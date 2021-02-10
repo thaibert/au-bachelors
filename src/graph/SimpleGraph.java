@@ -33,9 +33,8 @@ public class SimpleGraph implements Graph {
     }
 
     @Override
-    public Collection<Vertex> getNeighboursOf(Vertex v) {
-        Collection<Neighbor> neighbors = neighborsMap.getOrDefault(v, new ArrayList<>());
-        return neighbors.stream().map( n -> n.v).collect(Collectors.toSet());
+    public Collection<Neighbor> getNeighboursOf(Vertex v) {
+        return neighborsMap.getOrDefault(v, new ArrayList<>());
     }
 
     @Override
@@ -50,16 +49,6 @@ public class SimpleGraph implements Graph {
         return false;
     }
 
-
-    private class Neighbor {
-        public Vertex v;
-        public double distance;
-
-        public Neighbor(Vertex v, double distance) {
-            this.v = v;
-            this.distance = distance;
-        }
-    }
 }
 
 
