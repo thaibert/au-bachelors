@@ -21,28 +21,38 @@ public class GraphVisualiser extends Canvas {
 
     public void paint(Graphics g) {
         setBackground(Color.white);
-
-        /*
-         * paintNodes(g); paintEdges(g);
-         */
         drawGraph(g);
-
     }
 
     private void drawGraph(Graphics g) {
         Graph graph = new GraphPopulator().populateGraph("intersections.csv");
         graph.getAllVertices().forEach(v -> {
+            // Draw nodes
             String lat = Double.toString(v.getLatitude());
             String lon = Double.toString(v.getLongitude());
             int[] v_coords = convertToXAndY(new String[] { lat, lon });
             g.drawOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
 
+            // Draw edges
             graph.getNeighboursOf(v).forEach(n -> {
                 String n_lat = Double.toString(n.getLatitude());
                 String n_lon = Double.toString(n.getLongitude());
                 int[] n_coords = convertToXAndY(new String[] { n_lat, n_lon });
                 g.drawLine(v_coords[0], v_coords[1], n_coords[0], n_coords[1]);
             });
+
+            // Testing to see whether way intersection is handled; or if we need to detect where ways intersect
+            if (graph.getNeighboursOf(v).size() > 2) {
+                // A node in a way can have at most 2 neighbors. If it's bigger, it IS handled :D
+                Color oldColor = g.getColor();
+                g.setColor(Color.MAGENTA);
+
+                int temp_radius = 3 * graph.getNeighboursOf(v).size();
+
+                g.drawOval(v_coords[0] - temp_radius / 2, v_coords[1] - temp_radius / 2, temp_radius, temp_radius);
+
+                g.setColor(oldColor);
+            }
         });
 
     }
@@ -54,6 +64,7 @@ public class GraphVisualiser extends Canvas {
         f.add(m);
         
         f.setSize(window_x,window_y);
+        f.setResizable(false);
         f.setVisible(true);
         
     }
