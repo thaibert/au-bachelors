@@ -66,7 +66,7 @@ public class GraphPopulator {
 
                 double dist_lat = Math.pow(currVertex.getLatitude() - prevVertex.getLatitude(), 2);
                 double dist_lon = Math.pow(currVertex.getLongitude()- prevVertex.getLongitude(),2);
-                double dist = dist_lat + dist_lon; // should really be sqrt(d_lat+d_lon), but may be slow? todo
+                double dist = Math.sqrt(dist_lat + dist_lon); // TODO may be slow?
 
                 graph.addEdge(prevVertex, currVertex, dist);
                 graph.addEdge(currVertex, prevVertex, dist);
