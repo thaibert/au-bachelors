@@ -19,13 +19,11 @@ public class GraphPopulator {
     }
 
     private void addNodes(String filename, Graph graph) {
-        try {
-            File file = new File(filename);
-            InputStream temp = new FileInputStream(file);
-            InputStreamReader input = new InputStreamReader(temp);
+        try (BufferedReader reader = new BufferedReader(
+            new InputStreamReader(
+                new FileInputStream(
+                    new File(filename))))) {
             System.out.println("--------------------");
-
-            BufferedReader reader = new BufferedReader(input);
             String currentLine = reader.readLine(); // Read first line to skip CSV header line
 
             while (null != (currentLine = reader.readLine())) {
@@ -35,28 +33,23 @@ public class GraphPopulator {
 
                 graph.addVertex(new Vertex(lat, lon));
             }
-            reader.close(); // TODO should probably be in a final block
         } catch(Exception e) {
             System.out.println("--> " + e);
         } 
     }
 
     private void addEdges(String filename, Graph graph) {
-        try {
-            File file = new File(filename);
-            InputStream temp = new FileInputStream(file);
-            InputStreamReader input = new InputStreamReader(temp);
+        try (BufferedReader reader = new BufferedReader(
+            new InputStreamReader(
+                new FileInputStream(
+                    new File(filename))))) {
             System.out.println("--------------------");
-
-            BufferedReader reader = new BufferedReader(input);
             String currentLine = reader.readLine(); // Read first line to skip CSV header line
 
             Vertex prevVertex = null;
             Vertex currVertex = null;
             String prevWayID = "";
             String currWayID = "";
-
-
 
             while (null != (currentLine = reader.readLine())) {
                 // Setup "prev" values at the start rather than the end. Then we don't forget :)
@@ -82,7 +75,6 @@ public class GraphPopulator {
                 graph.addEdge(prevVertex, currVertex, dist);
                 graph.addEdge(currVertex, prevVertex, dist);
             }
-            reader.close(); // TODO should probably be in a final block
         } catch(Exception e) {
             System.out.println("--> " + e);
         } 
