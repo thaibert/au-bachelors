@@ -4,12 +4,8 @@ import java.io.*;
 import java.util.*;
 
 public class GraphPopulator {
-    public static void main(String[] args) {
-        GraphPopulator gp = new GraphPopulator();
-        Graph graph = gp.populateGraph("intersections.csv");
-    }
 
-    public Graph populateGraph(String filename) {
+    public static Graph populateGraph(String filename) {
         Graph graph = new SimpleGraph();
 
         addNodes(filename, graph);
@@ -18,12 +14,12 @@ public class GraphPopulator {
         return graph;
     }
 
-    private void addNodes(String filename, Graph graph) {
+    private static void addNodes(String filename, Graph graph) {
         try (BufferedReader reader = new BufferedReader(
             new InputStreamReader(
                 new FileInputStream(
                     new File(filename))))) {
-            System.out.println("--------------------");
+            System.out.println("-------------------- adding nodes");
             String currentLine = reader.readLine(); // Read first line to skip CSV header line
 
             while (null != (currentLine = reader.readLine())) {
@@ -38,12 +34,12 @@ public class GraphPopulator {
         } 
     }
 
-    private void addEdges(String filename, Graph graph) {
+    private static void addEdges(String filename, Graph graph) {
         try (BufferedReader reader = new BufferedReader(
             new InputStreamReader(
                 new FileInputStream(
                     new File(filename))))) {
-            System.out.println("--------------------");
+            System.out.println("-------------------- adding edges");
             String currentLine = reader.readLine(); // Read first line to skip CSV header line
 
             Vertex prevVertex = null;

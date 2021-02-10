@@ -14,7 +14,7 @@ public class SimpleGraph implements Graph {
     @Override
     public void addVertex(Vertex v) {
         if (neighborsMap.keySet().contains(v)) {
-            System.out.println("--> Tried adding already existing vertex");
+            // System.out.println("--> Tried adding already existing vertex");
         }
         neighborsMap.putIfAbsent(v, new ArrayList<>());
     }
