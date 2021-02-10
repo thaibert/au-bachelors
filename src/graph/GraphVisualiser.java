@@ -16,11 +16,11 @@ public class GraphVisualiser extends Canvas {
     // SE = (10.2050, 56.1600)
     // SW = (10.1700, 56.1600)
     // NW = (10.1700, 56.1850)
-    final static double MIN_LONG = 10.1700;
-    final static double MAX_LONG = 10.2050;
-    final static double MIN_LAT = 56.1600;
-    final static double MAX_LAT = 56.1850;
-    final static int window_x = 700*multiplier;
+    final static double MIN_LONG = 9.4807; // 10.1700;
+    final static double MAX_LONG = 10.259; // 10.2050;
+    final static double MIN_LAT = 56.0337; // 56.1600;
+    final static double MAX_LAT = 56.2794; // 56.1850;
+    final static int window_x = 1600*multiplier;
     final static int window_y = 900*multiplier;
     final static int radius = 6*multiplier;
 
@@ -49,6 +49,7 @@ public class GraphVisualiser extends Canvas {
     // ================== public use methods end here ==================
 
     public void paint(Graphics g) {
+        g.setColor(new Color(0,0,0, 20)); // 20 alpha out of 255
         drawGraph(g);
         if (this.shortestPath != null) {
             drawPath(g);
@@ -61,7 +62,7 @@ public class GraphVisualiser extends Canvas {
             String lat = Double.toString(v.getLatitude());
             String lon = Double.toString(v.getLongitude());
             int[] v_coords = convertToXAndY(new String[] { lat, lon });
-            g.drawOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
+            //g.drawOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
 
             // Draw edges
             graph.getNeighboursOf(v).forEach(n -> {
@@ -74,6 +75,7 @@ public class GraphVisualiser extends Canvas {
             // Testing to see whether way intersection is handled; or if we need to detect where ways intersect
             if (graph.getNeighboursOf(v).size() > 2) {
                 // A node in a way can have at most 2 neighbors. If it's bigger, it IS handled :D
+                /*
                 Color oldColor = g.getColor();
                 g.setColor(Color.MAGENTA);
 
@@ -82,6 +84,7 @@ public class GraphVisualiser extends Canvas {
                 g.drawOval(v_coords[0] - temp_radius / 2, v_coords[1] - temp_radius / 2, temp_radius, temp_radius);
 
                 g.setColor(oldColor);
+                */
             }
         });
 
@@ -92,7 +95,8 @@ public class GraphVisualiser extends Canvas {
         // TODO actually draw shortest path
         // Available in this.shortestPath
 
-        g.setColor(Color.ORANGE);
+        Color oldColor = g.getColor();
+        g.setColor(Color.RED);
 
         Vertex prev = this.shortestPath.get(0);
         for (int i = 1; i < this.shortestPath.size(); i++) {
@@ -107,7 +111,7 @@ public class GraphVisualiser extends Canvas {
             g.drawLine(v_coords[0], v_coords[1], prev_coords[0], prev_coords[1]);
             prev = v;
         }
-        g.setColor(Color.BLACK);
+        g.setColor(oldColor);
 
     }
 

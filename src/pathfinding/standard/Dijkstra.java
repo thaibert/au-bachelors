@@ -58,9 +58,11 @@ public class Dijkstra implements PathfindingAlgo {
                 relax(u, n);
             });
 
+            // warning: ugly hacks incoming
             Vertex[] allElements = pq.toArray(new Vertex[]{});
             pq = new PriorityQueue<>(pq.size()+1, new DistComparator());
             pq.addAll(Arrays.asList(allElements));
+            // TODO please clean me up
         }
 
         // Get out the shortest path
@@ -118,10 +120,11 @@ public class Dijkstra implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
-        Vertex a = new Vertex(56.1634686,10.1722176); // Viborgvej
-        Vertex b = new Vertex(56.1828308,10.2037825); // O2/Randersvej
+        // Vertex a = new Vertex(56.1634686,10.1722176); // Viborgvej
+        Vertex b = new Vertex(56.1723636,9.5538336); // Silkeborg
+        Vertex a = new Vertex(56.1828308,10.2037825); // O2/Randersvej
 
         Dijkstra d = new Dijkstra();
         List<Vertex> shortest = d.shortestPath(graph, a, b);
