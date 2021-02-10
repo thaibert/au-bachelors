@@ -19,7 +19,7 @@ public class GraphPopulator {
             new InputStreamReader(
                 new FileInputStream(
                     new File(filename))))) {
-            System.out.println("--------------------");
+            System.out.println("-------------------- adding nodes");
             String currentLine = reader.readLine(); // Read first line to skip CSV header line
 
             while (null != (currentLine = reader.readLine())) {
@@ -39,7 +39,7 @@ public class GraphPopulator {
             new InputStreamReader(
                 new FileInputStream(
                     new File(filename))))) {
-            System.out.println("--------------------");
+            System.out.println("-------------------- adding edges");
             String currentLine = reader.readLine(); // Read first line to skip CSV header line
 
             Vertex prevVertex = null;
