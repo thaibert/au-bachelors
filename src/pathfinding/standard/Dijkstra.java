@@ -20,7 +20,21 @@ public class Dijkstra implements PathfindingAlgo {
 
 
 
-        return null;
+        return new ArrayList<>();
+    }
+
+    public static void main(String[] args) {
+        Graph graph = GraphPopulator.populateGraph("intersections.csv");
+
+        Vertex a = new Vertex(1,1);
+        Vertex b = new Vertex(2,2);
+
+        Dijkstra d = new Dijkstra();
+        List<Vertex> shortest = d.shortestPath(a, b);
+
+        GraphVisualiser vis = new GraphVisualiser(graph);
+        vis.drawPath(shortest);
+        vis.visualize();
     }
 
 
