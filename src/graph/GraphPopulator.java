@@ -12,6 +12,13 @@ public class GraphPopulator {
     public Graph populateGraph(String filename) {
         Graph graph = new SimpleGraph();
 
+        addNodes(filename, graph);
+        addEdges(filename, graph);
+
+        return graph;
+    }
+
+    private void addNodes(String filename, Graph graph) {
         try {
             File file = new File(filename);
             InputStream temp = new FileInputStream(file);
@@ -33,23 +40,12 @@ public class GraphPopulator {
             reader.close(); // TODO should probably be in a final block
         } catch(Exception e) {
             System.out.println("--> " + e);
-            return null;
         } 
-
-        addEdges(graph);
-
-        return graph;
     }
 
-    private void addEdges(Graph graph) {
-        addWays(graph);
-        addIntersections(graph);
-    }
-
-
-    private void addWays(Graph graph) {
+    private void addEdges(String filename, Graph graph) {
         try {
-            File file = new File("intersections.csv");
+            File file = new File(filename);
             InputStream temp = new FileInputStream(file);
             InputStreamReader input = new InputStreamReader(temp);
             System.out.println("--------------------");
@@ -98,10 +94,6 @@ public class GraphPopulator {
         } catch(Exception e) {
             System.out.println("--> " + e);
         } 
-    }
-
-    private void addIntersections(Graph graph) {
-        // TODO
     }
 
 }
