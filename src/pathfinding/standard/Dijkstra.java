@@ -35,11 +35,16 @@ public class Dijkstra implements PathfindingAlgo {
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("intersections.csv");
 
-        Vertex a = new Vertex(1,1);
-        Vertex b = new Vertex(2,2);
+        Vertex a = new Vertex(56.1634686,10.1722176); // Viborgvej
+        Vertex b = new Vertex(56.1828308,10.2037825); // O2/Randersvej
 
         Dijkstra d = new Dijkstra();
         List<Vertex> shortest = d.shortestPath(graph, a, b);
+
+        shortest.add(a);
+        shortest.add(b);
+
+        System.out.println(shortest);
 
         GraphVisualiser vis = new GraphVisualiser(graph);
         vis.drawPath(shortest);
