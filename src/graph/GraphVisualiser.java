@@ -9,6 +9,9 @@ import java.io.*;
 
 public class GraphVisualiser extends Canvas {
 
+    // It's really small on my screen when it's only 700x900
+    final static int multiplier = 3;
+
     // NE = (10.2050, 56.1850)
     // SE = (10.2050, 56.1600)
     // SW = (10.1700, 56.1600)
@@ -17,9 +20,9 @@ public class GraphVisualiser extends Canvas {
     final static double MAX_LONG = 10.2050;
     final static double MIN_LAT = 56.1600;
     final static double MAX_LAT = 56.1850;
-    final static int window_x = 700;
-    final static int window_y = 900;
-    final static int radius = 6;
+    final static int window_x = 700*multiplier;
+    final static int window_y = 900*multiplier;
+    final static int radius = 6*multiplier;
 
     private Graph graph;
     private List<Vertex> shortestPath;
