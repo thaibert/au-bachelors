@@ -5,6 +5,8 @@ import java.util.*;
 
 public class GraphPopulator {
 
+    final static double radius = 6371000;
+
     public static Graph populateGraph(String filename) {
         System.out.println("--> Populating graph");
         Graph graph = new SimpleGraph();
@@ -65,9 +67,11 @@ public class GraphPopulator {
                     continue;
                 }
 
-                double dist_lat = Math.pow(currVertex.getLatitude() - prevVertex.getLatitude(), 2);
-                double dist_lon = Math.pow(currVertex.getLongitude()- prevVertex.getLongitude(),2);
-                double dist = Math.sqrt(dist_lat + dist_lon); // TODO may be slow?
+                //double dist_lat = Math.pow(currVertex.getLatitude() - prevVertex.getLatitude(), 2);
+                //double dist_lon = Math.pow(currVertex.getLongitude()- prevVertex.getLongitude(),2);
+                //double dist = Math.sqrt(dist_lat + dist_lon); // TODO may be slow?
+
+                double dist = 2 * radius * Math.asin(Math.sqrt(hav(currVertex.getLatitude() - prevVertex.getLatitude()) + Math.cos(currVertex.getLatitude()) * Math.cos(prevVertex.getLatitude())*hav(currVertex.getLongitude()-prevVertex.getLongitude())));
 
                 graph.addEdge(prevVertex, currVertex, dist);
                 graph.addEdge(currVertex, prevVertex, dist);
@@ -75,6 +79,10 @@ public class GraphPopulator {
         } catch(Exception e) {
             System.out.println("--> " + e);
         } 
+    }
+
+    private static double hav(double number) {
+        return (1-Math.cos(number))/2;
     }
 
 }
