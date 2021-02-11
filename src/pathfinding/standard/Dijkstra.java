@@ -28,7 +28,6 @@ public class Dijkstra implements PathfindingAlgo {
         //      for each vertex v in G.Adj[u]
         //          Relax(u,v,w)   
 
-
         dist = new HashMap<>();
         pred = new HashMap<>();
 
@@ -37,32 +36,32 @@ public class Dijkstra implements PathfindingAlgo {
 
 
         // Main algo
-        Set<Vertex> vertices = new HashSet<>(g.getAllVertices());
-        Queue<Vertex> pq = new PriorityQueue<>(vertices.size(), new DistComparator());
-        pq.addAll(vertices);
+        DistComparator comp = new DistComparator();
+        PriorityQueue<Vertex> pq = new PriorityQueue<>(comp);
+        pq.add(a);
 
-        System.out.println("vertices: " + vertices.size() + ",    pq: " + pq.size());
+        System.out.println("vertices: " + g.getAllVertices().size() + ",    pq: " + pq.size());
 
-        int num = 0;        
+        int num = 0;
         while (pq.size() > 0) {
             num++;
             if (num % 1000 == 0) {
                 System.out.println("  --> " + num + ",   pq size: " + pq.size());
             }
+
             Vertex u = pq.poll();
+
             if (u.equals(b)) {
+                System.out.println("  --> Finished early");
                 break;
             }
-            pq.remove(u);
-            g.getNeighboursOf(u).forEach(n -> {
-                relax(u, n);
-            });
 
-            // warning: ugly hacks incoming
-            Vertex[] allElements = pq.toArray(new Vertex[]{});
-            pq = new PriorityQueue<>(pq.size()+1, new DistComparator());
-            pq.addAll(Arrays.asList(allElements));
-            // TODO please clean me up
+            g.getNeighboursOf(u).forEach(n -> {
+                boolean relaxed = relax(u, n);
+                if (relaxed) {
+                    pq.add(n.v);
+                }
+            });
         }
 
         // Get out the shortest path
@@ -78,45 +77,18 @@ public class Dijkstra implements PathfindingAlgo {
         }
         out.add(a);
         System.out.println("        " + out.size() + " nodes");
+        System.out.println("        " + comp.getComparisons() + " comparisons");
         return out;
     }
 
-    private void relax(Vertex u, Neighbor n) {
+    private boolean relax(Vertex u, Neighbor n) {
         if (dist.get(n.v) > dist.get(u) + n.distance) {
             dist.put(n.v, dist.get(u) + n.distance);
             pred.put(n.v, u);
+            return true;
         }
+        return false;
     }
-
-
-
-
-
-
-// 1  function Dijkstra(Graph, source):
-//         create vertex set Q
-//  4
-//  5      for each vertex v in Graph:            
-//  6          dist[v] ← INFINITY                 
-//  7          prev[v] ← UNDEFINED                
-//  8          add v to Q                     
-//  9      dist[source] ← 0                       
-// 10     
-// 11      while Q is not empty:
-// 12          u ← vertex in Q with min dist[u]   
-// 13                                             
-// 14          remove u from Q
-// 15         
-// 16          for each neighbor v of u:           // only v that are still in Q
-//                 if v == goal return // maybe relax first?
-// 17              alt ← dist[u] + length(u, v)
-// 18              if alt < dist[v]:              
-// 19                  dist[v] ← alt
-// 20                  prev[v] ← u
-// 21
-// 22      return dist[], prev[]
-
-
 
 
 
@@ -137,10 +109,17 @@ public class Dijkstra implements PathfindingAlgo {
 
 
     class DistComparator implements Comparator<Vertex> {
+        
+        public long comparisons = 0;
 
         @Override
         public int compare(Vertex a, Vertex b) {
+            this.comparisons++;
             return Double.compare(dist.getOrDefault(a, INF_DIST), dist.getOrDefault(b, INF_DIST));
+        }
+
+        public long getComparisons() {
+            return this.comparisons;
         }
     }
 
