@@ -22,7 +22,6 @@ public class SimpleGraph implements Graph {
     //** Add an edge from u -> v */
     @Override
     public void addEdge(Vertex u, Vertex v, double distance) {
-        // TODO USE DISTANCE!
         Neighbor n = new Neighbor(v, distance);
         neighborsMap.get(u).add(n);
     }

@@ -6,6 +6,7 @@ import java.util.*;
 public class GraphPopulator {
 
     public static Graph populateGraph(String filename) {
+        System.out.println("--> Populating graph");
         Graph graph = new SimpleGraph();
 
         addNodes(filename, graph);
@@ -19,7 +20,7 @@ public class GraphPopulator {
             new InputStreamReader(
                 new FileInputStream(
                     new File(filename))))) {
-            System.out.println("-------------------- adding nodes");
+            System.out.println("  --> adding nodes");
             String currentLine = reader.readLine(); // Read first line to skip CSV header line
 
             while (null != (currentLine = reader.readLine())) {
@@ -39,7 +40,7 @@ public class GraphPopulator {
             new InputStreamReader(
                 new FileInputStream(
                     new File(filename))))) {
-            System.out.println("-------------------- adding edges");
+            System.out.println("  --> adding edges");
             String currentLine = reader.readLine(); // Read first line to skip CSV header line
 
             Vertex prevVertex = null;

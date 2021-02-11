@@ -92,9 +92,6 @@ public class GraphVisualiser extends Canvas {
 
 
     private void drawPath(Graphics g) {
-        // TODO actually draw shortest path
-        // Available in this.shortestPath
-
         Color oldColor = g.getColor();
         g.setColor(Color.RED);
 
