@@ -6,9 +6,9 @@ import java.util.*;
 public class Solution {
 
     private List<Vertex> shortestPath;
-    private Map<Vertex, Vertex> visited;
+    private List<Edge> visited;
     
-    public Solution(List<Vertex> path, Map<Vertex, Vertex> visited){
+    public Solution(List<Vertex> path, List<Edge> visited){
         this.shortestPath = path;
         this.visited = visited;
     }
@@ -17,7 +17,7 @@ public class Solution {
 		return shortestPath;
 	}
 
-    public Map<Vertex, Vertex> getVisited() {
+    public List<Edge> getVisited() {
         return visited;
     }
     

@@ -17,7 +17,7 @@ public class Dijkstra implements PathfindingAlgo {
     private Map<Vertex, Vertex> pred; // S in the algo is pred.keySet()
     
     // For visual
-    private Map<Vertex, Vertex> edgesConsidered;
+    private List<Edge> edgesConsidered;
 
     public Solution shortestPath(Graph g, Vertex a, Vertex b){
         System.out.println("--> Running Dijkstra");
@@ -35,7 +35,7 @@ public class Dijkstra implements PathfindingAlgo {
         pred = new HashMap<>();
         
         //Purely for visualising
-        edgesConsidered = new HashMap<>();
+        edgesConsidered = new ArrayList<>();
 
         g.getAllVertices().stream().forEach( v -> dist.put(v, INF_DIST) );
         dist.put(a, 0.0);
@@ -94,7 +94,7 @@ public class Dijkstra implements PathfindingAlgo {
         // for visualising all considered edges
         // TODO currently it only paint one edge going out of each node. I can't think of a way to do it, without a list of pairs
         // But i can't get pairs to work currently
-        edgesConsidered.put(u, n.v);
+        edgesConsidered.add(new Edge(u, n.v));
 
         if (dist.get(n.v) > dist.get(u) + n.distance) {
             dist.put(n.v, dist.get(u) + n.distance);

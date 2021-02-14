@@ -5,6 +5,8 @@ import java.util.List;
 import java.awt.*;
 import javax.swing.*;
 
+import pathfinding.framework.*; 
+
 import java.io.*;
 
 public class GraphVisualiser extends Canvas {
@@ -26,7 +28,7 @@ public class GraphVisualiser extends Canvas {
 
     private Graph graph;
     private List<Vertex> shortestPath;
-    private Map<Vertex,Vertex> visited;
+    private List<Edge> visited;
 
     public GraphVisualiser(Graph graph) {
         this.graph = graph;
@@ -47,7 +49,7 @@ public class GraphVisualiser extends Canvas {
         this.shortestPath = path;
     }
 
-    public void drawVisited(Map<Vertex,Vertex> visited){
+    public void drawVisited(List<Edge> visited){
         this.visited = visited;
     }
 
@@ -124,15 +126,17 @@ public class GraphVisualiser extends Canvas {
         Color oldColor = g.getColor();
         g.setColor(new Color(0,0,153));
 
-        this.visited.forEach((key, value) ->{
-            String key_lat = Double.toString(key.getLatitude());
-            String key_lon = Double.toString(key.getLongitude());
-            int[] key_coords = convertToXAndY(new String[] { key_lat, key_lon });
-            String value_lat = Double.toString(value.getLatitude());
-            String value_lon = Double.toString(value.getLongitude());
-            int[] value_coords = convertToXAndY(new String[] { value_lat, value_lon });
+        this.visited.forEach(edge ->{
+            Vertex node1 = edge.getStart();
+            Vertex node2 = edge.getEnd(); 
+            String node1_lat = Double.toString(node1.getLatitude());
+            String node1_lon = Double.toString(node1.getLongitude());
+            int[] node1_coords = convertToXAndY(new String[] { node1_lat, node1_lon });
+            String node2_lat = Double.toString(node2.getLatitude());
+            String node2_lon = Double.toString(node2.getLongitude());
+            int[] node2_coords = convertToXAndY(new String[] { node2_lat, node2_lon });
 
-            g.drawLine(key_coords[0], key_coords[1], value_coords[0], value_coords[1]);
+            g.drawLine(node1_coords[0], node1_coords[1], node2_coords[0], node2_coords[1]);
         });
 
         g.setColor(oldColor);
