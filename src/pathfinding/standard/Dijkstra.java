@@ -15,8 +15,11 @@ public class Dijkstra implements PathfindingAlgo {
     */
     private Map<Vertex, Double> dist;
     private Map<Vertex, Vertex> pred; // S in the algo is pred.keySet()
+    
+    // For visual
+    private Map<Vertex, Vertex> edgesConsidered;
 
-    public List<Vertex> shortestPath(Graph g, Vertex a, Vertex b){
+    public Solution shortestPath(Graph g, Vertex a, Vertex b){
         System.out.println("--> Running Dijkstra");
         //  Psudokode from the book
         //  Initialize-Single-Source(G, s) (s = source)
@@ -30,6 +33,9 @@ public class Dijkstra implements PathfindingAlgo {
 
         dist = new HashMap<>();
         pred = new HashMap<>();
+        
+        //Purely for visualising
+        edgesConsidered = new HashMap<>();
 
         g.getAllVertices().stream().forEach( v -> dist.put(v, INF_DIST) );
         dist.put(a, 0.0);
@@ -78,13 +84,20 @@ public class Dijkstra implements PathfindingAlgo {
         out.add(a);
         System.out.println("        " + out.size() + " nodes");
         System.out.println("        " + comp.getComparisons() + " comparisons");
-        return out;
+
+        Solution solution = new Solution(out, edgesConsidered);
+
+        return solution;
     }
 
     private boolean relax(Vertex u, Neighbor n) {
+        // for visualising all considered edges
+        edgesConsidered.put(u, n.v);
+
         if (dist.get(n.v) > dist.get(u) + n.distance) {
             dist.put(n.v, dist.get(u) + n.distance);
             pred.put(n.v, u);
+
             return true;
         }
         return false;
@@ -100,10 +113,11 @@ public class Dijkstra implements PathfindingAlgo {
         Vertex a = new Vertex(56.1828308,10.2037825); // O2/Randersvej
 
         Dijkstra d = new Dijkstra();
-        List<Vertex> shortest = d.shortestPath(graph, a, b);
+        Solution solution = d.shortestPath(graph, a, b);
 
         GraphVisualiser vis = new GraphVisualiser(graph);
-        vis.drawPath(shortest);
+        vis.drawPath(solution.getShortestPath());
+        vis.drawVisited(solution.getVisited());
         vis.visualize();
     }
 

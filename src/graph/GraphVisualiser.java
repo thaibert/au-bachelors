@@ -10,7 +10,7 @@ import java.io.*;
 public class GraphVisualiser extends Canvas {
 
     // It's really small on my screen when it's only 700x900
-    final static int multiplier = 1;
+    final static int multiplier = 2;
 
     // NE = (10.2050, 56.1850)
     // SE = (10.2050, 56.1600)
@@ -26,6 +26,7 @@ public class GraphVisualiser extends Canvas {
 
     private Graph graph;
     private List<Vertex> shortestPath;
+    private Map<Vertex,Vertex> visited;
 
     public GraphVisualiser(Graph graph) {
         this.graph = graph;
@@ -46,11 +47,18 @@ public class GraphVisualiser extends Canvas {
         this.shortestPath = path;
     }
 
+    public void drawVisited(Map<Vertex,Vertex> visited){
+        this.visited = visited;
+    }
+
     // ================== public use methods end here ==================
 
     public void paint(Graphics g) {
         g.setColor(new Color(0,0,0, 20)); // 20 alpha out of 255
         drawGraph(g);
+        if (this.visited != null) {
+            drawVisited(g);
+        }
         if (this.shortestPath != null) {
             drawPath(g);
         }
@@ -112,6 +120,24 @@ public class GraphVisualiser extends Canvas {
 
     }
 
+    private void drawVisited(Graphics g){
+        Color oldColor = g.getColor();
+        g.setColor(new Color(0,0,153));
+
+        this.visited.forEach((key, value) ->{
+            String key_lat = Double.toString(key.getLatitude());
+            String key_lon = Double.toString(key.getLongitude());
+            int[] key_coords = convertToXAndY(new String[] { key_lat, key_lon });
+            String value_lat = Double.toString(value.getLatitude());
+            String value_lon = Double.toString(value.getLongitude());
+            int[] value_coords = convertToXAndY(new String[] { value_lat, value_lon });
+
+            g.drawLine(key_coords[0], key_coords[1], value_coords[0], value_coords[1]);
+        });
+
+        g.setColor(oldColor);
+
+    }
 
     public static int[] convertToXAndY(String[] arg){
         
