@@ -92,6 +92,8 @@ public class Dijkstra implements PathfindingAlgo {
 
     private boolean relax(Vertex u, Neighbor n) {
         // for visualising all considered edges
+        // TODO currently it only paint one edge going out of each node. I can't think of a way to do it, without a list of pairs
+        // But i can't get pairs to work currently
         edgesConsidered.put(u, n.v);
 
         if (dist.get(n.v) > dist.get(u) + n.distance) {
