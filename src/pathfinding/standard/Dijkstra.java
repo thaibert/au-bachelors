@@ -117,7 +117,7 @@ public class Dijkstra implements PathfindingAlgo {
         Dijkstra d = new Dijkstra();
         Solution solution = d.shortestPath(graph, a, b);
 
-        GraphVisualiser vis = new GraphVisualiser(graph);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize();

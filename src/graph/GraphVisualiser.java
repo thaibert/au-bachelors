@@ -14,14 +14,10 @@ public class GraphVisualiser extends Canvas {
     // It's really small on my screen when it's only 700x900
     final static int multiplier = 2;
 
-    // NE = (10.2050, 56.1850)
-    // SE = (10.2050, 56.1600)
-    // SW = (10.1700, 56.1600)
-    // NW = (10.1700, 56.1850)
-    final static double MIN_LONG = 9.4807; // 10.1700;
-    final static double MAX_LONG = 10.259; // 10.2050;
-    final static double MIN_LAT = 56.0337; // 56.1600;
-    final static double MAX_LAT = 56.2794; // 56.1850;
+    private static double MIN_LONG;
+    private static double MAX_LONG;
+    private static double MIN_LAT;
+    private static double MAX_LAT;
     final static int window_x = 1600*multiplier;
     final static int window_y = 900*multiplier;
     final static int radius = 6*multiplier;
@@ -30,8 +26,14 @@ public class GraphVisualiser extends Canvas {
     private List<Vertex> shortestPath;
     private List<Edge> visited;
 
-    public GraphVisualiser(Graph graph) {
+    public GraphVisualiser(Graph graph, BoundingBox bbox) {
         this.graph = graph;
+
+        MIN_LAT = bbox.SOUTH;
+        MAX_LAT = bbox.NORTH;
+        MIN_LONG = bbox.WEST;
+        MAX_LONG = bbox.EAST;
+
         setBackground(Color.WHITE);
     }
 
