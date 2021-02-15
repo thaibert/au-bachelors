@@ -3,6 +3,7 @@ package graph;
 import java.util.*;
 import java.util.List;
 import java.awt.*;
+import java.awt.image.*;
 import javax.swing.*;
 
 import pathfinding.framework.*; 
@@ -12,16 +13,16 @@ import java.io.*;
 public class GraphVisualiser extends Canvas {
 
     // It's really small on my screen when it's only 700x900
-    final static int multiplier = 2;
+    final static int zoom_level = 1;
     private static boolean DRAW_NODES = false;
 
     private static double MIN_LONG;
     private static double MAX_LONG;
     private static double MIN_LAT;
     private static double MAX_LAT;
-    final static int window_x = 1600*multiplier;
-    final static int window_y = 900*multiplier;
-    final static int radius = 6*multiplier;
+    static int window_x, window_y;
+    static int image_width, image_height;
+    final static int radius = 6*zoom_level;
 
     private Graph graph;
     private List<Vertex> shortestPath;
@@ -35,15 +36,40 @@ public class GraphVisualiser extends Canvas {
         MIN_LONG = bbox.WEST;
         MAX_LONG = bbox.EAST;
 
+        double dx = Math.abs(bbox.EAST - bbox.WEST);
+        double dy = Math.abs(bbox.NORTH - bbox.SOUTH);
+        double bboxRatio = dx/dy;
+
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        double screenRatio = screenSize.getWidth()/(screenSize.getHeight()-100);
+        if (bboxRatio > screenRatio) {
+            // long bounding box
+            window_x = (int) (screenSize.getWidth());
+            window_y = 100 + (int) (dy * screenSize.getWidth()/dx);
+        } else {
+            // tall bounding box
+            window_x = (int) (dx * (screenSize.getHeight())/dy);
+            window_y = 100 + (int) (screenSize.getHeight());
+        }
+        image_width = window_x * zoom_level;
+        image_height = window_y * zoom_level;
+
         setBackground(Color.WHITE);
     }
 
     public void visualize() {
         JFrame f = new JFrame();
-        f.add(this);
+        // f.add(new BufferedImage(window_x, window_y, BufferedImage.TYPE_INT_ARGB));
+
+        BufferedImage img = new BufferedImage(image_width, image_height, BufferedImage.TYPE_INT_ARGB);
+        paint(img.getGraphics()); // Actually draw stuff!!!!
+
+        // Enable scrolling around
+        ImageIcon imgIcon = new ImageIcon(img);
+        JScrollPane scrollPane = new JScrollPane(new JLabel(imgIcon));
+        f.getContentPane().add(scrollPane);
         
         f.setSize(window_x,window_y);
-        f.setResizable(false);
         f.setVisible(true);
     }
 
@@ -153,8 +179,8 @@ public class GraphVisualiser extends Canvas {
 
         //System.out.printf("temp dx: %f, dy: %f\n", tempx, tempy);
 
-        int x = (int) Math.round((lon-MIN_LONG)/d_long * window_x);
-        int y = window_y - (int) Math.round((lat-MIN_LAT)/d_lat * window_y);
+        int x = (int) Math.round((lon-MIN_LONG)/d_long * image_width);
+        int y = image_height - (int) Math.round((lat-MIN_LAT)/d_lat * image_height);
 
         //System.out.printf("output x: %d, y: %d\n", x, y);
 
