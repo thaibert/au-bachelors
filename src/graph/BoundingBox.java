@@ -3,6 +3,7 @@ package graph;
 public class BoundingBox {
 
     public static BoundingBox Aarhus = new BoundingBox(56.1269, 56.1846, 10.1365, 10.2580);
+    public static BoundingBox GreaterAarhus = new BoundingBox(56.0953, 56.2296, 10.0393, 10.2974);
     public static BoundingBox AarhusSilkeborg = new BoundingBox(56.0337, 56.2794, 9.4807, 10.259);
     public static BoundingBox Denmark = new BoundingBox(54.525, 57.799, 8.010, 12.838);
     
