@@ -32,6 +32,7 @@ public class OSMExtractor {
             //                        and  wayID -> [nodeID1, nodeID2,...]
             Map<String, String> nodeIdToLatlong = new HashMap<>();
             Map<String, Collection<String>> wayIdToNodes = new HashMap<>();
+            Map<String, Boolean> onewayStreets = new HashMap<>();
             Map<String, Integer> refsPerNode = new HashMap<>();
 
             // Filter to XML tags of type node and way
@@ -84,7 +85,9 @@ public class OSMExtractor {
                             String v = getAttribute(child, "v");
                             if ("highway".equals(k) && carTypes.contains(v)) {
                                 isCarAccessible = true;
-                                break;
+                            }
+                            if ("oneway".equals(k) && "yes".equals(v)) {
+                                onewayStreets.put(id, true);
                             }
                         }
                     }
@@ -112,12 +115,13 @@ public class OSMExtractor {
             System.out.println("  --> Writing all-roads.csv");
             File csv1 = new File("aarhus-silkeborg-all-roads.csv");
             try (PrintWriter pw = new PrintWriter(csv1)) {
-                pw.write("lat,lon,wayID,\n");
+                pw.write("lat,lon,wayID,oneway,\n");
                 
                 wayIdToNodes.forEach((wayID, nodes) -> {
                     nodes.forEach( nodeID -> {
                             String latlon = nodeIdToLatlong.get(nodeID);
-                            pw.write(latlon + "," + wayID + ",\n");
+                            int oneway = onewayStreets.containsKey(wayID) ? 1 : 0;
+                            pw.write(latlon + "," + wayID + "," + oneway + ",\n");
                     });
                 });
                 
@@ -128,14 +132,15 @@ public class OSMExtractor {
             System.out.println("  --> Writing intersections.csv");
             File csv2 = new File("aarhus-silkeborg-intersections.csv");
             try (PrintWriter pw = new PrintWriter(csv2)) {
-                pw.write("lat,lon,wayID,\n");
+                pw.write("lat,lon,wayID,oneway,\n");
                 
                 wayIdToNodes.forEach((wayID, nodes) -> {
                     nodes.forEach( nodeID -> {
                         // Filtering on ways ref'ing this node filter for intersections!
                             if (refsPerNode.getOrDefault(nodeID, 0) > 1) {
                             String latlon = nodeIdToLatlong.get(nodeID);
-                            pw.write(latlon + "," + wayID + ",\n");
+                            String oneway = onewayStreets.containsKey(wayID) ? "1" : "0";
+                            pw.write(latlon + "," + wayID + "," + oneway + ",\n");
                         }
                     });
                 });

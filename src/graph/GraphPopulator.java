@@ -59,6 +59,7 @@ public class GraphPopulator {
                 double lat = Double.valueOf(args[0]);
                 double lon = Double.valueOf(args[1]);
                 currWayID = args[2];
+                boolean oneway = "1".equals(args[3]); // args[3] is the "oneway" column. Either 1 or 0.
 
                 currVertex = new Vertex(lat, lon);
 
@@ -74,7 +75,10 @@ public class GraphPopulator {
                 double dist = 2 * radius * Math.asin(Math.sqrt(hav(currVertex.getLatitude() - prevVertex.getLatitude()) + Math.cos(currVertex.getLatitude()) * Math.cos(prevVertex.getLatitude())*hav(currVertex.getLongitude()-prevVertex.getLongitude())));
 
                 graph.addEdge(prevVertex, currVertex, dist);
-                graph.addEdge(currVertex, prevVertex, dist);
+                if (! oneway) {
+                    // Only add the edge going back if it makes sense!
+                    graph.addEdge(currVertex, prevVertex, dist);
+                }
             }
         } catch(Exception e) {
             System.out.println("--> " + e);
