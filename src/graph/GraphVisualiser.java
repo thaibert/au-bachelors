@@ -105,7 +105,12 @@ public class GraphVisualiser extends Canvas {
             String prev_lon = Double.toString(prev.getLongitude());
             int[] prev_coords = convertToXAndY(new String[] { prev_lat, prev_lon });
 
+<<<<<<< HEAD
             drawThickLine(g, v_coords[0], v_coords[1], prev_coords[0], prev_coords[1]);
+=======
+            //drawThickLine(g, v_coords[0], v_coords[1], prev_coords[0], prev_coords[1]);
+            g.drawLine(v_coords[0], v_coords[1], prev_coords[0], prev_coords[1]);
+>>>>>>> e549fc87449ac5ec69a0aa5281aab29245fc3cc4
 
             prev = v;
         }
