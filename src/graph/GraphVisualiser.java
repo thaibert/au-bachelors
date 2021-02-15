@@ -13,6 +13,7 @@ public class GraphVisualiser extends Canvas {
 
     // It's really small on my screen when it's only 700x900
     final static int multiplier = 2;
+    private static boolean DRAW_NODES = false;
 
     private static double MIN_LONG;
     private static double MAX_LONG;
@@ -74,7 +75,9 @@ public class GraphVisualiser extends Canvas {
             String lat = Double.toString(v.getLatitude());
             String lon = Double.toString(v.getLongitude());
             int[] v_coords = convertToXAndY(new String[] { lat, lon });
-            //g.drawOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
+            if (DRAW_NODES) {
+                g.drawOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
+            }
 
             // Draw edges
             graph.getNeighboursOf(v).forEach(n -> {
@@ -83,21 +86,6 @@ public class GraphVisualiser extends Canvas {
                 int[] n_coords = convertToXAndY(new String[] { n_lat, n_lon });
                 g.drawLine(v_coords[0], v_coords[1], n_coords[0], n_coords[1]);
             });
-
-            // Testing to see whether way intersection is handled; or if we need to detect where ways intersect
-            if (graph.getNeighboursOf(v).size() > 2) {
-                // A node in a way can have at most 2 neighbors. If it's bigger, it IS handled :D
-                /*
-                Color oldColor = g.getColor();
-                g.setColor(Color.MAGENTA);
-
-                int temp_radius = radius/2 * 3 * graph.getNeighboursOf(v).size() / 2;
-
-                g.drawOval(v_coords[0] - temp_radius / 2, v_coords[1] - temp_radius / 2, temp_radius, temp_radius);
-
-                g.setColor(oldColor);
-                */
-            }
         });
 
     }
@@ -117,7 +105,8 @@ public class GraphVisualiser extends Canvas {
             String prev_lon = Double.toString(prev.getLongitude());
             int[] prev_coords = convertToXAndY(new String[] { prev_lat, prev_lon });
 
-            g.drawLine(v_coords[0], v_coords[1], prev_coords[0], prev_coords[1]);
+            drawThickLine(g, v_coords[0], v_coords[1], prev_coords[0], prev_coords[1]);
+
             prev = v;
         }
         g.setColor(oldColor);
@@ -174,11 +163,39 @@ public class GraphVisualiser extends Canvas {
         return result;
     }
 
+    private static void drawThickLine(Graphics g, int x1, int y1, int x2, int y2) {
 
-    public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("intersections.csv");
-        GraphVisualiser vis = new GraphVisualiser(graph);
-        vis.visualize();
+        int delta = 1;
+        int[] xPoints;
+        int[] yPoints;
+
+        if (x1 < x2) {
+            if (y1 < y2) {
+                // DONE
+                xPoints = new int[]{x1-delta, x1+delta, x2+delta, x2-delta};
+                yPoints = new int[]{y1+delta, y1-delta, y2-delta, y2+delta};
+            } else {
+                // DONE
+                //y2 < y1
+                xPoints = new int[]{x2-delta, x2+delta, x1+delta, x1-delta};
+                yPoints = new int[]{y2-delta, y2+delta, y1+delta, y1-delta};
+            }
+        } else {
+            // x2 < x1
+            if (y1 < y2) {
+                // DONE
+                xPoints = new int[]{x1-delta, x1+delta, x2+delta, x2-delta};
+                yPoints = new int[]{y1-delta, y1+delta, y2+delta, y2-delta};
+            } else {
+                // 
+                //y2 < y1
+                xPoints = new int[]{x2-delta, x2+delta, x1+delta, x1-delta};
+                yPoints = new int[]{y2+delta, y2-delta, y1-delta, y1+delta};
+            }
+        }
+       
+
+        g.fillPolygon(xPoints, yPoints, 4);
     }
     
 }
