@@ -38,6 +38,7 @@ public class TestDijkstras {
         // assert !equalSolutions;
         // TODO wrap so only on when assertions are on
         if (!equalSolutions) {
+            System.out.println("failed!");
             GraphVisualiser vis1 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
             vis1.drawPath(solutionOurs.getShortestPath());
             vis1.visualize();
@@ -52,6 +53,10 @@ public class TestDijkstras {
                 System.out.println(e);
             }
         }
+        List<Vertex> vertices = solutionTraditional.getShortestPath();
+        Vertex first = vertices.get(0);
+        Vertex last = vertices.get(vertices.size()-1);
+        System.out.println("  " + first + "  ->  " + last);
 
     }
 
@@ -71,12 +76,10 @@ public class TestDijkstras {
                 testTraditionalDijkstraVsOurs();
 
             } catch(Exception e) {
-                System.out.print(" failed!");
-                // System.out.println(e.getMessage());
+                 System.out.println(" failed (exception)");
             } catch(AssertionError e) {
-                System.out.println(e.getMessage());
+                System.out.println(" failed (assert)");
             }
-            System.out.print("\n");
         }
         System.out.println("[*] Done!");
     }
