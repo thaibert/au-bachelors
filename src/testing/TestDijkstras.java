@@ -26,19 +26,28 @@ public class TestDijkstras {
 
         Vertex a = pickRandomVertex(g);
         Vertex b = pickRandomVertex(g);
+
         
-        PathfindingAlgo traditional = new Dijkstra(); // TODO traditional
+        PathfindingAlgo traditional = new DijkstraTraditional();
         PathfindingAlgo ours = new Dijkstra();
 
-        Solution solutionTraditional = traditional.shortestPath(g, a, b);
-        Solution solutionOurs = ours.shortestPath(g, a, b);
+        Solution solutionTraditional, solutionOurs;
+        try {
+            solutionTraditional = traditional.shortestPath(g, a, b);
+            solutionOurs = ours.shortestPath(g, a, b);
+        } catch(Exception e) {
+            System.setOut(originalStream);
+            System.out.println(e.getMessage());
+            solutionTraditional = solutionOurs = new Solution(new ArrayList<>(), new ArrayList<>());
+        }
         System.setOut(originalStream);
+        System.out.print("  " + a + "  ->  " + b);
 
         boolean equalSolutions = solutionTraditional.getShortestPath().equals(solutionOurs.getShortestPath());
         // assert !equalSolutions;
         // TODO wrap so only on when assertions are on
         if (!equalSolutions) {
-            System.out.println("failed!");
+            System.out.println(" not equal!");
             GraphVisualiser vis1 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
             vis1.drawPath(solutionOurs.getShortestPath());
             vis1.visualize();
@@ -53,10 +62,7 @@ public class TestDijkstras {
                 System.out.println(e);
             }
         }
-        List<Vertex> vertices = solutionTraditional.getShortestPath();
-        Vertex first = vertices.get(0);
-        Vertex last = vertices.get(vertices.size()-1);
-        System.out.println("  " + first + "  ->  " + last);
+        System.out.println();
 
     }
 
@@ -69,7 +75,7 @@ public class TestDijkstras {
     }
 
     public static void main(String[] args) {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 100000; i++) {
             System.out.print(" -> " + i);
             try {
 
