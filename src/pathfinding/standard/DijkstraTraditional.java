@@ -68,6 +68,11 @@ public class DijkstraTraditional implements PathfindingAlgo {
         System.out.println("  --> backtracking solution");
         List<Vertex> out = new ArrayList<>();
 
+        if (predecessor.get(goal) == null) {
+            System.out.println("  --> No path exists!!");
+            return new Solution(new ArrayList<>(), edgesConsidered);
+        }
+
         Vertex temp = goal;
         while (! start.equals(temp)) {
             out.add(temp);
