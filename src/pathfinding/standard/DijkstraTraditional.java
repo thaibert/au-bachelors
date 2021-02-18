@@ -30,22 +30,22 @@ public class DijkstraTraditional implements PathfindingAlgo {
 
         pq.add(new Pair(start, 0));
 
-        g.getAllVertices().stream()
-            .map(v -> new Pair(v, INF_DIST))
-            .forEach(pq::add);
+        //g.getAllVertices().stream()
+        //    .map(v -> new Pair(v, INF_DIST))
+        //    .forEach(pq::add);
         
         int iterations = 0;
         while (pq.size() > 0) {
             iterations++;
 
             if (iterations % 1000 == 0) {
-                System.out.println("  " + iterations);
+                System.out.println("    --> " + iterations + ",   pq size: " + pq.size());
             }
 
             Pair head = pq.poll();
 
             if (head.v.equals(goal)) {
-                System.out.println("  --> Finished early");
+                System.out.println("  --> Finished early at " + iterations);
                 break;
             }
 

@@ -37,7 +37,7 @@ public class Dijkstra implements PathfindingAlgo {
         //Purely for visualising
         edgesConsidered = new ArrayList<>();
 
-        g.getAllVertices().stream().forEach( v -> dist.put(v, INF_DIST) );
+        //g.getAllVertices().stream().forEach( v -> dist.put(v, INF_DIST) );
         dist.put(start, 0.0);
 
 
@@ -58,7 +58,7 @@ public class Dijkstra implements PathfindingAlgo {
             Vertex head = pq.poll();
 
             if (head.equals(goal)) {
-                System.out.println("  --> Finished early");
+                System.out.println("  --> Finished early at " + num);
                 break;
             }
 
@@ -100,7 +100,7 @@ public class Dijkstra implements PathfindingAlgo {
         // But i can't get pairs to work currently
         edgesConsidered.add(new Edge(u, n.v));
 
-        if (dist.get(n.v) > dist.get(u) + n.distance) {
+        if (dist.getOrDefault(n.v, INF_DIST) > dist.getOrDefault(u, INF_DIST) + n.distance) {
             dist.put(n.v, dist.get(u) + n.distance);
             pred.put(n.v, u);
 
