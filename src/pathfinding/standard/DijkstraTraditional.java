@@ -25,7 +25,7 @@ public class DijkstraTraditional implements PathfindingAlgo {
         Map<Vertex, Vertex> predecessor = new HashMap<>(); 
         List<Edge> edgesConsidered = new ArrayList<>();
 
-        Comparator<Pair> comp = new DistComparator();
+        DistComparator comp = new DistComparator();
         PriorityQueue<Pair> pq = new PriorityQueue<>(comp);
 
         pq.add(new Pair(start, 0));
@@ -43,6 +43,11 @@ public class DijkstraTraditional implements PathfindingAlgo {
             }
 
             Pair head = pq.poll();
+
+            if (head.v.equals(goal)) {
+                System.out.println("  --> Finished early");
+                break;
+            }
 
             g.getNeighboursOf(head.v)
                 .forEach(n -> {
@@ -76,8 +81,9 @@ public class DijkstraTraditional implements PathfindingAlgo {
         out.add(start);
         System.out.println("      " + out.size() + " nodes");
         System.out.println("      " + edgesConsidered.size() + " edges considered");
+        System.out.println("      " + comp.getComparisons() + " comparisons");
 
-        Solution solution = new Solution(out, new ArrayList<>()); // edgesConsidered);
+        Solution solution = new Solution(out, edgesConsidered); // edgesConsidered);
 
         return solution;
     }
@@ -88,8 +94,8 @@ public class DijkstraTraditional implements PathfindingAlgo {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
         // Vertex a = new Vertex(56.1634686,10.1722176); // Viborgvej
-        Vertex b = new Vertex(56.1723636,9.5538336); // Silkeborg
-        Vertex a = new Vertex(56.1828308,10.2037825); // O2/Randersvej
+        Vertex a = new Vertex(56.1723636,9.5538336); // Silkeborg
+        Vertex b = new Vertex(56.1828308,10.2037825); // O2/Randersvej
 
         PathfindingAlgo d = new DijkstraTraditional();
         Solution solution = d.shortestPath(graph, a, b);
@@ -103,10 +109,18 @@ public class DijkstraTraditional implements PathfindingAlgo {
 
     class DistComparator implements Comparator<Pair> {
 
+        public long comparisons = 0;
+
         @Override
         public int compare(Pair p1, Pair p2) {
+            this.comparisons++;
             return Double.compare(p1.dist, p2.dist);
         }
+
+        public long getComparisons() {
+            return this.comparisons;
+        }
+        
     }
 
     class Pair {
