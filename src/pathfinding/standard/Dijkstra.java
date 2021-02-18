@@ -70,6 +70,11 @@ public class Dijkstra implements PathfindingAlgo {
             });
         }
 
+        if (pred.get(goal) == null) {
+            System.out.println("  --> No path exists!!");
+            return new Solution(new ArrayList<>(), edgesConsidered);
+        }
+
         // Get out the shortest path
         System.out.println("  --> backtracking solution");
         List<Vertex> out = new ArrayList<>();
