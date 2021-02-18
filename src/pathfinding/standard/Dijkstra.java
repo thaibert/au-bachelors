@@ -19,7 +19,7 @@ public class Dijkstra implements PathfindingAlgo {
     // For visual
     private List<Edge> edgesConsidered;
 
-    public Solution shortestPath(Graph g, Vertex a, Vertex b){
+    public Solution shortestPath(Graph g, Vertex start, Vertex goal){
         System.out.println("--> Running Dijkstra");
         //  Psudokode from the book
         //  Initialize-Single-Source(G, s) (s = source)
@@ -38,13 +38,13 @@ public class Dijkstra implements PathfindingAlgo {
         edgesConsidered = new ArrayList<>();
 
         g.getAllVertices().stream().forEach( v -> dist.put(v, INF_DIST) );
-        dist.put(a, 0.0);
+        dist.put(start, 0.0);
 
 
         // Main algo
         DistComparator comp = new DistComparator();
         PriorityQueue<Vertex> pq = new PriorityQueue<>(comp);
-        pq.add(a);
+        pq.add(start);
 
         System.out.println("vertices: " + g.getAllVertices().size() + ",    pq: " + pq.size());
 
@@ -52,18 +52,18 @@ public class Dijkstra implements PathfindingAlgo {
         while (pq.size() > 0) {
             num++;
             if (num % 1000 == 0) {
-                System.out.println("  --> " + num + ",   pq size: " + pq.size());
+                System.out.println("    --> " + num + ",   pq size: " + pq.size());
             }
 
-            Vertex u = pq.poll();
+            Vertex head = pq.poll();
 
-            if (u.equals(b)) {
+            if (head.equals(goal)) {
                 System.out.println("  --> Finished early");
                 break;
             }
 
-            g.getNeighboursOf(u).forEach(n -> {
-                boolean relaxed = relax(u, n);
+            g.getNeighboursOf(head).forEach(n -> {
+                boolean relaxed = relax(head, n);
                 if (relaxed) {
                     pq.add(n.v);
                 }
@@ -71,19 +71,18 @@ public class Dijkstra implements PathfindingAlgo {
         }
 
         // Get out the shortest path
-        System.out.println("    --> backtracking solution");
+        System.out.println("  --> backtracking solution");
         List<Vertex> out = new ArrayList<>();
 
-        Vertex temp = b;
-        int i = 0;
-        while (! a.equals(temp)) {
+        Vertex temp = goal;
+        while (! start.equals(temp)) {
             out.add(temp);
             temp = pred.get(temp);
-            i++;
         }
-        out.add(a);
-        System.out.println("        " + out.size() + " nodes");
-        System.out.println("        " + comp.getComparisons() + " comparisons");
+        out.add(start);
+        System.out.println("      " + out.size() + " nodes");
+        System.out.println("      " + edgesConsidered.size() + " edges considered");
+        System.out.println("      " + comp.getComparisons() + " comparisons");
 
         Solution solution = new Solution(out, edgesConsidered);
 
@@ -111,10 +110,10 @@ public class Dijkstra implements PathfindingAlgo {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
         // Vertex a = new Vertex(56.1634686,10.1722176); // Viborgvej
-        Vertex b = new Vertex(56.1723636,9.5538336); // Silkeborg
-        Vertex a = new Vertex(56.1828308,10.2037825); // O2/Randersvej
+        Vertex a = new Vertex(56.1723636,9.5538336); // Silkeborg
+        Vertex b = new Vertex(56.1828308,10.2037825); // O2/Randersvej
 
-        Dijkstra d = new Dijkstra();
+        PathfindingAlgo d = new Dijkstra();
         Solution solution = d.shortestPath(graph, a, b);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
