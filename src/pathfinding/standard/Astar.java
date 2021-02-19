@@ -4,7 +4,7 @@ import pathfinding.framework.*;
 import graph.*;
 import java.util.*;
 
-public class Astar {
+public class Astar implements PathfindingAlgo {
     private final double INF_DIST = Double.MAX_VALUE;
 
 
