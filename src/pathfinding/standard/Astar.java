@@ -20,7 +20,7 @@ public class Astar {
     // For visual
     private List<Edge> edgesConsidered;
 
-    public Solution shortestPath( Graph g, Vertex a, Vertex b){
+    public Solution shortestPath(Graph g, Vertex start, Vertex goal){
 
         dist = new HashMap<>();
         pred = new HashMap<>();
@@ -32,28 +32,28 @@ public class Astar {
         // TODO kan man skip det her og så bruge dist.getOrDefault(...)?
         g.getAllVertices().stream().forEach( v -> {dist.put(v, INF_DIST);
                                                    fscore.put(v, INF_DIST);} );
-        dist.put(a, 0.0);
-        fscore.put(a, hueristic(a,b));
+        dist.put(start, 0.0);
+        fscore.put(start, heuristic(start, goal));
         DistComparator comp = new DistComparator();
         PriorityQueue<Vertex> pq = new PriorityQueue<>(comp);
-        pq.add(a);
+        pq.add(start);
 
 
         while (pq.size() > 0) {
-            Vertex u = pq.poll(); // Should retrieve the lowest Fscore
+            Vertex min = pq.poll(); // Should retrieve the lowest Fscore
 
-            if (u.equals(b)) {
+            if (min.equals(goal)) {
                 System.out.println("  --> Finished early");
                 break;
             }
 
-            g.getNeighboursOf(u).forEach(n -> {
-                edgesConsidered.add(new Edge(u, n.v));
-                double tent_gScore = dist.get(u) + n.distance;
+            g.getNeighboursOf(min).forEach(n -> {
+                edgesConsidered.add(new Edge(min, n.v));
+                double tent_gScore = dist.get(min) + n.distance;
                 if (tent_gScore < dist.get(n.v)) {
-                    pred.put(n.v, u);
+                    pred.put(n.v, min);
                     dist.put(n.v, tent_gScore);
-                    fscore.put(n.v, tent_gScore + hueristic(n.v,b));
+                    fscore.put(n.v, tent_gScore + heuristic(n.v, goal));
                     if (!pq.contains(n.v)){
                         pq.add(n.v);
                     }
@@ -64,14 +64,19 @@ public class Astar {
 
         // Get out the shortest path
         System.out.println("    --> backtracking solution");
+
+        if (pred.get(goal) == null) {
+            System.out.println("  --> No path exists!!");
+            return new Solution(new ArrayList<>(), edgesConsidered);
+        }
         List<Vertex> out = new ArrayList<>();
 
-        Vertex temp = b;
-        while (! a.equals(temp)) {
+        Vertex temp = goal;
+        while (! start.equals(temp)) {
             out.add(temp);
             temp = pred.get(temp);
         }
-        out.add(a);
+        out.add(start);
         System.out.println("        " + out.size() + " nodes");
         System.out.println("        " + comp.getComparisons() + " comparisons");
 
@@ -115,7 +120,7 @@ public class Astar {
         }
     }
 
-    private double hueristic(Vertex a, Vertex b) {
+    private double heuristic(Vertex a, Vertex b) {
         // Currently we simply use the haversine distance 
         double dist = 2 * radius * Math.asin(Math.sqrt(hav(a.getLatitude() - b.getLatitude()) + Math.cos(a.getLatitude()) * Math.cos(b.getLatitude())*hav(a.getLongitude()-b.getLongitude())));
         return dist;
