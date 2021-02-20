@@ -88,11 +88,11 @@ public class Astar implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv", false);
 
         // Vertex a = new Vertex(56.1634686,10.1722176); // Viborgvej
-        Vertex b = new Vertex(56.1723636,9.5538336); // Silkeborg
-        Vertex a = new Vertex(56.1828308,10.2037825); // O2/Randersvej
+        Vertex a = new Vertex(56.1723636,9.5538336); // Silkeborg
+        Vertex b = new Vertex(56.1828308,10.2037825); // O2/Randersvej
 
         Astar d = new Astar();
         Solution solution = d.shortestPath(graph, a, b);

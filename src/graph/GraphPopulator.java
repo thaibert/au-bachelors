@@ -7,12 +7,12 @@ public class GraphPopulator {
 
     final static double radius = 6371000;
 
-    public static Graph populateGraph(String filename) {
+    public static Graph populateGraph(String filename, boolean inverted) {
         System.out.println("--> Populating graph");
         Graph graph = new SimpleGraph();
 
         addNodes(filename, graph);
-        addEdges(filename, graph);
+        addEdges(filename, graph, inverted);
 
         return graph;
     }
@@ -37,7 +37,7 @@ public class GraphPopulator {
         } 
     }
 
-    private static void addEdges(String filename, Graph graph) {
+    private static void addEdges(String filename, Graph graph, boolean inverted) {
         try (BufferedReader reader = new BufferedReader(
             new InputStreamReader(
                 new FileInputStream(
@@ -74,11 +74,23 @@ public class GraphPopulator {
 
                 double dist = 2 * radius * Math.asin(Math.sqrt(hav(currVertex.getLatitude() - prevVertex.getLatitude()) + Math.cos(currVertex.getLatitude()) * Math.cos(prevVertex.getLatitude())*hav(currVertex.getLongitude()-prevVertex.getLongitude())));
 
-                graph.addEdge(prevVertex, currVertex, dist);
-                if (! oneway) {
-                    // Only add the edge going back if it makes sense!
+                if (inverted) {
                     graph.addEdge(currVertex, prevVertex, dist);
+
+                    if (! oneway) {
+                        // Only add the edge going back if it makes sense!
+                        graph.addEdge(prevVertex, currVertex, dist);
+                    }
+                } else {
+                    graph.addEdge(prevVertex, currVertex, dist);
+
+                    if (! oneway) {
+                        // Only add the edge going back if it makes sense!
+                        graph.addEdge(currVertex, prevVertex, dist);
+                    }
                 }
+
+
             }
         } catch(Exception e) {
             System.out.println("--> " + e);
