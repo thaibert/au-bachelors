@@ -5,23 +5,65 @@ import graph.*;
 import java.util.*;
 
 public class BidirectionalDijkstra implements PathfindingAlgo {
+    private final double INF_DIST = Double.MAX_VALUE;
+
+    //_f means forward algo, _b means backwards algo
+    private Map<Vertex, Double> dist_f;
+    private Map<Vertex, Vertex> pred_f; // S in the algo is pred.keySet()
+    private Map<Vertex, Double> dist_b;
+    private Map<Vertex, Vertex> pred_b; // S in the algo is pred.keySet()
+
+
+    // For visual
+    private List<Edge> edgesConsidered;
+    
+
 
     @Override // TODO problems in taking 2 graphs as input :/
     public Solution shortestPath(Graph graph, Vertex start, Vertex goal) {
 
+        dist_f = new HashMap<>();
+        pred_f = new HashMap<>();
+        dist_b = new HashMap<>();
+        pred_b = new HashMap<>();
 
-
+        //Purely for visualising
+        edgesConsidered = new ArrayList<>();
 
         // Main source of inspiration:
         // https://www.ucl.ac.uk/~ucahmto/math/2020/05/30/bidirectional-dijkstra.html
-
-
-
         
+        dist_f.put(start, 0.0);
+        dist_b.put(goal, 0.0);
+
+
+        // Main algo
+        DistComparator comp = new DistComparator();
+        PriorityQueue<Pair> pq_f = new PriorityQueue<>(comp);
+        pq_f.add(new Pair(start, 0));
+
+        PriorityQueue<Pair> pq_b = new PriorityQueue<>(comp);
+        pq_b.add(new Pair(goal, 0));
+
         // TODO Auto-generated method stub
         return null;
     }
 
+
+    private boolean relax(Vertex u, Neighbor n, Map<Vertex, Double> dist, Map<Vertex, Vertex> pred) {
+        // for visualising all considered edges
+        // TODO currently it only paint one edge going out of each node. I can't think of a way to do it, without a list of pairs
+        // But i can't get pairs to work currently
+        edgesConsidered.add(new Edge(u, n.v));
+
+        if (dist.getOrDefault(n.v, INF_DIST) > dist.getOrDefault(u, INF_DIST) + n.distance) {
+            dist.put(n.v, dist.get(u) + n.distance);
+            pred.put(n.v, u);
+
+            return true;
+        }
+        return false;
+    }
     
     public static void main(String[] args) {
         // We need to be able to utilize the inverted graph, so for now we ignore space efficiency and just create 2 graphs
