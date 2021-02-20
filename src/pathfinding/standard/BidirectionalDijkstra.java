@@ -45,6 +45,16 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
         PriorityQueue<Pair> pq_b = new PriorityQueue<>(comp);
         pq_b.add(new Pair(goal, 0));
 
+        while (pq_f.size() > 0 && pq_b.size() > 0) {
+            Pair head_f = pq_f.poll();
+            Pair head_b = pq_b.poll();
+
+            
+
+
+
+        }
+
         // TODO Auto-generated method stub
         return null;
     }
@@ -52,8 +62,6 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
 
     private boolean relax(Vertex u, Neighbor n, Map<Vertex, Double> dist, Map<Vertex, Vertex> pred) {
         // for visualising all considered edges
-        // TODO currently it only paint one edge going out of each node. I can't think of a way to do it, without a list of pairs
-        // But i can't get pairs to work currently
         edgesConsidered.add(new Edge(u, n.v));
 
         if (dist.getOrDefault(n.v, INF_DIST) > dist.getOrDefault(u, INF_DIST) + n.distance) {
