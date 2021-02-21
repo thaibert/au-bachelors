@@ -1,9 +1,9 @@
 package pathfinding.standard;
 
 import pathfinding.framework.*;
-import utility.GraphUtils;
 import graph.*;
 import java.util.*;
+import utility.*;
 
 public class BidirectionalDijkstra{
     private final double INF_DIST = Double.MAX_VALUE;
@@ -170,32 +170,6 @@ public class BidirectionalDijkstra{
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize();
-    }
-
-    class DistComparator implements Comparator<Pair> {
-
-        public long comparisons = 0;
-
-        @Override
-        public int compare(Pair p1, Pair p2) {
-            this.comparisons++;
-            return Double.compare(p1.dist, p2.dist);
-        }
-
-        public long getComparisons() {
-            return this.comparisons;
-        }
-        
-    }
-
-    class Pair {
-        public final Vertex v;
-        public final double dist;
-
-        public Pair(Vertex v, double dist) {
-            this.v = v;
-            this.dist = dist;
-        }
     }
 
 }
