@@ -7,12 +7,12 @@ public class GraphPopulator {
 
     final static double radius = 6371000;
 
-    public static Graph populateGraph(String filename, boolean inverted) {
+    public static Graph populateGraph(String filename) {
         System.out.println("--> Populating graph");
         Graph graph = new SimpleGraph();
 
         addNodes(filename, graph);
-        addEdges(filename, graph, inverted);
+        addEdges(filename, graph);
 
         return graph;
     }
@@ -37,7 +37,7 @@ public class GraphPopulator {
         } 
     }
 
-    private static void addEdges(String filename, Graph graph, boolean inverted) {
+    private static void addEdges(String filename, Graph graph) {
         try (BufferedReader reader = new BufferedReader(
             new InputStreamReader(
                 new FileInputStream(
@@ -73,24 +73,13 @@ public class GraphPopulator {
                 //double dist = Math.sqrt(dist_lat + dist_lon); // TODO may be slow?
 
                 double dist = 2 * radius * Math.asin(Math.sqrt(hav(currVertex.getLatitude() - prevVertex.getLatitude()) + Math.cos(currVertex.getLatitude()) * Math.cos(prevVertex.getLatitude())*hav(currVertex.getLongitude()-prevVertex.getLongitude())));
+                
+                graph.addEdge(prevVertex, currVertex, dist);
 
-                if (inverted) {
+                if (! oneway) {
+                    // Only add the edge going back if it makes sense!
                     graph.addEdge(currVertex, prevVertex, dist);
-
-                    if (! oneway) {
-                        // Only add the edge going back if it makes sense!
-                        graph.addEdge(prevVertex, currVertex, dist);
-                    }
-                } else {
-                    graph.addEdge(prevVertex, currVertex, dist);
-
-                    if (! oneway) {
-                        // Only add the edge going back if it makes sense!
-                        graph.addEdge(currVertex, prevVertex, dist);
-                    }
                 }
-
-
             }
         } catch(Exception e) {
             System.out.println("--> " + e);

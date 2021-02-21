@@ -1,6 +1,7 @@
 package pathfinding.standard;
 
 import pathfinding.framework.*;
+import utility.GraphUtils;
 import graph.*;
 import java.util.*;
 
@@ -155,8 +156,8 @@ public class BidirectionalDijkstra{
     
     public static void main(String[] args) {
         // We need to be able to utilize the inverted graph, so for now we ignore space efficiency and just create 2 graphs
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv", false);
-        Graph invertedGraph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv", true);
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph invertedGraph = GraphUtils.invertGraph(graph);
 
         // Vertex a = new Vertex(56.1634686,10.1722176); // Viborgvej
         Vertex a = new Vertex(56.1723636,9.5538336); // Silkeborg

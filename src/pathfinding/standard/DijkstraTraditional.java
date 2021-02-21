@@ -3,6 +3,7 @@ package pathfinding.standard;
 import pathfinding.framework.*;
 import graph.*;
 import java.util.*;
+import utility.Pair;
 
 public class DijkstraTraditional implements PathfindingAlgo {
     private final double INF_DIST = Double.MAX_VALUE;
@@ -126,15 +127,5 @@ public class DijkstraTraditional implements PathfindingAlgo {
             return this.comparisons;
         }
         
-    }
-
-    class Pair {
-        public final Vertex v;
-        public final double dist;
-
-        public Pair(Vertex v, double dist) {
-            this.v = v;
-            this.dist = dist;
-        }
     }
 }
