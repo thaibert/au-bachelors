@@ -34,6 +34,20 @@ public class OSMExtractorV2 {
             Map<String, Boolean> onewayStreets = new HashMap<>();
             Map<String, Integer> refsPerNode = new HashMap<>();
 
+            // Filter to XML tags of type node and way
+            Collection<String> wantedTypes = Arrays.asList(new String[]{"node", "way"});
+            Collection<String> carTypes = Arrays.asList(new String[]{"motorway", "trunk", "primary", "secondary", "tertiary", "unclassified", "residential",
+                                                                                 "motorway_link", "trunk_link", "primary_link", "secondary_link", "tertiary_link",
+                                                                                 "living_street", "service"});
+
+            String id = null;
+            String lat = null;
+            String lon = null;
+
+            String k = null;
+            String v = null;
+
+            XMLEvent innerNextEvent = null;
 
             while(reader.hasNext()){
 
@@ -48,14 +62,51 @@ public class OSMExtractorV2 {
                     StartElement startElement = nextEvent.asStartElement();
                     switch(startElement.getName().getLocalPart()) {
                         case "node":
-                            String id = startElement.getAttributeByName(new QName("id")).toString();
-                            String lat = startElement.getAttributeByName(new QName("lat")).toString();
-                            String lon = startElement.getAttributeByName(new QName("lon")).toString();
+                            id = startElement.getAttributeByName(new QName("id")).toString();
+                            lat = startElement.getAttributeByName(new QName("lat")).toString();
+                            lon = startElement.getAttributeByName(new QName("lon")).toString();
                             nodeIdToLatlong.put(id, lat + "," + lon);
                             break;
                         case "way":
-                            
+                            id = startElement.getAttributeByName(new QName("id")).toString();
 
+                            Collection<String> childIds = new ArrayList<>();
+
+                            boolean isCarAccessible = false; 
+
+                            while (reader.hasNext())
+                                iterations++;
+                                innerNextEvent = reader.nextEvent();
+                                if (innerNextEvent.isStartElement()) {
+                                    StartElement innerStartElement = innerNextEvent.asStartElement();
+                                    switch(innerStartElement.getName().getLocalPart()) {
+                                        case "nd":
+                                            
+                                            break;
+                                        
+                                        case "tag":
+                                            k = startElement.getAttributeByName(new QName("k")).toString();
+                                            v = startElement.getAttributeByName(new QName("v")).toString();
+
+                                            if ("highway".equals(k) && carTypes.contains(v)) {
+                                                isCarAccessible = true;
+                                            }
+                                            if ("oneway".equals(k) && "yes".equals(v)) {
+                                                onewayStreets.put(id, true);
+                                            }
+
+                                            break;
+                                    }
+
+                                }
+                                if (innerNextEvent.isEndElement()) {
+                                    EndElement innerEndElement = innerNextEvent.asEndElement();
+
+                                    if (innerEndElement.getName().getLocalPart().equals("way")) {
+                                        break;
+                                    }
+                                }
+                            
                             break;
                 }
 
