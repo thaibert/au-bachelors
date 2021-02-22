@@ -10,7 +10,7 @@ import java.util.*;
 
 public class TestDijkstras {
 
-    static void testTraditionalDijkstraVsOurs() {
+    static void testTraditionalDijkstraVsOurs(Graph g) {
 
         // Disable printing while running
         PrintStream originalStream = System.out;
@@ -21,8 +21,6 @@ public class TestDijkstras {
             }
         });
         System.setOut(noopStream);
-
-        Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
         Vertex a = pickRandomVertex(g);
         Vertex b = pickRandomVertex(g);
@@ -75,11 +73,14 @@ public class TestDijkstras {
     }
 
     public static void main(String[] args) {
-        for (int i = 0; i < 100000; i++) {
+        Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv", false);
+
+
+        for (int i = 0; i < 10000; i++) {
             System.out.print(" -> " + i);
             try {
 
-                testTraditionalDijkstraVsOurs();
+                testTraditionalDijkstraVsOurs(g);
 
             } catch(Exception e) {
                  System.out.println(" failed (exception)");
