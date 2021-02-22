@@ -111,7 +111,7 @@ public class Dijkstra implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv", false);
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
         // Vertex a = new Vertex(56.1634686,10.1722176); // Viborgvej
         Vertex a = new Vertex(56.1723636,9.5538336); // Silkeborg

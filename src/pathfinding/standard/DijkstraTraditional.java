@@ -3,6 +3,7 @@ package pathfinding.standard;
 import pathfinding.framework.*;
 import graph.*;
 import java.util.*;
+import utility.*;
 
 public class DijkstraTraditional implements PathfindingAlgo {
     private final double INF_DIST = Double.MAX_VALUE;
@@ -96,7 +97,7 @@ public class DijkstraTraditional implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv", false);
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
         // Vertex a = new Vertex(56.1634686,10.1722176); // Viborgvej
         Vertex a = new Vertex(56.1723636,9.5538336); // Silkeborg
@@ -111,30 +112,4 @@ public class DijkstraTraditional implements PathfindingAlgo {
         vis.visualize();
     }
 
-
-    class DistComparator implements Comparator<Pair> {
-
-        public long comparisons = 0;
-
-        @Override
-        public int compare(Pair p1, Pair p2) {
-            this.comparisons++;
-            return Double.compare(p1.dist, p2.dist);
-        }
-
-        public long getComparisons() {
-            return this.comparisons;
-        }
-        
-    }
-
-    class Pair {
-        public final Vertex v;
-        public final double dist;
-
-        public Pair(Vertex v, double dist) {
-            this.v = v;
-            this.dist = dist;
-        }
-    }
 }
