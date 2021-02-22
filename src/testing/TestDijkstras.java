@@ -73,7 +73,7 @@ public class TestDijkstras {
     }
 
     public static void main(String[] args) {
-        Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv", false);
+        Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
 
         for (int i = 0; i < 10000; i++) {
