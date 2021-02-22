@@ -156,17 +156,17 @@ public class BidirectionalDijkstra{
     
     public static void main(String[] args) {
         // We need to be able to utilize the inverted graph, so for now we ignore space efficiency and just create 2 graphs
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
         Graph invertedGraph = GraphUtils.invertGraph(graph);
 
         // Vertex a = new Vertex(56.1634686,10.1722176); // Viborgvej
-        Vertex a = new Vertex(56.1723636,9.5538336); // Silkeborg
-        Vertex b = new Vertex(56.1828308,10.2037825); // O2/Randersvej
+        // Vertex a = new Vertex(56.1723636,9.5538336); // Silkeborg
+        // Vertex b = new Vertex(56.1828308,10.2037825); // O2/Randersvej
 
         BidirectionalDijkstra d = new BidirectionalDijkstra();
-        Solution solution = d.shortestPath(graph, invertedGraph, a, b);
+        Solution solution = d.shortestPath(graph, invertedGraph, Location.CPH, Location.Skagen);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize();

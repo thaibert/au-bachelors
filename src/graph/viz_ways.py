@@ -9,10 +9,17 @@ import pandas as pd
 import hashlib
 
 
-NE = (10.2050, 56.1850)
-SE = (10.2050, 56.1600)
-SW = (10.1700, 56.1600)
-NW = (10.1700, 56.1850)
+MIN_LON = 7.7011
+MAX_LON = 15.65449
+MIN_LAT = 54.44065
+MAX_LAT = 58.06239
+
+
+NE = (MAX_LON, MAX_LAT)
+SE = (MAX_LON, MIN_LAT)
+SW = (MIN_LON, MIN_LAT)
+NW = (MIN_LON, MAX_LAT)
+# denmark:  <bounds minlat="54.44065" minlon="7.7011" maxlat="58.06239" maxlon="15.65449"/>
 
 fig = plt.figure(figsize=(7, 9)) ## Approximate ratio of first data set
 axes = fig.add_subplot(1,1,1)#, aspect='equal')
@@ -40,8 +47,8 @@ def coordinatesOnFigure(long, lat, SW=SW, NE=NE, xmax=xmax, ymin=ymin):
 
 
 
-all_roads = pd.read_csv("all-roads.csv")
-intersect = pd.read_csv("intersections.csv")
+#all_roads = pd.read_csv("denmark-all-roads.csv")
+all_roads = intersect = pd.read_csv("denmark-intersections.csv")
 
 
 def hashAndColorfy(id):
@@ -75,6 +82,8 @@ def plotLines():
     print("  " + str(all_roads.shape[0]) + "   roads")
     lines_index = 0 # Keep i and lines_index separate; if we hit a new way, i is incremented and lines_index stays put
     for i in range(all_roads.shape[0]):
+        if i % 10000 == 0:
+            print(i)
         if all_roads["wayID"][i] != prev_wayID:
             # new way, start over again
             prev_x, prev_y = all_roads["lon"][i], all_roads["lat"][i]
@@ -93,16 +102,18 @@ def plotLines():
     # DRAW!
     print("  --> drawing lines")
     for i in range(0, len(lines)):
+        if i % 10000 == 0:
+            print(i)
         # x is an array of [x1, x2], y an array of [y1, y2]
         row = lines[i]
         x1, y1, x2, y2 = row["x1"], row["y1"], row["x2"], row["y2"]
         color = row["color"]
 
         xs, ys = [x1, x2], [y1, y2]
-        plt.plot(xs, ys, alpha=0.7, linewidth=0.5, c=color)
+        plt.plot(xs, ys, alpha=0.1, linewidth=0.5, c=color)
 
 
-plotPoints()
+#plotPoints()
 plotLines()
 
 print("--> saving as svg")
