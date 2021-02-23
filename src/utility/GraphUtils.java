@@ -22,20 +22,29 @@ public class GraphUtils {
         return inverted;
     }
 
-    public class DistComparator implements Comparator<Pair> {
+    public static Vertex findNearestVertex(Graph g, double lat, double lon) {
+        Collection<Vertex> vertices = g.getAllVertices();
+        Vertex coords = new Vertex(lat, lon);
 
-        public long comparisons = 0;
-
-        @Override
-        public int compare(Pair p1, Pair p2) {
-            this.comparisons++;
-            return Double.compare(p1.dist, p2.dist);
+        Vertex bestSoFar = null;
+        double bestDist = Double.MAX_VALUE;
+        for (Vertex v : vertices) {
+            if (dist(v, coords) < bestDist) {
+                bestSoFar = v;
+                bestDist = dist(v, coords);
+            }
         }
+        return bestSoFar;
+    }
 
-        public long getComparisons() {
-            return this.comparisons;
-        }
-        
+    public static double dist(Vertex a, Vertex b) {
+        double radius = 6371000; // Radius of the Earth
+        double dist = 2 * radius * Math.asin(Math.sqrt(hav(a.getLatitude() - b.getLatitude()) + Math.cos(a.getLatitude()) * Math.cos(b.getLatitude())*hav(a.getLongitude()-b.getLongitude())));
+        return dist;
+    }
+
+    private static double hav(double number) {
+        return (1-Math.cos(number))/2;
     }
     
 }
