@@ -7,4 +7,6 @@ public class Location {
     public static Vertex Randersvej = new Vertex(56.1828308,10.2037825); 
     public static Vertex Skagen = new Vertex(57.7262073,10.5622452);
     public static Vertex CPH = new Vertex(55.6852117,12.5456237);
+    public static Vertex Lolland = new Vertex(54.8949936,11.0364265);
+    public static Vertex Thisted = new Vertex(56.9549523,8.6883191);
 }

@@ -95,7 +95,7 @@ public class Astar implements PathfindingAlgo {
         Vertex b = new Vertex(56.1828308,10.2037825); // O2/Randersvej
 
         Astar d = new Astar();
-        Solution solution = d.shortestPath(graph, Location.Skagen, Location.CPH);
+        Solution solution = d.shortestPath(graph, Location.Lolland, Location.Thisted);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());
