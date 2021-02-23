@@ -21,11 +21,11 @@ SW = (MIN_LON, MIN_LAT)
 NW = (MIN_LON, MAX_LAT)
 # denmark:  <bounds minlat="54.44065" minlon="7.7011" maxlat="58.06239" maxlon="15.65449"/>
 
-fig = plt.figure(figsize=(7, 9)) ## Approximate ratio of first data set
+fig = plt.figure(figsize=(50,50))
 axes = fig.add_subplot(1,1,1)#, aspect='equal')
 
-axes.set_xlim([10.1700, 10.2050])
-axes.set_ylim([56.1600, 56.1850])
+axes.set_xlim([MIN_LON, MAX_LON])
+axes.set_ylim([MIN_LAT, MAX_LAT])
 
 
 #img_array = plt.imread("lisbon_2.jpg")
@@ -79,7 +79,7 @@ def plotLines():
     print("  --> calculating points")
     lines = {} 
 
-    print("  " + str(all_roads.shape[0]) + "   roads")
+    print("  " + str(all_roads.shape[0]) + "   lines of data")
     lines_index = 0 # Keep i and lines_index separate; if we hit a new way, i is incremented and lines_index stays put
     for i in range(all_roads.shape[0]):
         if i % 10000 == 0:
@@ -110,7 +110,7 @@ def plotLines():
         color = row["color"]
 
         xs, ys = [x1, x2], [y1, y2]
-        plt.plot(xs, ys, alpha=0.1, linewidth=0.5, c=color)
+        plt.plot(xs, ys, alpha=0.5, linewidth=0.5, c=color)
 
 
 #plotPoints()
@@ -120,9 +120,9 @@ print("--> saving as svg")
 plt.axis('off')
 plt.gca().set_position([0, 0, 1, 1])
 plt.savefig("combined.svg")
+print("--> DONE")
 
 plt.show()
 
-print("--> DONE")
 
 
