@@ -127,12 +127,12 @@ public class GraphVisualiser extends Canvas {
             String v_lat = Double.toString(v.getLatitude());
             String v_lon = Double.toString(v.getLongitude());
             int[] v_coords = convertToXAndY(new String[] { v_lat, v_lon });
+            
             String prev_lat = Double.toString(prev.getLatitude());
             String prev_lon = Double.toString(prev.getLongitude());
             int[] prev_coords = convertToXAndY(new String[] { prev_lat, prev_lon });
 
             drawThickLine(g, v_coords[0], v_coords[1], prev_coords[0], prev_coords[1]);
-
             prev = v;
         }
         g.setColor(oldColor);
@@ -141,9 +141,34 @@ public class GraphVisualiser extends Canvas {
 
     private void drawVisited(Graphics g){
         Color oldColor = g.getColor();
-        g.setColor(new Color(0,0,153));
 
-        this.visited.forEach(edge ->{
+        // Calculate min/max distance to get the colors right
+        double minDist = Double.MAX_VALUE;
+        double maxDist = 0;
+
+        for (Edge edge : this.visited) {
+            double dist = edge.getDist();
+            if (dist > maxDist) {
+                maxDist = dist;
+            }
+            if (dist < minDist) {
+                minDist = dist;
+            }
+        }
+
+        // Actually color the edges!
+        int index = 0;
+        for (Edge edge : this.visited) {
+            // Color according to when an edge was considered
+            // float h = (index * 1.0f) / (this.visited.size() * 1.0f); // hue
+
+            // Color according to distance in algorithm
+            float h = (float) ((edge.getDist()-minDist) / (maxDist - minDist));
+
+            float s = 1; // saturation
+            float b = 1; // brightness
+            g.setColor(Color.getHSBColor(h, s, b));
+            
             Vertex node1 = edge.getStart();
             Vertex node2 = edge.getEnd(); 
             String node1_lat = Double.toString(node1.getLatitude());
@@ -154,7 +179,8 @@ public class GraphVisualiser extends Canvas {
             int[] node2_coords = convertToXAndY(new String[] { node2_lat, node2_lon });
 
             g.drawLine(node1_coords[0], node1_coords[1], node2_coords[0], node2_coords[1]);
-        });
+            index++;
+        }
 
         g.setColor(oldColor);
 
@@ -191,7 +217,7 @@ public class GraphVisualiser extends Canvas {
 
     private static void drawThickLine(Graphics g, int x1, int y1, int x2, int y2) {
 
-        int delta = 1;
+        int delta = 2;
         int[] xPoints;
         int[] yPoints;
 
