@@ -92,6 +92,7 @@ public class GraphVisualiser extends Canvas {
         }
         if (this.shortestPath != null) {
             drawPath(g);
+            drawStartGoal(g);
         }
     }
 
@@ -119,7 +120,7 @@ public class GraphVisualiser extends Canvas {
 
     private void drawPath(Graphics g) {
         Color oldColor = g.getColor();
-        g.setColor(Color.RED);
+        g.setColor(Color.BLACK);
 
         Vertex prev = this.shortestPath.get(0);
         for (int i = 1; i < this.shortestPath.size(); i++) {
@@ -137,6 +138,27 @@ public class GraphVisualiser extends Canvas {
         }
         g.setColor(oldColor);
 
+    }
+
+    private void drawStartGoal(Graphics g) {
+        // Draw start
+        int size = 10*zoom_level;
+        Vertex start = this.shortestPath.get(0);
+        int[] startCoords = convertToXAndY(new String[]{ Double.toString(start.getLatitude()), 
+                                                         Double.toString(start.getLongitude()) });
+        g.setColor(Color.BLACK);
+        g.fillOval(startCoords[0] - (size+4) / 2, startCoords[1] - (size+4) / 2, size+4, size+4);
+        g.setColor(Color.GREEN);
+        g.fillOval(startCoords[0] - size / 2, startCoords[1] - size / 2, size, size);
+
+        // Draw goal
+        Vertex goal = this.shortestPath.get(this.shortestPath.size()-1);
+        int[] goalCoords = convertToXAndY(new String[]{ Double.toString(goal.getLatitude()), 
+                                                        Double.toString(goal.getLongitude()) });
+        g.setColor(Color.BLACK);
+        g.fillOval(goalCoords[0] - (size+4) / 2, goalCoords[1] - (size+4) / 2, size+4, size+4);
+        g.setColor(Color.ORANGE);
+        g.fillOval(goalCoords[0] - size / 2, goalCoords[1] - size / 2, size, size);
     }
 
     private void drawVisited(Graphics g){
@@ -217,7 +239,7 @@ public class GraphVisualiser extends Canvas {
 
     private static void drawThickLine(Graphics g, int x1, int y1, int x2, int y2) {
 
-        int delta = 2;
+        int delta = 1;
         int[] xPoints;
         int[] yPoints;
 
