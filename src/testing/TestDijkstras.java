@@ -10,6 +10,12 @@ import java.util.*;
 
 public class TestDijkstras {
 
+    static long totalTimeTraditional = 0;
+    static long totalTimeOurs = 0;
+
+    static long start = 0;
+    static long stop = 0;
+
     static void testTraditionalDijkstraVsOurs(Graph g) {
 
         // Disable printing while running
@@ -31,8 +37,16 @@ public class TestDijkstras {
 
         Solution solutionTraditional, solutionOurs;
         try {
+            start = System.nanoTime();
             solutionTraditional = traditional.shortestPath(g, a, b);
+            stop = System.nanoTime();
+            totalTimeTraditional += (stop - start);
+            
+            start = System.nanoTime();
             solutionOurs = ours.shortestPath(g, a, b);
+            stop = System.nanoTime();
+            totalTimeOurs += (stop - start);
+
         } catch(Exception e) {
             System.setOut(originalStream);
             System.out.println(e.getMessage());
@@ -46,6 +60,7 @@ public class TestDijkstras {
         // TODO wrap so only on when assertions are on
         if (!equalSolutions) {
             System.out.println(" not equal!");
+
             GraphVisualiser vis1 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
             vis1.drawPath(solutionOurs.getShortestPath());
             vis1.visualize();
@@ -73,10 +88,11 @@ public class TestDijkstras {
     }
 
     public static void main(String[] args) {
-        Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph g = GraphPopulator.populateGraph("denmark-intersections.csv");
 
+        int runs = 1000;
 
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < runs; i++) {
             System.out.print(" -> " + i);
             try {
 
@@ -89,5 +105,12 @@ public class TestDijkstras {
             }
         }
         System.out.println("[*] Done!");
+        System.out.println("     Total runs: " + runs);
+        System.out.printf("     Total time taken for \"traditional\"       %d nanoseconds \n", totalTimeTraditional);
+        System.out.printf("     Total time taken for ours                %d nanoseconds \n", totalTimeOurs);
+
+        System.out.printf("     Average time taken for \"traditional\"     %f nanoseconds \n", (double) totalTimeTraditional/runs);
+        System.out.printf("     Average time taken for ours              %f nanoseconds \n", (double) totalTimeOurs/runs);
+
     }
 }
