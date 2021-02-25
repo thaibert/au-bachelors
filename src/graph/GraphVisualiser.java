@@ -136,7 +136,7 @@ public class GraphVisualiser extends Canvas {
             prev = v;
         }
 
-        g.setColor(Color.green);
+        g.setColor(Color.red);
         Vertex v = this.shortestPath.get(0);
         String v_lat = Double.toString(v.getLatitude());
         String v_lon = Double.toString(v.getLongitude());
@@ -144,7 +144,7 @@ public class GraphVisualiser extends Canvas {
         g.drawOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
         g.fillOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
 
-        g.setColor(Color.blue);
+        g.setColor(Color.green);
         v = this.shortestPath.get(this.shortestPath.size() - 1 );
         v_lat = Double.toString(v.getLatitude());
         v_lon = Double.toString(v.getLongitude());
