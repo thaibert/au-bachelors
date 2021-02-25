@@ -9,4 +9,7 @@ public class Location {
     public static Vertex CPH = new Vertex(55.6852117,12.5456237);
     public static Vertex Lolland = new Vertex(54.8949936,11.0364265);
     public static Vertex Thisted = new Vertex(56.9549523,8.6883191);
+    public static Vertex Holstebro = new Vertex(56.3587153,8.6189198);
+    public static Vertex Esbjerg = new Vertex(55.4687285,8.4555024);
+    public static Vertex Grenaa = new Vertex(56.4139164,10.8951318);
 }

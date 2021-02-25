@@ -53,10 +53,11 @@ public class DijkstraTraditional implements PathfindingAlgo {
             g.getNeighboursOf(head.v)
                 .forEach(n -> {
                     // RELAX
-                    edgesConsidered.add(new Edge(head.v, n.v));
 
                     double maybeNewBestDistance = head.dist + n.distance;
                     double previousBestDistance = bestDist.getOrDefault(n.v, INF_DIST);
+
+                    edgesConsidered.add(new Edge(head.v, n.v, maybeNewBestDistance));
 
                     if (maybeNewBestDistance < previousBestDistance) {
                         bestDist.put(n.v, maybeNewBestDistance);

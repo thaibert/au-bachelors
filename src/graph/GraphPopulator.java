@@ -3,6 +3,8 @@ package graph;
 import java.io.*;
 import java.util.*;
 
+import utility.GraphUtils;
+
 public class GraphPopulator {
 
     final static double radius = 6371000;
@@ -72,7 +74,7 @@ public class GraphPopulator {
                 //double dist_lon = Math.pow(currVertex.getLongitude()- prevVertex.getLongitude(),2);
                 //double dist = Math.sqrt(dist_lat + dist_lon); // TODO may be slow?
 
-                double dist = 2 * radius * Math.asin(Math.sqrt(hav(currVertex.getLatitude() - prevVertex.getLatitude()) + Math.cos(currVertex.getLatitude()) * Math.cos(prevVertex.getLatitude())*hav(currVertex.getLongitude()-prevVertex.getLongitude())));
+                double dist = GraphUtils.haversineDist(prevVertex, currVertex);
                 
                 graph.addEdge(prevVertex, currVertex, dist);
 
