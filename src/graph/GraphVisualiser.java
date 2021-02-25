@@ -22,7 +22,7 @@ public class GraphVisualiser extends Canvas {
     private static double MAX_LAT;
     static int window_x, window_y;
     static int image_width, image_height;
-    final static int radius = 6*zoom_level;
+    final static int radius = 12*zoom_level;
 
     private Graph graph;
     private List<Vertex> shortestPath;
@@ -135,6 +135,23 @@ public class GraphVisualiser extends Canvas {
             drawThickLine(g, v_coords[0], v_coords[1], prev_coords[0], prev_coords[1]);
             prev = v;
         }
+
+        g.setColor(Color.green);
+        Vertex v = this.shortestPath.get(0);
+        String v_lat = Double.toString(v.getLatitude());
+        String v_lon = Double.toString(v.getLongitude());
+        int[] v_coords = convertToXAndY(new String[] { v_lat, v_lon });
+        g.drawOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
+        g.fillOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
+
+        g.setColor(Color.blue);
+        v = this.shortestPath.get(this.shortestPath.size() - 1 );
+        v_lat = Double.toString(v.getLatitude());
+        v_lon = Double.toString(v.getLongitude());
+        v_coords = convertToXAndY(new String[] { v_lat, v_lon });
+        g.drawOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
+        g.fillOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
+
         g.setColor(oldColor);
 
     }
