@@ -106,11 +106,11 @@ public class TestDijkstras {
         }
         System.out.println("[*] Done!");
         System.out.println("     Total runs: " + runs);
-        System.out.printf("     Total time taken for \"traditional\"       %d nanoseconds \n", totalTimeTraditional);
-        System.out.printf("     Total time taken for ours                %d nanoseconds \n", totalTimeOurs);
+        System.out.printf("     Total time taken for \"traditional\"       %f seconds \n", (double) totalTimeTraditional/1000000000);
+        System.out.printf("     Total time taken for ours                %f seconds \n", (double) totalTimeOurs/1000000000);
 
-        System.out.printf("     Average time taken for \"traditional\"     %f nanoseconds \n", (double) totalTimeTraditional/runs);
-        System.out.printf("     Average time taken for ours              %f nanoseconds \n", (double) totalTimeOurs/runs);
+        System.out.printf("     Average time taken for \"traditional\"     %f seconds \n", (double) totalTimeTraditional/runs/1000000000);
+        System.out.printf("     Average time taken for ours              %f seconds \n", (double) totalTimeOurs/runs/1000000000);
 
     }
 }
