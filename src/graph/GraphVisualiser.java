@@ -137,45 +137,30 @@ public class GraphVisualiser extends Canvas {
             prev = v;
         }
 
-        g.setColor(Color.red);
-        Vertex v = this.shortestPath.get(0);
-        String v_lat = Double.toString(v.getLatitude());
-        String v_lon = Double.toString(v.getLongitude());
-        int[] v_coords = convertToXAndY(new String[] { v_lat, v_lon });
-        g.drawOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
-        g.fillOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
-
-        g.setColor(Color.green);
-        v = this.shortestPath.get(this.shortestPath.size() - 1 );
-        v_lat = Double.toString(v.getLatitude());
-        v_lon = Double.toString(v.getLongitude());
-        v_coords = convertToXAndY(new String[] { v_lat, v_lon });
-        g.drawOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
-        g.fillOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
-
         g.setColor(oldColor);
 
     }
 
     private void drawStartGoal(Graphics g) {
         // Draw start
-        int size = 10*zoom_level;
-        Vertex start = this.shortestPath.get(0);
-        int[] startCoords = convertToXAndY(new String[]{ Double.toString(start.getLatitude()), 
-                                                         Double.toString(start.getLongitude()) });
+        Vertex v = this.shortestPath.get(0);
+        String v_lat = Double.toString(v.getLatitude());
+        String v_lon = Double.toString(v.getLongitude());
+        int[] v_coords = convertToXAndY(new String[] { v_lat, v_lon });
         g.setColor(Color.BLACK);
-        g.fillOval(startCoords[0] - (size+4) / 2, startCoords[1] - (size+4) / 2, size+4, size+4);
-        g.setColor(Color.GREEN);
-        g.fillOval(startCoords[0] - size / 2, startCoords[1] - size / 2, size, size);
+        g.fillOval(v_coords[0] - (radius+4) / 2, v_coords[1] - (radius+4) / 2, radius+4, radius+4);
+        g.setColor(Color.red);
+        g.fillOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
 
         // Draw goal
-        Vertex goal = this.shortestPath.get(this.shortestPath.size()-1);
-        int[] goalCoords = convertToXAndY(new String[]{ Double.toString(goal.getLatitude()), 
-                                                        Double.toString(goal.getLongitude()) });
+        v = this.shortestPath.get(this.shortestPath.size() - 1 );
+        v_lat = Double.toString(v.getLatitude());
+        v_lon = Double.toString(v.getLongitude());
+        v_coords = convertToXAndY(new String[] { v_lat, v_lon });
         g.setColor(Color.BLACK);
-        g.fillOval(goalCoords[0] - (size+4) / 2, goalCoords[1] - (size+4) / 2, size+4, size+4);
-        g.setColor(Color.ORANGE);
-        g.fillOval(goalCoords[0] - size / 2, goalCoords[1] - size / 2, size, size);
+        g.fillOval(v_coords[0] - (radius+4) / 2, v_coords[1] - (radius+4) / 2, radius+4, radius+4);
+        g.setColor(Color.green);
+        g.fillOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
     }
 
     private void drawVisited(Graphics g){
