@@ -119,7 +119,6 @@ public class GraphVisualiser extends Canvas {
 
 
     private void drawPath(Graphics g) {
-        Color oldColor = g.getColor();
         g.setColor(Color.BLACK);
 
         Vertex prev = this.shortestPath.get(0);
@@ -136,9 +135,6 @@ public class GraphVisualiser extends Canvas {
             drawThickLine(g, v_coords[0], v_coords[1], prev_coords[0], prev_coords[1]);
             prev = v;
         }
-
-        g.setColor(oldColor);
-
     }
 
     private void drawStartGoal(Graphics g) {
@@ -164,8 +160,6 @@ public class GraphVisualiser extends Canvas {
     }
 
     private void drawVisited(Graphics g){
-        Color oldColor = g.getColor();
-
         // Calculate min/max distance to get the colors right
         double minDist = Double.MAX_VALUE;
         double maxDist = 0;
@@ -205,9 +199,6 @@ public class GraphVisualiser extends Canvas {
             g.drawLine(node1_coords[0], node1_coords[1], node2_coords[0], node2_coords[1]);
             index++;
         }
-
-        g.setColor(oldColor);
-
     }
 
     public static int[] convertToXAndY(String[] arg){

@@ -95,12 +95,10 @@ public class Dijkstra implements PathfindingAlgo {
     }
 
     private boolean relax(Vertex u, Neighbor n) {
-        // for visualising all considered edges
 
         double previousBestDistance = dist.getOrDefault(n.v, INF_DIST);
         double maybeNewBestDistance = dist.getOrDefault(u, INF_DIST) + n.distance;
-        
-        edgesConsidered.add(new Edge(u, n.v, maybeNewBestDistance));
+        edgesConsidered.add(new Edge(u, n.v, maybeNewBestDistance)); // for visualising all considered edges
 
         if (maybeNewBestDistance < previousBestDistance) {
             dist.put(n.v, dist.get(u) + n.distance);
@@ -116,12 +114,8 @@ public class Dijkstra implements PathfindingAlgo {
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
 
-        // Vertex a = new Vertex(56.1634686,10.1722176); // Viborgvej
-        Vertex a = new Vertex(56.1723636,9.5538336); // Silkeborg
-        Vertex b = new Vertex(56.1828308,10.2037825); // O2/Randersvej
-
         PathfindingAlgo d = new Dijkstra();
-        Solution solution = d.shortestPath(graph, a, b);
+        Solution solution = d.shortestPath(graph, Location.Silkeborg, Location.Randersvej);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());

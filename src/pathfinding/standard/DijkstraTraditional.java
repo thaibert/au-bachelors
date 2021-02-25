@@ -90,7 +90,7 @@ public class DijkstraTraditional implements PathfindingAlgo {
         System.out.println("      " + edgesConsidered.size() + " edges considered");
         System.out.println("      " + comp.getComparisons() + " comparisons");
 
-        Solution solution = new Solution(out, edgesConsidered); // edgesConsidered);
+        Solution solution = new Solution(out, edgesConsidered);
 
         return solution;
     }

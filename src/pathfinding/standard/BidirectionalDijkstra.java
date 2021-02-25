@@ -149,7 +149,7 @@ public class BidirectionalDijkstra{
         System.out.println("      " + edgesConsidered.size() + " edges considered");
         System.out.println("      " + comp.getComparisons() + " comparisons");
 
-        Solution solution = new Solution(out, edgesConsidered); // edgesConsidered);
+        Solution solution = new Solution(out, edgesConsidered);
 
         return solution;
 
@@ -159,10 +159,6 @@ public class BidirectionalDijkstra{
         // We need to be able to utilize the inverted graph, so for now we ignore space efficiency and just create 2 graphs
         Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
         Graph invertedGraph = GraphUtils.invertGraph(graph);
-
-        // Vertex a = new Vertex(56.1634686,10.1722176); // Viborgvej
-        // Vertex a = new Vertex(56.1723636,9.5538336); // Silkeborg
-        // Vertex b = new Vertex(56.1828308,10.2037825); // O2/Randersvej
 
         BidirectionalDijkstra d = new BidirectionalDijkstra();
         Solution solution = d.shortestPath(graph, invertedGraph, Location.CPH, Location.Skagen);
