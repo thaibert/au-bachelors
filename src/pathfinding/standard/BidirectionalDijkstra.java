@@ -72,10 +72,10 @@ public class BidirectionalDijkstra{
             g.getNeighboursOf(head_f.v)
                 .forEach(n -> {
                     // RELAX
-                    edgesConsidered.add(new Edge(head_f.v, n.v));
-
                     double maybeNewBestDistance = head_f.dist + n.distance;
                     double previousBestDistance = bestDist_f.getOrDefault(n.v, INF_DIST);
+
+                    edgesConsidered.add(new Edge(head_f.v, n.v, maybeNewBestDistance));
 
                     if (maybeNewBestDistance < previousBestDistance) {
                         bestDist_f.put(n.v, maybeNewBestDistance);
@@ -94,10 +94,11 @@ public class BidirectionalDijkstra{
             ginv.getNeighboursOf(head_b.v)
             .forEach(n -> {
                 // RELAX
-                edgesConsidered.add(new Edge(head_b.v, n.v));
-
                 double maybeNewBestDistance = head_b.dist + n.distance;
                 double previousBestDistance = bestDist_b.getOrDefault(n.v, INF_DIST);
+
+                edgesConsidered.add(new Edge(head_b.v, n.v, maybeNewBestDistance));
+
 
                 if (maybeNewBestDistance < previousBestDistance) {
                     bestDist_b.put(n.v, maybeNewBestDistance);

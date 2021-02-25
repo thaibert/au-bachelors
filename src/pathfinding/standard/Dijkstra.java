@@ -97,9 +97,12 @@ public class Dijkstra implements PathfindingAlgo {
     private boolean relax(Vertex u, Neighbor n) {
         // for visualising all considered edges
 
-        edgesConsidered.add(new Edge(u, n.v));
+        double previousBestDistance = dist.getOrDefault(n.v, INF_DIST);
+        double maybeNewBestDistance = dist.getOrDefault(u, INF_DIST) + n.distance;
+        
+        edgesConsidered.add(new Edge(u, n.v, maybeNewBestDistance));
 
-        if (dist.getOrDefault(n.v, INF_DIST) > dist.getOrDefault(u, INF_DIST) + n.distance) {
+        if (maybeNewBestDistance < previousBestDistance) {
             dist.put(n.v, dist.get(u) + n.distance);
             pred.put(n.v, u);
 

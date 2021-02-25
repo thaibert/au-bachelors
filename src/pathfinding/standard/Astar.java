@@ -14,10 +14,6 @@ public class Astar implements PathfindingAlgo {
 
     private Map<Vertex, Vertex> pred; // S in the algo is pred.keySet()
 
-
-    // For heuristic 
-    final static double radius = 6371000;
-
     // For visual
     private List<Edge> edgesConsidered;
 
@@ -49,12 +45,14 @@ public class Astar implements PathfindingAlgo {
             }
 
             g.getNeighboursOf(min).forEach(n -> {
-                edgesConsidered.add(new Edge(min, n.v));
                 double tent_gScore = dist.get(min) + n.distance;
+                double potentialNewFscore = tent_gScore + heuristic(n.v, goal);
+
+                edgesConsidered.add(new Edge(min, n.v, potentialNewFscore));
                 if (tent_gScore < dist.get(n.v)) {
                     pred.put(n.v, min);
                     dist.put(n.v, tent_gScore);
-                    fscore.put(n.v, tent_gScore + heuristic(n.v, goal));
+                    fscore.put(n.v, potentialNewFscore);
                     if (!pq.contains(n.v)){
                         pq.add(n.v);
                     }
@@ -90,10 +88,6 @@ public class Astar implements PathfindingAlgo {
 
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
-
-        // Vertex a = new Vertex(56.1634686,10.1722176); // Viborgvej
-        Vertex a = new Vertex(56.1723636,9.5538336); // Silkeborg
-        Vertex b = new Vertex(56.1828308,10.2037825); // O2/Randersvej
 
         Astar d = new Astar();
         Solution solution = d.shortestPath(graph, Location.Lolland, Location.Thisted);
