@@ -1,6 +1,7 @@
 package pathfinding.standard;
 
 import pathfinding.framework.*;
+import utility.*;
 import graph.*;
 import java.util.*;
 
@@ -121,12 +122,7 @@ public class Astar implements PathfindingAlgo {
     }
 
     private double heuristic(Vertex a, Vertex b) {
-        // Currently we simply use the haversine distance 
-        double dist = 2 * radius * Math.asin(Math.sqrt(hav(a.getLatitude() - b.getLatitude()) + Math.cos(a.getLatitude()) * Math.cos(b.getLatitude())*hav(a.getLongitude()-b.getLongitude())));
-        return dist;
-    }
-    private static double hav(double number) {
-        return (1-Math.cos(number))/2;
+        return GraphUtils.haversineDist(a, b);
     }
 
 }
