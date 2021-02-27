@@ -53,9 +53,9 @@ public class Astar implements PathfindingAlgo {
                     pred.put(n.v, min);
                     dist.put(n.v, tent_gScore);
                     fscore.put(n.v, potentialNewFscore);
-                    if (!pq.contains(n.v)){
+                    //if (!pq.contains(n.v)){
                         pq.add(n.v);
-                    }
+                    //}
                 }
             });
 
