@@ -1,6 +1,7 @@
 package testing;
 
 import graph.*;
+import utility.*;
 import pathfinding.framework.*;
 import pathfinding.standard.*;
 
@@ -28,8 +29,8 @@ public class TestDijkstras {
         });
         System.setOut(noopStream);
 
-        Vertex a = pickRandomVertex(g);
-        Vertex b = pickRandomVertex(g);
+        Vertex a = GraphUtils.pickRandomVertex(g);
+        Vertex b = GraphUtils.pickRandomVertex(g);
 
         
         PathfindingAlgo traditional = new DijkstraTraditional();
@@ -77,14 +78,6 @@ public class TestDijkstras {
         }
         System.out.println();
 
-    }
-
-    static Vertex pickRandomVertex(Graph g) {
-        Collection<Vertex> vertices = g.getAllVertices();
-        return vertices.stream()
-            .skip((int) (vertices.size() * Math.random()))
-            .findFirst()
-            .get();
     }
 
     public static void main(String[] args) {

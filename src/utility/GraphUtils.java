@@ -58,5 +58,13 @@ public class GraphUtils {
     private static double hav(double number) {
         return (1.0 - Math.cos(number)) / 2.0;
     }
+
+    public static Vertex pickRandomVertex(Graph g) {
+        Collection<Vertex> vertices = g.getAllVertices();
+        return vertices.stream()
+            .skip((int) (vertices.size() * Math.random()))
+            .findFirst()
+            .get();
+    }
     
 }
