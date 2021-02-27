@@ -138,7 +138,8 @@ public class GraphVisualiser extends Canvas {
     }
 
     private void drawStartGoal(Graphics g) {
-        // Draw start
+        // Our list have start at the end, and goal at the front!
+        // Draw end
         Vertex v = this.shortestPath.get(0);
         String v_lat = Double.toString(v.getLatitude());
         String v_lon = Double.toString(v.getLongitude());
@@ -148,7 +149,7 @@ public class GraphVisualiser extends Canvas {
         g.setColor(Color.red);
         g.fillOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
 
-        // Draw goal
+        // Draw start
         v = this.shortestPath.get(this.shortestPath.size() - 1 );
         v_lat = Double.toString(v.getLatitude());
         v_lon = Double.toString(v.getLongitude());

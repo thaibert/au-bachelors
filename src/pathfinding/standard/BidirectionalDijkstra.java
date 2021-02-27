@@ -5,7 +5,7 @@ import graph.*;
 import java.util.*;
 import utility.*;
 
-public class BidirectionalDijkstra{
+public class BidirectionalDijkstra {
     private final double INF_DIST = Double.MAX_VALUE;
     double mu = INF_DIST;
 
@@ -63,7 +63,7 @@ public class BidirectionalDijkstra{
 
             // TODO BREAK CONDITION
             if (bestDist_b.get(head_b.v) + 
-                bestDist_f.get(head_f.v) > mu) {
+                bestDist_f.get(head_f.v) >= mu) {
                 System.out.println("Entered exit");
                 break;
             }
@@ -109,7 +109,7 @@ public class BidirectionalDijkstra{
                 }
 
                 if (s_f.contains(n.v) && bestDist_b.get(head_b.v) + n.distance + bestDist_f.get(n.v) < mu) {
-                    mu = bestDist_f.get(head_b.v) + n.distance + bestDist_f.get(n.v);
+                    mu = bestDist_b.get(head_b.v) + n.distance + bestDist_f.get(n.v);
                     bestVertex = n.v;
                 }
             });
@@ -123,11 +123,11 @@ public class BidirectionalDijkstra{
         System.out.println("  --> backtracking solution");
         List<Vertex> out = new ArrayList<>();
 
-        /* TODO something that checks if we actually found something
-        if (predecessor.get(goal) == null) {
+        /* TODO something that checks if we actually found something */
+        if (predecessor_f.get(bestVertex) == null) {
             System.out.println("  --> No path exists!!");
             return new Solution(new ArrayList<>(), edgesConsidered);
-        }*/
+        }
 
         Vertex temp = bestVertex;
         while (! start.equals(temp)) {
@@ -142,14 +142,16 @@ public class BidirectionalDijkstra{
             out2.add(temp);
         }
         out.add(start);
-        Collections.reverse(out);
-        out.addAll(out2);
+        Collections.reverse(out2);
+        out2.addAll(out);
         
-        System.out.println("      " + out.size() + " nodes");
+
+        System.out.println("      " + out2.size() + " nodes");
         System.out.println("      " + edgesConsidered.size() + " edges considered");
         System.out.println("      " + comp.getComparisons() + " comparisons");
+        System.out.println("      " + mu + " distance");
 
-        Solution solution = new Solution(out, edgesConsidered);
+        Solution solution = new Solution(out2, edgesConsidered);
 
         return solution;
 
@@ -157,13 +159,17 @@ public class BidirectionalDijkstra{
     
     public static void main(String[] args) {
         // We need to be able to utilize the inverted graph, so for now we ignore space efficiency and just create 2 graphs
-        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         Graph invertedGraph = GraphUtils.invertGraph(graph);
 
-        BidirectionalDijkstra d = new BidirectionalDijkstra();
-        Solution solution = d.shortestPath(graph, invertedGraph, Location.CPH, Location.Skagen);
+        Vertex a = new Vertex(56.0929669, 10.0084564);
+        Vertex b = new Vertex(56.2299823, 9.5319387);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
+
+        BidirectionalDijkstra d = new BidirectionalDijkstra();
+        Solution solution = d.shortestPath(graph, invertedGraph, a, b);
+
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize();
