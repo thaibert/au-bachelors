@@ -76,8 +76,10 @@ public class Astar implements PathfindingAlgo {
             temp = pred.get(temp);
         }
         out.add(start);
-        System.out.println("        " + out.size() + " nodes");
-        System.out.println("        " + comp.getComparisons() + " comparisons");
+        System.out.println("      " + out.size() + " nodes");
+        System.out.println("      " + edgesConsidered.size() + " edges considered");
+        System.out.println("      " + comp.getComparisons() + " comparisons");
+        System.out.println("      " + dist.get(goal));
 
         Solution solution = new Solution(out, edgesConsidered);
 
@@ -87,12 +89,16 @@ public class Astar implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+
+        Vertex a = new Vertex(56.0929669, 10.0084564);
+        Vertex b = new Vertex(56.2299823, 9.5319387);
+
 
         Astar d = new Astar();
-        Solution solution = d.shortestPath(graph, Location.Lolland, Location.Thisted);
+        Solution solution = d.shortestPath(graph, a, b);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize();
