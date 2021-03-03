@@ -133,7 +133,7 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
         List<Vertex> out = new ArrayList<>();
 
         /* TODO something that checks if we actually found something */
-        if (predecessor_f.get(bestVertex) == null) {
+        if (predecessor_f.get(bestVertex) == null && predecessor_b.get(bestVertex) == null) {
             System.out.println("  --> No path exists!!");
             return new Solution(new ArrayList<>(), edgesConsidered);
         }
@@ -170,13 +170,13 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
         // We need to be able to utilize the inverted graph, so for now we ignore space efficiency and just create 2 graphs
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
-        Vertex a = new Vertex(56.2587198,10.3059575);
-        Vertex b = new Vertex(56.1605044,9.95009);
+
+        Vertex a = new Vertex(56.1570293,9.814296);
+        Vertex b = new Vertex(56.1582726,9.8152893);
 
 
         BidirectionalDijkstra d = new BidirectionalDijkstra(graph);
         Solution solution = d.shortestPath(a, b);
-        solution = d.shortestPath(a, b);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
