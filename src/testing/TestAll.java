@@ -9,10 +9,15 @@ import java.io.*;
 import java.util.*;
 
 public class TestAll {
+    static final int DIJKSTRA_TRADITIONAL = 0;
+    static final int DIJKSTRA_OURS = 1;
+    static final int DIJKSTRA_BIDIRECTIONAL = 2;
+    static final int ASTAR = 3;
+
     static String[] names = new String[]{"TradDijk   ", 
                                          "OurDijk    ", 
-                                         "A*         ", 
-                                         "BidirecDijk"};
+                                         "BidirecDijk", 
+                                         "A*         "};
     static int numAlgos = names.length;
 
     static PathfindingAlgo[] algos = new PathfindingAlgo[numAlgos];
@@ -82,11 +87,12 @@ public class TestAll {
             GraphVisualiser vis1 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
             vis1.drawPath(solutions[0].getShortestPath());
             vis1.visualize();
+            System.out.printf("%s has %d nodes\n", names[0], solutions[0].getShortestPath().size());
 
             // Draw the rest
             for (int i = 0; i < numAlgos; i++) {
                 if (! solutionsEqual[i]) {
-                    System.out.println("Difference in Traditional dijkstra and " + names[i]);
+                    System.out.printf("%s has %d nodes\n", names[i], solutions[i].getShortestPath().size());
                     GraphVisualiser vis2 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
                     vis2.drawPath(solutions[i].getShortestPath());
                     vis2.visualize();
@@ -104,14 +110,15 @@ public class TestAll {
 
 
     public static void main(String[] args) {
-        Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph g = GraphPopulator.populateGraph("aarhus-intersections.csv");
 
-        algos[0] = new DijkstraTraditional(g);
-        algos[1] = new Dijkstra(g);
-        algos[2] = new Astar(g);
-        algos[3] = new BidirectionalDijkstra(g);
+        algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g);
+        algos[DIJKSTRA_OURS] = new Dijkstra(g);
+        algos[ASTAR] = new Astar(g);
+        algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
 
-        int runs = 30;
+        int runs = 10000;
+
 
         for (int i = 0; i < runs; i++) {
             System.out.print(" -> " + i);
@@ -148,7 +155,6 @@ public class TestAll {
         }
 
     }
-
 
 
 }
