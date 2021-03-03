@@ -14,6 +14,8 @@ public class XMLFilter {
         new String[]{"motorway", "trunk", "primary", "secondary", "tertiary", "unclassified", "residential",
                      "motorway_link", "trunk_link", "primary_link", "secondary_link", "tertiary_link",
                      "living_street", "service"} );
+    private static Collection<String> roundabouts = Arrays.asList(
+        new String[]{"roundabout", "mini-roundabout", "circular"} );
     public static void filter(String filename) {
         Map<String, List<String>> wayID_to_nds = new HashMap<>();
         Set<String> onewayStreets = new HashSet<>();
@@ -55,6 +57,10 @@ public class XMLFilter {
                             isCarRoad = true;
                         }
                         if ("oneway".equals(k) && "yes".equals(v)) {
+                            onewayStreets.add(curr_wayID);
+                        }
+                        if ("junction".equals(k) && roundabouts.contains(v)) {
+                            // Roundabouts are one-way!
                             onewayStreets.add(curr_wayID);
                         }
                     }
