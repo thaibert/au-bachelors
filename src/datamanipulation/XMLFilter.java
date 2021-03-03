@@ -16,16 +16,21 @@ public class XMLFilter {
                      "living_street", "service"} );
     private static Collection<String> roundabouts = Arrays.asList(
         new String[]{"roundabout", "mini-roundabout", "circular"} );
-    public static void filter(String filename) {
+
+
+
+    public static void filter(String osmFile, String outPrefix) {
         Map<String, List<String>> wayID_to_nds = new HashMap<>();
         Set<String> onewayStreets = new HashSet<>();
 
         Map<String, String> nodeIDtoCoords = new HashMap<>();
         Map<String, Integer> refsPerNode = new HashMap<>();
 
+        int events = 0;
         try {
+            System.out.println("--> 1st pass of " + osmFile);
             XMLInputFactory factory = XMLInputFactory.newInstance();
-            XMLEventReader eventReader = factory.createXMLEventReader(new FileReader(filename));
+            XMLEventReader eventReader = factory.createXMLEventReader(new FileReader(osmFile));
             
 
             String curr_wayID = "";
@@ -33,6 +38,10 @@ public class XMLFilter {
             List<String> curr_refs = new ArrayList<>();
 
             while(eventReader.hasNext()) {
+                events++;
+                if (events % 10e5 == 0) {
+                    System.out.print(".");
+                }
                 XMLEvent event = eventReader.nextEvent();
 
                 if (event.getEventType() == XMLStreamConstants.START_ELEMENT) {
@@ -89,19 +98,14 @@ public class XMLFilter {
                         curr_refs = new ArrayList<>();
                     }
                 }
-
                 // if (event.getEventType() == XMLStreamConstants.CHARACTERS) {//todo does it ever appear? }
             }
+            System.out.println(); // The "progress bar" dots have no newline, so print one here.
+
         } catch(Exception e) {
             e.printStackTrace();
         }
-
-
-
-
-
-        // System.out.println(wayID_to_nds);
-        System.out.println(wayID_to_nds.keySet().size());
+        System.out.printf("  --> %10d events processed\n", events);
 
         Set<String> appears = new HashSet<>();
         for (List<String> refs : wayID_to_nds.values()) {
@@ -109,7 +113,7 @@ public class XMLFilter {
                 appears.add(ref);
             }
         }
-        System.out.println("Ref set prepared");
+        System.out.printf("  --> %10d refs found\n", appears.size());
 
 
 
@@ -118,8 +122,9 @@ public class XMLFilter {
 
         // Run through again, this time get nodes out
         try {
+            System.out.println("--> 2nd pass");
             XMLInputFactory factory = XMLInputFactory.newInstance();
-            XMLEventReader eventReader = factory.createXMLEventReader(new FileReader(filename));
+            XMLEventReader eventReader = factory.createXMLEventReader(new FileReader(osmFile));
 
             while(eventReader.hasNext()) {
                 XMLEvent event = eventReader.nextEvent();
@@ -134,6 +139,10 @@ public class XMLFilter {
                             String lat = startElement.getAttributeByName(new QName("lat")).getValue();
                             String lon = startElement.getAttributeByName(new QName("lon")).getValue();
                             nodeIDtoCoords.put(node_id, lat + "," + lon);
+                            
+                            if (nodeIDtoCoords.keySet().size() % (appears.size()/10) == 0) {
+                                System.out.printf("  --> %3d %% \n", (1 + 100 * nodeIDtoCoords.keySet().size()/appears.size() ));
+                            }
                         }
                     }
                 }
@@ -142,15 +151,13 @@ public class XMLFilter {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("Nodes filtered out");
-
 
 
 
         // WRITE TO CSV
 
-        System.out.println("  --> Writing all-roads.csv");
-        File csv1 = new File("denmark-all-roads.csv");
+        System.out.println("--> Writing  " + outPrefix + "-all-roads.csv");
+        File csv1 = new File(outPrefix + "-all-roads.csv");
         try (PrintWriter pw = new PrintWriter(csv1)) {
             pw.write("lat,lon,wayID,oneway,\n");
             
@@ -166,8 +173,8 @@ public class XMLFilter {
             System.out.println("--> " + e);
         }
 
-        System.out.println("  --> Writing intersections.csv");
-        File csv2 = new File("denmark-intersections.csv");
+        System.out.println("--> Writing  " + outPrefix + "-intersections.csv");
+        File csv2 = new File(outPrefix + "-intersections.csv");
         try (PrintWriter pw = new PrintWriter(csv2)) {
             pw.write("lat,lon,wayID,oneway,\n");
             
@@ -189,6 +196,7 @@ public class XMLFilter {
     }
 
     public static void main(String[] args) {
-        filter("denmark-latest.osm");
+        filter("denmark-latest.osm", "denmark");
+        // filter("aarhus-silkeborg.osm", "aarhus-silkeborg");
     }
 }
