@@ -13,11 +13,13 @@ public class TestAll {
     static final int DIJKSTRA_OURS = 1;
     static final int DIJKSTRA_BIDIRECTIONAL = 2;
     static final int ASTAR = 3;
+    static final int ALT = 4;
 
     static String[] names = new String[]{"TradDijk   ", 
                                          "OurDijk    ", 
                                          "BidirecDijk", 
-                                         "A*         "};
+                                         "A*         ",
+                                         "ALT        "};
     static int numAlgos = names.length;
 
     static PathfindingAlgo[] algos = new PathfindingAlgo[numAlgos];
@@ -96,7 +98,7 @@ public class TestAll {
             GraphUtils.pathDistance(path));
 
             // Draw traditional dijkstra
-            GraphVisualiser vis1 = new GraphVisualiser(g, BoundingBox.Christiansbjerg);
+            GraphVisualiser vis1 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
             vis1.drawPath(path);
             vis1.visualize(names[0]);
             
@@ -109,7 +111,7 @@ public class TestAll {
                         names[i], 
                         path.size(), 
                         GraphUtils.pathDistance(path));
-                    GraphVisualiser vis2 = new GraphVisualiser(g, BoundingBox.Christiansbjerg);
+                    GraphVisualiser vis2 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
                     vis2.drawPath(solutions[i].getShortestPath());
                     vis2.visualize(names[i]);
                 }
@@ -126,12 +128,13 @@ public class TestAll {
 
 
     public static void main(String[] args) {
-        Graph g = GraphPopulator.populateGraph("aarhus-intersections.csv");
+        Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
         algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g);
         algos[DIJKSTRA_OURS] = new Dijkstra(g);
         algos[ASTAR] = new Astar(g);
         algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
+        algos[ALT] = new ALT(g);
 
         int runs = (int) 1e3;
 

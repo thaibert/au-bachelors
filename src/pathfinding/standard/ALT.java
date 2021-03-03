@@ -32,34 +32,46 @@ public class ALT implements PathfindingAlgo {
 
         Graph ginv = GraphUtils.invertGraph(graph);
 
-        //List<Vertex> landmarks = landmark(graph, 25);
-        List<Vertex> landmarks = new ArrayList<>();
-        //landmarks.add(GraphUtils.findNearestVertex(graph, 56.21684389259911, 9.517964491806737));
-        landmarks.add(new Vertex(56.0929669, 10.0084564));
+        List<Vertex> landmarks = landmark(graph, 25);
+        // List<Vertex> landmarks = new ArrayList<>();
+        // landmarks.add(GraphUtils.findNearestVertex(graph, 56.21684389259911, 9.517964491806737));
+        // landmarks.add(new Vertex(56.0929669, 10.0084564));
 
         distanceToLandmark = new HashMap<>();
         distanceFromLandmark = new HashMap<>();
-        landmarks.forEach( v -> {
+
+        landmarks.forEach( l -> {
             System.out.print(".");
-            distanceFromLandmark.put(v,dijkstra(graph, v));
-            distanceToLandmark.put(v,dijkstra(ginv, v));
+            Map<Vertex, Double> normal = dijkstra(graph, l);
+            Map<Vertex, Double> inv = dijkstra(ginv, l);
+
+            distanceFromLandmark.put(l, normal);
+            distanceToLandmark.put(l, inv);
         });
     }
 
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
         
-        double bestTriangle = 0;
+        double bestTriangle = -INF_DIST;
         Vertex bestLandmark = null;
-        
+
         for (Vertex v: distanceToLandmark.keySet()){
-            double temp = Math.max(distanceToLandmark.get(v).get(start)-distanceToLandmark.get(v).get(goal), 
-                                   distanceFromLandmark.get(v).get(goal)-distanceFromLandmark.get(v).get(start));
+            Map<Vertex, Double> distTo = distanceToLandmark.get(v);
+            Map<Vertex, Double> distFrom = distanceFromLandmark.get(v);
+
+            double temp = Math.max(distTo.getOrDefault(start, -INF_DIST)
+                                  -distTo.getOrDefault(goal, INF_DIST), 
+                                   distFrom.getOrDefault(goal, -INF_DIST)
+                                  -distFrom.getOrDefault(start, INF_DIST));
+                                System.out.println(temp);
             if (temp > bestTriangle) {
                 bestTriangle = temp;
                 bestLandmark = v;
+                System.out.println(bestLandmark + " is now best landmark");
             }
         }
+
 
         Map<Vertex, Double> dist = new HashMap<>();
         Map<Vertex, Vertex> parent = new HashMap<>(); 
@@ -72,21 +84,26 @@ public class ALT implements PathfindingAlgo {
 
         pq.add(new Pair(start, 0));
 
+        Set<Vertex> minDist = new HashSet<>();
+
         int iterations = 0;
         while(pq.size() > 0){
             iterations++;
+            Pair head = pq.poll();
+
+            minDist.add(head.v);
 
             if (iterations % 1000 == 0) {
+                System.out.println(head.dist);
                 System.out.println("    --> " + iterations + ",   pq size: " + pq.size());
             }
-            Pair head = pq.poll();
 
             if (head.v.equals(goal)) {
                 System.out.println("  --> Finished early at ");
                 break;
             }
 
-            for (Neighbor n: graph.getNeighboursOf(head.v)) {
+            for (Neighbor n : graph.getNeighboursOf(head.v)) {
                 // RELAX
                 double maybeNewBestDistance = dist.get(head.v) + n.distance;
                 double previousBestDistance = dist.getOrDefault(n.v, INF_DIST);
@@ -97,10 +114,18 @@ public class ALT implements PathfindingAlgo {
                     dist.put(n.v, maybeNewBestDistance);
                     parent.put(n.v, head.v);
 
-                    double estimateToGoal = Math.max(distanceToLandmark.get(bestLandmark).getOrDefault(n.v,INF_DIST)-distanceToLandmark.get(bestLandmark).getOrDefault(goal,INF_DIST), 
-                                                        distanceFromLandmark.get(bestLandmark).getOrDefault(goal,INF_DIST)-distanceFromLandmark.get(bestLandmark).getOrDefault(n.v,INF_DIST)); 
+                    double estimateToGoal = Math.max(distanceToLandmark.get(bestLandmark)
+                                                       .getOrDefault(n.v,INF_DIST)
+                                                    -distanceToLandmark.get(bestLandmark)
+                                                       .getOrDefault(goal,INF_DIST), 
+                                                     distanceFromLandmark.get(bestLandmark)
+                                                       .getOrDefault(goal,INF_DIST)
+                                                     -distanceFromLandmark.get(bestLandmark)
+                                                       .getOrDefault(n.v,INF_DIST)); 
                     // put back in PQ with new dist, but leave the old, "wrong" dist in there too.
-                    pq.add(new Pair(n.v, maybeNewBestDistance + estimateToGoal)); 
+                    // if (! minDist.contains(n.v)) {
+                        pq.add(new Pair(n.v, maybeNewBestDistance + estimateToGoal)); 
+                    // }
                 }
             }
         }
@@ -135,10 +160,11 @@ public class ALT implements PathfindingAlgo {
     
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
 
-        Vertex a = new Vertex(56.0929669, 10.0084564);
-        Vertex b = new Vertex(56.2299823, 9.5319387);
+        Vertex a = new Vertex(56.1102309,10.2295427);
+        Vertex b = new Vertex(56.0429021,10.2634393);
+
 
         PathfindingAlgo d = new ALT(graph);
         Solution solution = d.shortestPath(a, b);
@@ -175,7 +201,7 @@ public class ALT implements PathfindingAlgo {
 
 
         Map<Vertex, Double> bestDist = new HashMap<>();
-        Map<Vertex, Vertex> predecessor = new HashMap<>(); 
+        // Map<Vertex, Vertex> predecessor = new HashMap<>(); 
 
         DistComparator comp = new DistComparator();
         PriorityQueue<Pair> pq = new PriorityQueue<>(comp);
@@ -186,9 +212,15 @@ public class ALT implements PathfindingAlgo {
         //    .map(v -> new Pair(v, INF_DIST))
         //    .forEach(pq::add);
         
+        Map<Vertex, Double> shortest = new HashMap<>();
+        List<Edge> expanded = new ArrayList<>();
+
         while (pq.size() > 0) {
 
             Pair head = pq.poll();
+            if (head.dist < shortest.getOrDefault(head.v, INF_DIST)) {
+                shortest.put(head.v, head.dist);
+            }
 
 
             g.getNeighboursOf(head.v)
@@ -198,18 +230,19 @@ public class ALT implements PathfindingAlgo {
                     double maybeNewBestDistance = head.dist + n.distance;
                     double previousBestDistance = bestDist.getOrDefault(n.v, INF_DIST);
 
+                    expanded.add(new Edge(head.v, n.v, maybeNewBestDistance));
+
+
                     if (maybeNewBestDistance < previousBestDistance) {
                         bestDist.put(n.v, maybeNewBestDistance);
-                        predecessor.put(n.v, head.v);
+                        // predecessor.put(n.v, head.v);
 
                         // put back in PQ with new dist, but leave the old, "wrong" dist in there too.
                         pq.add(new Pair(n.v, maybeNewBestDistance)); 
                     }
                 });
         }
-
-        // TODO IN CASE OF ERRORS
-        return bestDist;
+        return shortest;
     }
 
 }
