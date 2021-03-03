@@ -8,6 +8,7 @@ import java.util.*;
 public class Astar implements PathfindingAlgo {
     private final double INF_DIST = Double.MAX_VALUE;
 
+    private Graph g;
 
     private Map<Vertex, Double> dist;
     private Map<Vertex, Double> fscore;
@@ -17,7 +18,11 @@ public class Astar implements PathfindingAlgo {
     // For visual
     private List<Edge> edgesConsidered;
 
-    public Solution shortestPath(Graph g, Vertex start, Vertex goal){
+    public Astar(Graph g) {
+        this.g = g;
+    }
+
+    public Solution shortestPath(Vertex start, Vertex goal){
 
         dist = new HashMap<>();
         pred = new HashMap<>();
@@ -91,14 +96,13 @@ public class Astar implements PathfindingAlgo {
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
-        Vertex a = new Vertex(56.0929669, 10.0084564);
-        Vertex b = new Vertex(56.2299823, 9.5319387);
+        Vertex a = new Vertex(56.0999867,9.582729);
+        Vertex b = new Vertex(56.1636085,10.1177374);
 
+        Astar d = new Astar(graph);
+        Solution solution = d.shortestPath(a, b);
 
-        Astar d = new Astar();
-        Solution solution = d.shortestPath(graph, a, b);
-
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.GreaterAarhus);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize();

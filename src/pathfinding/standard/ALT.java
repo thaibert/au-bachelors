@@ -16,8 +16,10 @@ import java.util.*;
 public class ALT implements PathfindingAlgo {
     private static final double INF_DIST = Double.MAX_VALUE;
 
-    private static Map<Vertex, Map<Vertex, Double>> distanceToLandmark;
-    private static Map<Vertex, Map<Vertex, Double>> distanceFromLandmark;
+    private Graph graph;
+
+    private Map<Vertex, Map<Vertex, Double>> distanceToLandmark;
+    private Map<Vertex, Map<Vertex, Double>> distanceFromLandmark;
 
     private Map<Vertex, Double> dist;
     private Map<Vertex, Vertex> parent;
@@ -25,8 +27,27 @@ public class ALT implements PathfindingAlgo {
     // For visual
     private List<Edge> edgesConsidered;
 
+    public ALT(Graph graph) {
+        this.graph = graph;
+
+        Graph ginv = GraphUtils.invertGraph(graph);
+
+        //List<Vertex> landmarks = landmark(graph, 25);
+        List<Vertex> landmarks = new ArrayList<>();
+        //landmarks.add(GraphUtils.findNearestVertex(graph, 56.21684389259911, 9.517964491806737));
+        landmarks.add(new Vertex(56.0929669, 10.0084564));
+
+        distanceToLandmark = new HashMap<>();
+        distanceFromLandmark = new HashMap<>();
+        landmarks.forEach( v -> {
+            System.out.print(".");
+            distanceFromLandmark.put(v,dijkstra(graph, v));
+            distanceToLandmark.put(v,dijkstra(ginv, v));
+        });
+    }
+
     @Override
-    public Solution shortestPath(Graph graph, Vertex start, Vertex goal) {
+    public Solution shortestPath(Vertex start, Vertex goal) {
         
         double bestTriangle = 0;
         Vertex bestLandmark = null;
@@ -84,29 +105,29 @@ public class ALT implements PathfindingAlgo {
             }
         }
 
-                // Get out the shortest path
-                System.out.println("  --> backtracking solution");
-                List<Vertex> out = new ArrayList<>();
-        
-                if (parent.get(goal) == null) {
-                    System.out.println("  --> No path exists!!");
-                    return new Solution(new ArrayList<>(), edgesConsidered);
-                }
-        
-                Vertex temp = goal;
-                while (! start.equals(temp)) {
-                    out.add(temp);
-                    temp = parent.get(temp);
-                }
-                out.add(start);
-                System.out.println("      " + out.size() + " nodes");
-                System.out.println("      " + edgesConsidered.size() + " edges considered");
-                System.out.println("      " + distComparator.getComparisons() + " comparisons");
-                System.out.println("      " + dist.get(goal));
-        
-                Solution solution = new Solution(out, edgesConsidered);
-        
-                return solution;
+        // Get out the shortest path
+        System.out.println("  --> backtracking solution");
+        List<Vertex> out = new ArrayList<>();
+
+        if (parent.get(goal) == null) {
+            System.out.println("  --> No path exists!!");
+            return new Solution(new ArrayList<>(), edgesConsidered);
+        }
+
+        Vertex temp = goal;
+        while (! start.equals(temp)) {
+            out.add(temp);
+            temp = parent.get(temp);
+        }
+        out.add(start);
+        System.out.println("      " + out.size() + " nodes");
+        System.out.println("      " + edgesConsidered.size() + " edges considered");
+        System.out.println("      " + distComparator.getComparisons() + " comparisons");
+        System.out.println("      " + dist.get(goal));
+
+        Solution solution = new Solution(out, edgesConsidered);
+
+        return solution;
     }
 
 
@@ -115,28 +136,12 @@ public class ALT implements PathfindingAlgo {
 
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
-        Graph ginv = GraphUtils.invertGraph(graph);
-
-        //List<Vertex> landmarks = landmark(graph, 25);
-        List<Vertex> landmarks = new ArrayList<>();
-        //landmarks.add(GraphUtils.findNearestVertex(graph, 56.21684389259911, 9.517964491806737));
-        landmarks.add(new Vertex(56.0929669, 10.0084564));
-
-        distanceToLandmark = new HashMap<>();
-        distanceFromLandmark = new HashMap<>();
-        landmarks.forEach( v -> {
-            System.out.print(".");
-            distanceFromLandmark.put(v,dijkstra(graph, v));
-            distanceToLandmark.put(v,dijkstra(ginv, v));
-        });
-
-
 
         Vertex a = new Vertex(56.0929669, 10.0084564);
         Vertex b = new Vertex(56.2299823, 9.5319387);
 
-        PathfindingAlgo d = new ALT();
-        Solution solution = d.shortestPath(graph, a, b);
+        PathfindingAlgo d = new ALT(graph);
+        Solution solution = d.shortestPath(a, b);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());

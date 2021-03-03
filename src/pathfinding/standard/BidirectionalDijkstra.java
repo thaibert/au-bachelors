@@ -5,9 +5,12 @@ import graph.*;
 import java.util.*;
 import utility.*;
 
-public class BidirectionalDijkstra {
+public class BidirectionalDijkstra implements PathfindingAlgo {
     private final double INF_DIST = Double.MAX_VALUE;
-    double mu = INF_DIST;
+
+    private final Graph g;
+    private final Graph ginv;
+
 
     //_f means forward algo, _b means backwards algo
     private Map<Vertex, Double> bestDist_f;
@@ -17,14 +20,18 @@ public class BidirectionalDijkstra {
     private Set<Vertex> s_f;
     private Set<Vertex> s_b;
     private Vertex bestVertex; 
+    double mu;
 
     // For visual
     private List<Edge> edgesConsidered;
+
+    public BidirectionalDijkstra(Graph g) {
+        this.g = g;
+        this.ginv = GraphUtils.invertGraph(g);
+    }
     
 
-
-     // TODO problems in taking 2 graphs as input :/
-    public Solution shortestPath(Graph g, Graph ginv, Vertex start, Vertex goal) {
+    public Solution shortestPath(Vertex start, Vertex goal) {
 
         // mu? // https://www.ucl.ac.uk/~ucahmto/math/2020/05/30/bidirectional-dijkstra.html
 
@@ -34,6 +41,8 @@ public class BidirectionalDijkstra {
         predecessor_b = new HashMap<>();
         s_f = new HashSet<>();
         s_b = new HashSet<>();
+        bestVertex = null;
+        mu = INF_DIST;
         
         //Purely for visualising
         edgesConsidered = new ArrayList<>();
@@ -160,14 +169,14 @@ public class BidirectionalDijkstra {
     public static void main(String[] args) {
         // We need to be able to utilize the inverted graph, so for now we ignore space efficiency and just create 2 graphs
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
-        Graph invertedGraph = GraphUtils.invertGraph(graph);
 
-        Vertex a = new Vertex(56.0929669, 10.0084564);
-        Vertex b = new Vertex(56.2299823, 9.5319387);
+        Vertex a = new Vertex(56.2587198,10.3059575);
+        Vertex b = new Vertex(56.1605044,9.95009);
 
 
-        BidirectionalDijkstra d = new BidirectionalDijkstra();
-        Solution solution = d.shortestPath(graph, invertedGraph, a, b);
+        BidirectionalDijkstra d = new BidirectionalDijkstra(graph);
+        Solution solution = d.shortestPath(a, b);
+        solution = d.shortestPath(a, b);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());

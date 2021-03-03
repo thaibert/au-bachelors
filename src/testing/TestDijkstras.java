@@ -11,6 +11,9 @@ import java.util.*;
 
 public class TestDijkstras {
 
+    static PathfindingAlgo traditional;
+    static PathfindingAlgo ours;
+
     static long totalTimeTraditional = 0;
     static long totalTimeOurs = 0;
 
@@ -32,19 +35,15 @@ public class TestDijkstras {
         Vertex a = GraphUtils.pickRandomVertex(g);
         Vertex b = GraphUtils.pickRandomVertex(g);
 
-        
-        PathfindingAlgo traditional = new DijkstraTraditional();
-        PathfindingAlgo ours = new Dijkstra();
-
         Solution solutionTraditional, solutionOurs;
         try {
             start = System.nanoTime();
-            solutionTraditional = traditional.shortestPath(g, a, b);
+            solutionTraditional = traditional.shortestPath(a, b);
             stop = System.nanoTime();
             totalTimeTraditional += (stop - start);
             
             start = System.nanoTime();
-            solutionOurs = ours.shortestPath(g, a, b);
+            solutionOurs = ours.shortestPath(a, b);
             stop = System.nanoTime();
             totalTimeOurs += (stop - start);
 
@@ -82,6 +81,11 @@ public class TestDijkstras {
 
     public static void main(String[] args) {
         Graph g = GraphPopulator.populateGraph("denmark-intersections.csv");
+
+        
+        traditional = new DijkstraTraditional(g);
+        ours = new Dijkstra(g);
+
 
         int runs = 1000;
 

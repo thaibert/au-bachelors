@@ -8,7 +8,13 @@ import utility.*;
 public class DijkstraTraditional implements PathfindingAlgo {
     private final double INF_DIST = Double.MAX_VALUE;
 
-    public Solution shortestPath(Graph g, Vertex start, Vertex goal){
+    private Graph g;
+
+    public DijkstraTraditional(Graph g) {
+        this.g = g;
+    }
+
+    public Solution shortestPath(Vertex start, Vertex goal){
         System.out.println("--> Running \"traditional\" Dijkstra");
         //  Pseudocode from CLRS
         //  Initialize-Single-Source(G, s) (s = source)
@@ -101,13 +107,13 @@ public class DijkstraTraditional implements PathfindingAlgo {
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
-        Vertex a = new Vertex(56.0929669, 10.0084564);
-        Vertex b = new Vertex(56.2299823, 9.5319387);
+        Vertex a = new Vertex(56.1578254, 10.0616485); // herningmotorvejen
+        Vertex b = new Vertex(56.1592914, 10.0695802); // afkørsel fra rundkørslen
 
-        PathfindingAlgo d = new DijkstraTraditional();
-        Solution solution = d.shortestPath(graph, a, b);
+        PathfindingAlgo d = new DijkstraTraditional(graph);
+        Solution solution = d.shortestPath(a, b);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.GreaterAarhus);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize();

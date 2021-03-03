@@ -13,13 +13,18 @@ public class Dijkstra implements PathfindingAlgo {
      * Talks about directed graph, but does it even matter, it's never going to be better to travel the same edge twice?
      * I think at least
     */
+    private Graph g;
     private Map<Vertex, Double> dist;
     private Map<Vertex, Vertex> pred; // S in the algo is pred.keySet()
     
     // For visual
     private List<Edge> edgesConsidered;
 
-    public Solution shortestPath(Graph g, Vertex start, Vertex goal){
+    public Dijkstra(Graph g) {
+        this.g = g;
+    }
+
+    public Solution shortestPath(Vertex start, Vertex goal){
         System.out.println("--> Running Dijkstra");
         //  Psudokode from the book
         //  Initialize-Single-Source(G, s) (s = source)
@@ -114,8 +119,8 @@ public class Dijkstra implements PathfindingAlgo {
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
 
-        PathfindingAlgo d = new Dijkstra();
-        Solution solution = d.shortestPath(graph, Location.Silkeborg, Location.Randersvej);
+        PathfindingAlgo d = new Dijkstra(graph);
+        Solution solution = d.shortestPath(Location.Silkeborg, Location.Randersvej);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());

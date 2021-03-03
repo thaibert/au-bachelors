@@ -10,6 +10,11 @@ import java.util.*;
 
 public class TestAll {
 
+    static PathfindingAlgo traditional;
+    static PathfindingAlgo ours;
+    static PathfindingAlgo astar;
+    static PathfindingAlgo bidirectional;
+
     static long totalTimeTraditional = 0;
     static long totalTimeOurs = 0;
     static long totalTimeBidirectional = 0;
@@ -23,7 +28,7 @@ public class TestAll {
     static long totalExpandedBidirectional = 0;
     static long totalExpandedAStar = 0;
 
-    static void testAllShortestPath(Graph g, Graph ginv){
+    static void testAllShortestPath(Graph g){
         // TODO in "actual" runs, we should comment in out in files, as it still takes time?
         // Disable printing while running 
         PrintStream originalStream = System.out;
@@ -36,12 +41,7 @@ public class TestAll {
         System.setOut(noopStream);
 
         Vertex a = GraphUtils.pickRandomVertex(g);
-        Vertex b = GraphUtils.pickRandomVertex(g);        
-        
-        PathfindingAlgo traditional = new DijkstraTraditional();
-        PathfindingAlgo ours = new Dijkstra();
-        PathfindingAlgo astar = new Astar();
-        BidirectionalDijkstra bidirictional = new BidirectionalDijkstra();
+        Vertex b = GraphUtils.pickRandomVertex(g);
 
         System.setOut(originalStream);
         System.out.print("  " + a + "  ->  " + b);
@@ -51,22 +51,22 @@ public class TestAll {
         Solution solutionTraditional, solutionOurs, solutionAStar, solutionBidirectional;
         try {
             start = System.nanoTime();
-            solutionTraditional = traditional.shortestPath(g, a, b);
+            solutionTraditional = traditional.shortestPath(a, b);
             stop = System.nanoTime();
             totalTimeTraditional += (stop - start);
             
             start = System.nanoTime();
-            solutionOurs = ours.shortestPath(g, a, b);
+            solutionOurs = ours.shortestPath(a, b);
             stop = System.nanoTime();
             totalTimeOurs += (stop - start);
 
             start = System.nanoTime();
-            solutionAStar = astar.shortestPath(g, a, b);
+            solutionAStar = astar.shortestPath(a, b);
             stop = System.nanoTime();
             totalTimeAStar += (stop - start);
 
             start = System.nanoTime();
-            solutionBidirectional = bidirictional.shortestPath(g, ginv, a, b);
+            solutionBidirectional = bidirectional.shortestPath(a, b);
             stop = System.nanoTime();
             totalTimeBidirectional += (stop - start);
             
@@ -103,6 +103,7 @@ public class TestAll {
                 System.out.println("Difference in Traditional dijkstra and bidirectional");
                 GraphVisualiser vis3 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
                 vis3.drawPath(solutionBidirectional.getShortestPath());
+                System.out.println(solutionBidirectional.getShortestPath());
                 vis3.visualize();
             }            
 
@@ -132,18 +133,23 @@ public class TestAll {
 
     public static void main(String[] args) {
         Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
-        Graph ginv = GraphUtils.invertGraph(g);
 
-        int runs = 1000;
+        traditional = new DijkstraTraditional(g);
+        ours = new Dijkstra(g);
+        astar = new Astar(g);
+        bidirectional = new BidirectionalDijkstra(g);
+
+        int runs = 300;
 
         for (int i = 0; i < runs; i++) {
             System.out.print(" -> " + i);
             try {
 
-                testAllShortestPath(g, ginv);
+                testAllShortestPath(g);
 
             } catch(Exception e) {
-                 System.out.println(" failed (exception)");
+                System.out.println(" failed (exception)");
+                e.printStackTrace();
             } catch(AssertionError e) {
                 System.out.println(" failed (assert)");
             }

@@ -8,6 +8,7 @@ public interface PathfindingAlgo {
     /** 
      * TODO description of interface 
      */
-    public Solution shortestPath(Graph graph, Vertex start, Vertex goal);
+    
+    public Solution shortestPath(Vertex start, Vertex goal);
 
 }
