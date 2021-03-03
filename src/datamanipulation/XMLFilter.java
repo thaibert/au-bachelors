@@ -104,6 +104,7 @@ public class XMLFilter {
 
         } catch(Exception e) {
             e.printStackTrace();
+            return;
         }
         System.out.printf("  --> %10d events processed\n", events);
 
@@ -150,6 +151,7 @@ public class XMLFilter {
 
         } catch (Exception e) {
             e.printStackTrace();
+            return;
         }
 
 
@@ -171,6 +173,7 @@ public class XMLFilter {
             
         } catch(Exception e) {
             System.out.println("--> " + e);
+            return;
         }
 
         System.out.println("--> Writing  " + outPrefix + "-intersections.csv");
@@ -191,6 +194,7 @@ public class XMLFilter {
 
         } catch(Exception e) {
             e.printStackTrace();
+            return;
         }
 
     }
