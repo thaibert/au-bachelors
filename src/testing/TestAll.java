@@ -154,17 +154,25 @@ public class TestAll {
                 System.out.println(" failed (assert)");
             }
         }
+
+        double sec = 10e9; // nanoseconds per second
+        double ms = 10e6;  // nanoseconds per millisecond
+
         System.out.println("[*] Done!");
         System.out.println("     Total runs: " + runs);
-        System.out.printf("     Total time taken for \"traditional\"       %8.3f seconds \n", (double) totalTimeTraditional/1000000000);
-        System.out.printf("     Total time taken for ours                %8.3f seconds \n", (double) totalTimeOurs/1000000000);
-        System.out.printf("     Total time taken for bidirectional       %8.3f seconds \n", (double) totalTimeBidirectional/1000000000);
-        System.out.printf("     Total time taken for astar               %8.3f seconds \n", (double) totalTimeAStar/1000000000);
+        System.out.println();
 
-        System.out.printf("     Average time taken for \"traditional\"     %8.3f seconds \n", (double) totalTimeTraditional/runs/1000000000);
-        System.out.printf("     Average time taken for ours              %8.3f seconds \n", (double) totalTimeOurs/runs/1000000000);
-        System.out.printf("     Average time taken for bidirectional     %8.3f seconds \n", (double) totalTimeBidirectional/runs/1000000000);
-        System.out.printf("     Average time taken for astar             %8.3f seconds \n", (double) totalTimeAStar/runs/1000000000);
+        System.out.printf("     Total time taken for \"traditional\"       %8.3f seconds \n", (double) totalTimeTraditional / sec);
+        System.out.printf("     Total time taken for ours                %8.3f seconds \n", (double) totalTimeOurs / sec);
+        System.out.printf("     Total time taken for bidirectional       %8.3f seconds \n", (double) totalTimeBidirectional / sec);
+        System.out.printf("     Total time taken for astar               %8.3f seconds \n", (double) totalTimeAStar / sec);
+        System.out.println();
+
+        System.out.printf("     Average time taken for \"traditional\"     %8.3f ms \n", (double) totalTimeTraditional/runs / ms);
+        System.out.printf("     Average time taken for ours              %8.3f ms \n", (double) totalTimeOurs/runs / ms);
+        System.out.printf("     Average time taken for bidirectional     %8.3f ms \n", (double) totalTimeBidirectional/runs / ms);
+        System.out.printf("     Average time taken for astar             %8.3f ms \n", (double) totalTimeAStar/runs / ms);
+        System.out.println();
 
         System.out.printf("     Average edges expanded for \"traditional\"     %8d edges \n", (long) totalExpandedTraditional/runs);
         System.out.printf("     Average edges expanded for ours              %8d edges \n", (long) totalExpandedOurs/runs);
