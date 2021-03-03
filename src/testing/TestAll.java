@@ -83,17 +83,27 @@ public class TestAll {
         if (hasDifference) {
             System.out.println(" not equal!");
 
+            List<Vertex> path = solutions[0].getShortestPath();
+            System.out.printf("%s has %5d nodes and a distance of %8.2f meters\n", 
+                names[0], 
+                path.size(), 
+            GraphUtils.pathDistance(path));
+
             // Draw traditional dijkstra
-            GraphVisualiser vis1 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
-            vis1.drawPath(solutions[0].getShortestPath());
+            GraphVisualiser vis1 = new GraphVisualiser(g, BoundingBox.Christiansbjerg);
+            vis1.drawPath(path);
             vis1.visualize(names[0]);
-            System.out.printf("%s has %d nodes\n", names[0], solutions[0].getShortestPath().size());
+            
 
             // Draw the rest
             for (int i = 0; i < numAlgos; i++) {
                 if (! solutionsEqual[i]) {
-                    System.out.printf("%s has %d nodes\n", names[i], solutions[i].getShortestPath().size());
-                    GraphVisualiser vis2 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
+                    path = solutions[i].getShortestPath();
+                    System.out.printf("%s has %5d nodes and a distance of %8.2f meters\n", 
+                        names[i], 
+                        path.size(), 
+                        GraphUtils.pathDistance(path));
+                    GraphVisualiser vis2 = new GraphVisualiser(g, BoundingBox.Christiansbjerg);
                     vis2.drawPath(solutions[i].getShortestPath());
                     vis2.visualize(names[i]);
                 }

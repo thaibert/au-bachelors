@@ -44,15 +44,16 @@ public class GraphVisualiser extends Canvas {
         double screenRatio = screenSize.getWidth()/(screenSize.getHeight()-100);
         if (bboxRatio > screenRatio) {
             // long bounding box
-            window_x = (int) (screenSize.getWidth());
-            window_y = 100 + (int) (dy * screenSize.getWidth()/dx);
+            window_x = (int) (screenSize.getWidth()-100);
+            window_y = (int) (dy * (screenSize.getWidth()-100)/dx);
         } else {
             // tall bounding box
-            window_x = (int) (dx * (screenSize.getHeight())/dy);
-            window_y = 100 + (int) (screenSize.getHeight());
+            window_x = (int) (dx * (screenSize.getHeight()-100)/dy);
+            window_y = (int) (screenSize.getHeight()-100);
         }
         image_width = window_x * zoom_level;
         image_height = window_y * zoom_level;
+        window_y += 100;
 
         setBackground(Color.WHITE);
     }

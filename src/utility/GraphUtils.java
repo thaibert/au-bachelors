@@ -66,5 +66,17 @@ public class GraphUtils {
             .findFirst()
             .get();
     }
+
+    public static double pathDistance(List<Vertex> path) {
+        if (path.size() < 2) {
+            return 0;
+        }
+
+        double sum = 0;
+        for (int i = 1; i < path.size(); i++) {
+            sum += haversineDist(path.get(i-1), path.get(i));
+        }
+        return sum;
+    }
     
 }
