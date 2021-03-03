@@ -9,24 +9,19 @@ import java.io.*;
 import java.util.*;
 
 public class TestAll {
+    static String[] names = new String[]{"TradDijk   ", 
+                                         "OurDijk    ", 
+                                         "A*         ", 
+                                         "BidirecDijk"};
+    static int numAlgos = names.length;
 
-    static PathfindingAlgo traditional;
-    static PathfindingAlgo ours;
-    static PathfindingAlgo astar;
-    static PathfindingAlgo bidirectional;
+    static PathfindingAlgo[] algos = new PathfindingAlgo[numAlgos];
+    static long[] totalTimes = new long[numAlgos];
+    static long[] totalExpanded = new long[numAlgos];
 
-    static long totalTimeTraditional = 0;
-    static long totalTimeOurs = 0;
-    static long totalTimeBidirectional = 0;
-    static long totalTimeAStar = 0;
+    static long start;
+    static long stop;
 
-    static long start = 0;
-    static long stop = 0;
-
-    static long totalExpandedTraditional = 0;
-    static long totalExpandedOurs = 0;
-    static long totalExpandedBidirectional = 0;
-    static long totalExpandedAStar = 0;
 
     static void testAllShortestPath(Graph g){
         // TODO in "actual" runs, we should comment in out in files, as it still takes time?
@@ -48,70 +43,54 @@ public class TestAll {
         System.setOut(noopStream);
 
 
-        Solution solutionTraditional, solutionOurs, solutionAStar, solutionBidirectional;
+        Solution[] solutions = new Solution[numAlgos];
         try {
-            start = System.nanoTime();
-            solutionTraditional = traditional.shortestPath(a, b);
-            stop = System.nanoTime();
-            totalTimeTraditional += (stop - start);
-            
-            start = System.nanoTime();
-            solutionOurs = ours.shortestPath(a, b);
-            stop = System.nanoTime();
-            totalTimeOurs += (stop - start);
 
-            start = System.nanoTime();
-            solutionAStar = astar.shortestPath(a, b);
-            stop = System.nanoTime();
-            totalTimeAStar += (stop - start);
-
-            start = System.nanoTime();
-            solutionBidirectional = bidirectional.shortestPath(a, b);
-            stop = System.nanoTime();
-            totalTimeBidirectional += (stop - start);
-            
+            for (int i = 0; i < numAlgos; i++) {
+                start = System.nanoTime();
+                solutions[i] = algos[i].shortestPath(a, b);
+                stop = System.nanoTime();
+                totalTimes[i] += (stop - start);
+                totalExpanded[i] += solutions[i].getVisited().size();
+            }
 
         } catch(Exception e) {
             System.setOut(originalStream);
-            System.out.println(e.getMessage());
-            solutionTraditional = solutionOurs = solutionAStar = solutionBidirectional = new Solution(new ArrayList<>(), new ArrayList<>());
+            e.printStackTrace();
+            Solution emptySolution = new Solution(new ArrayList<>(), new ArrayList<>());
+            for (int i = 0; i < numAlgos; i++) {
+                solutions[i] = emptySolution;
+            }
         }
         System.setOut(originalStream);
 
-        // Can it be compared more efficiently?
-        boolean equalSolutionsDijk = solutionTraditional.getShortestPath().equals(solutionOurs.getShortestPath());
-        boolean equalSolutionsBiDijk = solutionTraditional.getShortestPath().equals(solutionBidirectional.getShortestPath());
-        boolean equalSolutionsAstar = solutionTraditional.getShortestPath().equals(solutionAStar.getShortestPath());
+        boolean[] solutionsEqual = new boolean[numAlgos];
+        boolean hasDifference = false;
+        for (int i = 0; i < numAlgos; i++) {
+            boolean isEqual = solutions[0].getShortestPath().equals(solutions[i].getShortestPath());
+            solutionsEqual[i] = isEqual;
+            if (! isEqual) {
+                hasDifference = true;
+            }
+        }
 
-        // assert !equalSolutions;
         // TODO wrap so only on when assertions are on
-        if (!equalSolutionsDijk || !equalSolutionsBiDijk || !equalSolutionsAstar) {
+        if (hasDifference) {
             System.out.println(" not equal!");
 
+            // Draw traditional dijkstra
             GraphVisualiser vis1 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
-            vis1.drawPath(solutionOurs.getShortestPath());
+            vis1.drawPath(solutions[0].getShortestPath());
             vis1.visualize();
 
-            if (!equalSolutionsDijk) {
-                System.out.println("Difference in Traditional dijkstra and ours");
-                GraphVisualiser vis2 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
-                vis2.drawPath(solutionTraditional.getShortestPath());
-                vis2.visualize();
-            }
-
-            if (!equalSolutionsBiDijk) {
-                System.out.println("Difference in Traditional dijkstra and bidirectional");
-                GraphVisualiser vis3 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
-                vis3.drawPath(solutionBidirectional.getShortestPath());
-                System.out.println(solutionBidirectional.getShortestPath());
-                vis3.visualize();
-            }            
-
-            if (!equalSolutionsAstar) {
-                System.out.println("Difference in Traditional dijkstra and Astar");
-                GraphVisualiser vis4 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
-                vis4.drawPath(solutionAStar.getShortestPath());
-                vis4.visualize();
+            // Draw the rest
+            for (int i = 0; i < numAlgos; i++) {
+                if (! solutionsEqual[i]) {
+                    System.out.println("Difference in Traditional dijkstra and " + names[i]);
+                    GraphVisualiser vis2 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
+                    vis2.drawPath(solutions[i].getShortestPath());
+                    vis2.visualize();
+                }
             }
 
             try{
@@ -120,26 +99,19 @@ public class TestAll {
                 System.out.println(e);
             }
         }
-
-        totalExpandedTraditional += solutionTraditional.getVisited().size();
-        totalExpandedOurs += solutionOurs.getVisited().size();
-        totalExpandedBidirectional+= solutionBidirectional.getVisited().size();
-        totalExpandedAStar += solutionAStar.getVisited().size();
-
         System.out.println();   
-
     }
 
 
     public static void main(String[] args) {
         Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
-        traditional = new DijkstraTraditional(g);
-        ours = new Dijkstra(g);
-        astar = new Astar(g);
-        bidirectional = new BidirectionalDijkstra(g);
+        algos[0] = new DijkstraTraditional(g);
+        algos[1] = new Dijkstra(g);
+        algos[2] = new Astar(g);
+        algos[3] = new BidirectionalDijkstra(g);
 
-        int runs = 300;
+        int runs = 30;
 
         for (int i = 0; i < runs; i++) {
             System.out.print(" -> " + i);
@@ -159,25 +131,21 @@ public class TestAll {
         double ms = 10e6;  // nanoseconds per millisecond
 
         System.out.println("[*] Done!");
-        System.out.println("     Total runs: " + runs);
+        System.out.println("     Total runs: " + runs + "\n");
+
+        for (int i = 0; i < numAlgos; i++) {
+            System.out.printf("     Total time taken for %s:      %8.3f seconds \n", names[i], (double) totalTimes[i] / sec);
+        }
         System.out.println();
 
-        System.out.printf("     Total time taken for \"traditional\"       %8.3f seconds \n", (double) totalTimeTraditional / sec);
-        System.out.printf("     Total time taken for ours                %8.3f seconds \n", (double) totalTimeOurs / sec);
-        System.out.printf("     Total time taken for bidirectional       %8.3f seconds \n", (double) totalTimeBidirectional / sec);
-        System.out.printf("     Total time taken for astar               %8.3f seconds \n", (double) totalTimeAStar / sec);
+        for (int i = 0; i < numAlgos; i++) {
+            System.out.printf("     Average time taken for %s     %8.3f ms \n", names[i], (double) totalTimes[i]/runs / ms);
+        }
         System.out.println();
 
-        System.out.printf("     Average time taken for \"traditional\"     %8.3f ms \n", (double) totalTimeTraditional/runs / ms);
-        System.out.printf("     Average time taken for ours              %8.3f ms \n", (double) totalTimeOurs/runs / ms);
-        System.out.printf("     Average time taken for bidirectional     %8.3f ms \n", (double) totalTimeBidirectional/runs / ms);
-        System.out.printf("     Average time taken for astar             %8.3f ms \n", (double) totalTimeAStar/runs / ms);
-        System.out.println();
-
-        System.out.printf("     Average edges expanded for \"traditional\"     %8d edges \n", (long) totalExpandedTraditional/runs);
-        System.out.printf("     Average edges expanded for ours              %8d edges \n", (long) totalExpandedOurs/runs);
-        System.out.printf("     Average edges expanded for bidirectional     %8d edges \n", (long) totalExpandedBidirectional/runs);
-        System.out.printf("     Average edges expanded for A*                %8d edges \n", (long) totalExpandedAStar/runs);
+        for (int i = 0; i < numAlgos; i++) {
+            System.out.printf("     Average edges expanded for %s     %8d edges \n", names[i], (long) totalExpanded[i]/runs);
+        }
 
     }
 
