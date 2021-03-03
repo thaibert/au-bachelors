@@ -127,7 +127,7 @@ public class TestAll {
         algos[ASTAR] = new Astar(g);
         algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
 
-        int runs = 10000;
+        int runs = (int) 1e3;
 
 
         for (int i = 0; i < runs; i++) {
@@ -144,8 +144,8 @@ public class TestAll {
             }
         }
 
-        double sec = 10e9; // nanoseconds per second
-        double ms = 10e6;  // nanoseconds per millisecond
+        double sec = 1e9; // nanoseconds per second
+        double ms = 1e6;  // nanoseconds per millisecond
 
         System.out.println("[*] Done!");
         System.out.println("     Total runs: " + runs + "\n");
