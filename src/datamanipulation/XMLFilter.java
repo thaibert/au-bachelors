@@ -72,6 +72,10 @@ public class XMLFilter {
                             // Roundabouts are one-way!
                             onewayStreets.add(curr_wayID);
                         }
+                        if ("construction".equals(k) && carTypes.contains(v)) {
+                            // road maybe under construction, sometimes also an old tag
+                            isCarRoad = true;
+                        }
                     }
                 }
 
