@@ -121,6 +121,11 @@ public class GraphVisualiser extends Canvas {
     private void drawPath(Graphics g) {
         g.setColor(Color.BLACK);
 
+        if (this.shortestPath.size() == 0) {
+            System.out.println("no shortest path");
+            return;
+        }
+
         Vertex prev = this.shortestPath.get(0);
         for (int i = 1; i < this.shortestPath.size(); i++) {
             Vertex v = this.shortestPath.get(i);
@@ -140,6 +145,11 @@ public class GraphVisualiser extends Canvas {
     private void drawStartGoal(Graphics g) {
         // Our list have start at the end, and goal at the front!
         // Draw end
+
+        if (this.shortestPath.size() == 0) {
+            return;
+        }
+
         Vertex v = this.shortestPath.get(0);
         String v_lat = Double.toString(v.getLatitude());
         String v_lon = Double.toString(v.getLongitude());
@@ -164,6 +174,10 @@ public class GraphVisualiser extends Canvas {
         // Calculate min/max distance to get the colors right
         double minDist = Double.MAX_VALUE;
         double maxDist = 0;
+
+        if (this.visited.size() == 0) {
+            return;
+        }
 
         for (Edge edge : this.visited) {
             double dist = edge.getDist();
