@@ -43,6 +43,12 @@ public class TestAll {
         Vertex a = GraphUtils.pickRandomVertex(g);
         Vertex b = GraphUtils.pickRandomVertex(g);
 
+        if (a.equals(b)) {
+            System.setOut(originalStream);
+            System.out.print("\n");
+            return;
+        }
+
         System.setOut(originalStream);
         System.out.print("  " + a + "  ->  " + b);
         System.setOut(noopStream);
@@ -128,7 +134,6 @@ public class TestAll {
         algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
 
         int runs = (int) 1e3;
-
 
         for (int i = 0; i < runs; i++) {
             System.out.print(" -> " + i);
