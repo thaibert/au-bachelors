@@ -11,8 +11,6 @@ public class Astar implements PathfindingAlgo {
     private Graph g;
 
     private Map<Vertex, Double> dist;
-    private Map<Vertex, Double> fscore;
-
     private Map<Vertex, Vertex> pred; // S in the algo is pred.keySet()
 
     // For visual
@@ -26,41 +24,36 @@ public class Astar implements PathfindingAlgo {
 
         dist = new HashMap<>();
         pred = new HashMap<>();
-        fscore = new HashMap<>();
 
         //Purely for visualising
         edgesConsidered = new ArrayList<>();
 
-        // TODO kan man skip det her og så bruge dist.getOrDefault(...)?
-        g.getAllVertices().stream().forEach( v -> {dist.put(v, INF_DIST);
-                                                   fscore.put(v, INF_DIST);} );
         dist.put(start, 0.0);
-        fscore.put(start, heuristic(start, goal));
+
         DistComparator comp = new DistComparator();
-        PriorityQueue<Vertex> pq = new PriorityQueue<>(comp);
-        pq.add(start);
+        PriorityQueue<Pair> pq = new PriorityQueue<>(comp);
+
+        pq.add(new Pair(start, heuristic(start, goal)));
 
 
         while (pq.size() > 0) {
-            Vertex min = pq.poll(); // Should retrieve the lowest Fscore
+            Pair min = pq.poll(); // Should retrieve the lowest Fscore
 
-            if (min.equals(goal)) {
+            if (min.v.equals(goal)) {
                 System.out.println("  --> Finished early");
                 break;
             }
 
-            g.getNeighboursOf(min).forEach(n -> {
-                double tent_gScore = dist.get(min) + n.distance;
+            g.getNeighboursOf(min.v).forEach(n -> {
+                double tent_gScore = dist.getOrDefault(min.v, INF_DIST) + n.distance;
                 double potentialNewFscore = tent_gScore + heuristic(n.v, goal);
 
-                edgesConsidered.add(new Edge(min, n.v, potentialNewFscore));
-                if (tent_gScore < dist.get(n.v)) {
-                    pred.put(n.v, min);
+                edgesConsidered.add(new Edge(min.v, n.v, potentialNewFscore));
+                if (tent_gScore < dist.getOrDefault(n.v, INF_DIST)) {
+                    pred.put(n.v, min.v);
                     dist.put(n.v, tent_gScore);
-                    fscore.put(n.v, potentialNewFscore);
-                    //if (!pq.contains(n.v)){
-                        pq.add(n.v);
-                    //}
+
+                    pq.add(new Pair(n.v, potentialNewFscore));
                 }
             });
 
@@ -84,7 +77,7 @@ public class Astar implements PathfindingAlgo {
         System.out.println("      " + out.size() + " nodes");
         System.out.println("      " + edgesConsidered.size() + " edges considered");
         System.out.println("      " + comp.getComparisons() + " comparisons");
-        System.out.println("      " + dist.get(goal));
+        System.out.println("      " + dist.getOrDefault(goal, INF_DIST));
 
         Solution solution = new Solution(out, edgesConsidered);
 
@@ -106,23 +99,6 @@ public class Astar implements PathfindingAlgo {
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("A*");
-    }
-
-
-    // TODO update what is compared on
-    class DistComparator implements Comparator<Vertex> {
-        
-        public long comparisons = 0;
-
-        @Override
-        public int compare(Vertex a, Vertex b) {
-            this.comparisons++;
-            return Double.compare(fscore.getOrDefault(a, INF_DIST), fscore.getOrDefault(b, INF_DIST));
-        }
-
-        public long getComparisons() {
-            return this.comparisons;
-        }
     }
 
     private double heuristic(Vertex a, Vertex b) {
