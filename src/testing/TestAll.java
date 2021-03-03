@@ -18,6 +18,11 @@ public class TestAll {
     static long start = 0;
     static long stop = 0;
 
+    static long totalExpandedTraditional = 0;
+    static long totalExpandedOurs = 0;
+    static long totalExpandedBidirectional = 0;
+    static long totalExpandedAStar = 0;
+
     static void testAllShortestPath(Graph g, Graph ginv){
         // TODO in "actual" runs, we should comment in out in files, as it still takes time?
         // Disable printing while running 
@@ -114,6 +119,12 @@ public class TestAll {
                 System.out.println(e);
             }
         }
+
+        totalExpandedTraditional += solutionTraditional.getVisited().size();
+        totalExpandedOurs += solutionOurs.getVisited().size();
+        totalExpandedBidirectional+= solutionBidirectional.getVisited().size();
+        totalExpandedAStar += solutionAStar.getVisited().size();
+
         System.out.println();   
 
     }
@@ -149,6 +160,10 @@ public class TestAll {
         System.out.printf("     Average time taken for bidirectional     %8.3f seconds \n", (double) totalTimeBidirectional/runs/1000000000);
         System.out.printf("     Average time taken for astar             %8.3f seconds \n", (double) totalTimeAStar/runs/1000000000);
 
+        System.out.printf("     Average edges expanded for \"traditional\"     %8d edges \n", (long) totalExpandedTraditional/runs);
+        System.out.printf("     Average edges expanded for ours              %8d edges \n", (long) totalExpandedOurs/runs);
+        System.out.printf("     Average edges expanded for bidirectional     %8d edges \n", (long) totalExpandedBidirectional/runs);
+        System.out.printf("     Average edges expanded for A*                %8d edges \n", (long) totalExpandedAStar/runs);
 
     }
 
