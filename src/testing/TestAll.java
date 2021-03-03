@@ -86,7 +86,7 @@ public class TestAll {
             // Draw traditional dijkstra
             GraphVisualiser vis1 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
             vis1.drawPath(solutions[0].getShortestPath());
-            vis1.visualize();
+            vis1.visualize(names[0]);
             System.out.printf("%s has %d nodes\n", names[0], solutions[0].getShortestPath().size());
 
             // Draw the rest
@@ -95,7 +95,7 @@ public class TestAll {
                     System.out.printf("%s has %d nodes\n", names[i], solutions[i].getShortestPath().size());
                     GraphVisualiser vis2 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
                     vis2.drawPath(solutions[i].getShortestPath());
-                    vis2.visualize();
+                    vis2.visualize(names[i]);
                 }
             }
 

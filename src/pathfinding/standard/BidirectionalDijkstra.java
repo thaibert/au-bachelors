@@ -181,7 +181,7 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
-        vis.visualize();
+        vis.visualize("Dijkstra bidirectional");
     }
 
 }

@@ -63,11 +63,11 @@ public class TestDijkstras {
 
             GraphVisualiser vis1 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
             vis1.drawPath(solutionOurs.getShortestPath());
-            vis1.visualize();
+            vis1.visualize("Dijkstra ours");
 
             GraphVisualiser vis2 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
             vis2.drawPath(solutionTraditional.getShortestPath());
-            vis2.visualize();
+            vis2.visualize("Dijkstra traditional");
 
             try{
             Thread.sleep(400000);

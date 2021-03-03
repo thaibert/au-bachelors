@@ -57,8 +57,8 @@ public class GraphVisualiser extends Canvas {
         setBackground(Color.WHITE);
     }
 
-    public void visualize() {
-        JFrame f = new JFrame();
+    public void visualize(String windowName) {
+        JFrame f = new JFrame(windowName);
         // f.add(new BufferedImage(window_x, window_y, BufferedImage.TYPE_INT_ARGB));
 
         BufferedImage img = new BufferedImage(image_width, image_height, BufferedImage.TYPE_INT_ARGB);

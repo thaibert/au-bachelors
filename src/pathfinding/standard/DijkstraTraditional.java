@@ -116,7 +116,7 @@ public class DijkstraTraditional implements PathfindingAlgo {
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.GreaterAarhus);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
-        vis.visualize();
+        vis.visualize("Dijkstra traditional");
     }
 
 }

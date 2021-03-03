@@ -146,7 +146,7 @@ public class ALT implements PathfindingAlgo {
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
-        vis.visualize();
+        vis.visualize("ALT");
 
     }
 
