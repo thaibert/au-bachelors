@@ -53,26 +53,6 @@ public class ALT implements PathfindingAlgo {
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
         
-        double bestTriangle = -INF_DIST;
-        Vertex bestLandmark = null;
-
-        for (Vertex v: distanceToLandmark.keySet()){
-            Map<Vertex, Double> distTo = distanceToLandmark.get(v);
-            Map<Vertex, Double> distFrom = distanceFromLandmark.get(v);
-
-            double temp = Math.max(distTo.getOrDefault(start, -INF_DIST)
-                                  -distTo.getOrDefault(goal, INF_DIST), 
-                                   distFrom.getOrDefault(goal, -INF_DIST)
-                                  -distFrom.getOrDefault(start, INF_DIST));
-                                System.out.println(temp);
-            if (temp > bestTriangle) {
-                bestTriangle = temp;
-                bestLandmark = v;
-                System.out.println(bestLandmark + " is now best landmark");
-            }
-        }
-
-
         Map<Vertex, Double> dist = new HashMap<>();
         Map<Vertex, Vertex> parent = new HashMap<>(); 
         List<Edge> edgesConsidered = new ArrayList<>();
@@ -84,17 +64,16 @@ public class ALT implements PathfindingAlgo {
 
         pq.add(new Pair(start, 0));
 
-        Set<Vertex> minDist = new HashSet<>();
+        Set<Vertex> settled = new HashSet<>();
 
         int iterations = 0;
         while(pq.size() > 0){
             iterations++;
             Pair head = pq.poll();
 
-            minDist.add(head.v);
+            settled.add(head.v);
 
             if (iterations % 1000 == 0) {
-                System.out.println(head.dist);
                 System.out.println("    --> " + iterations + ",   pq size: " + pq.size());
             }
 
@@ -105,8 +84,8 @@ public class ALT implements PathfindingAlgo {
 
             for (Neighbor n : graph.getNeighboursOf(head.v)) {
                 // RELAX
-                double maybeNewBestDistance = dist.get(head.v) + n.distance;
-                double previousBestDistance = dist.getOrDefault(n.v, INF_DIST);
+                double maybeNewBestDistance = dist.get(head.v) + n.distance; // dist(s,v) + len(v,u)
+                double previousBestDistance = dist.getOrDefault(n.v, INF_DIST); // dist(s,u)
 
                 edgesConsidered.add(new Edge(head.v, n.v, maybeNewBestDistance));
 
@@ -114,18 +93,9 @@ public class ALT implements PathfindingAlgo {
                     dist.put(n.v, maybeNewBestDistance);
                     parent.put(n.v, head.v);
 
-                    double estimateToGoal = Math.max(distanceToLandmark.get(bestLandmark)
-                                                       .getOrDefault(n.v,INF_DIST)
-                                                    -distanceToLandmark.get(bestLandmark)
-                                                       .getOrDefault(goal,INF_DIST), 
-                                                     distanceFromLandmark.get(bestLandmark)
-                                                       .getOrDefault(goal,INF_DIST)
-                                                     -distanceFromLandmark.get(bestLandmark)
-                                                       .getOrDefault(n.v,INF_DIST)); 
-                    // put back in PQ with new dist, but leave the old, "wrong" dist in there too.
-                    // if (! minDist.contains(n.v)) {
-                        pq.add(new Pair(n.v, maybeNewBestDistance + estimateToGoal)); 
-                    // }
+                    if (! settled.contains(n.v)) {
+                        pq.add(new Pair(n.v, maybeNewBestDistance + pi_t(n.v, goal))); 
+                    }
                 }
             }
         }
@@ -155,6 +125,26 @@ public class ALT implements PathfindingAlgo {
         return solution;
     }
 
+    private double pi_t(Vertex curr, Vertex goal) {
+
+        double max = -INF_DIST;
+        for (Vertex l : distanceToLandmark.keySet()) {
+            // pi^l+ := dist(v, l) - dist(t, l)
+            double dist_vl = distanceToLandmark.get(l).getOrDefault(curr, 0.0);
+            double dist_tl = distanceToLandmark.get(l).getOrDefault(goal, 0.0);
+            double pi_plus = dist_vl - dist_tl;
+
+            // pi^l- := dist(l, t) - dist(l, v)
+            double dist_lt = distanceFromLandmark.get(l).getOrDefault(goal, 0.0);
+            double dist_lv = distanceFromLandmark.get(l).getOrDefault(curr, 0.0);
+            double pi_minus = dist_lt - dist_lv;
+
+            // System.out.println(dist_vl + "\n" + dist_tl + "\n" + dist_lt + "\n" + dist_lv + "\n\n");
+
+            max = Math.max(max, Math.max(pi_plus, pi_minus));
+        }
+        return max;
+    }
 
     
     
