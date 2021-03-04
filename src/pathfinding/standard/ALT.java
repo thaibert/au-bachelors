@@ -1,14 +1,8 @@
 package pathfinding.standard;
 
-import graph.BoundingBox;
-import graph.Graph;
-import graph.GraphPopulator;
-import graph.GraphVisualiser;
-import graph.Neighbor;
+import graph.*;
 import graph.Vertex;
-import pathfinding.framework.Edge;
-import pathfinding.framework.PathfindingAlgo;
-import pathfinding.framework.Solution;
+import pathfinding.framework.*;
 import utility.*;
 
 import java.util.*;
@@ -20,6 +14,7 @@ public class ALT implements PathfindingAlgo {
 
     private Map<Vertex, Map<Vertex, Double>> distanceToLandmark;
     private Map<Vertex, Map<Vertex, Double>> distanceFromLandmark;
+    private Collection<Vertex> reachableLandmarks;
 
     private Map<Vertex, Double> dist;
     private Map<Vertex, Vertex> parent;
@@ -32,7 +27,7 @@ public class ALT implements PathfindingAlgo {
 
         Graph ginv = GraphUtils.invertGraph(graph);
 
-        List<Vertex> landmarks = landmark(graph, 25);
+        List<Vertex> landmarks = landmark(graph, 5);
         // List<Vertex> landmarks = new ArrayList<>();
         // landmarks.add(GraphUtils.findNearestVertex(graph, 56.21684389259911, 9.517964491806737));
         // landmarks.add(new Vertex(56.0929669, 10.0084564));
@@ -52,7 +47,14 @@ public class ALT implements PathfindingAlgo {
 
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
-        
+
+        reachableLandmarks = findReachableTo(start, goal);
+        System.out.println(reachableLandmarks.size());
+        if (reachableLandmarks.size() == 0) {
+            // bailout early
+            return new Solution(new ArrayList<>(), new ArrayList<>());
+        }
+
         Map<Vertex, Double> dist = new HashMap<>();
         Map<Vertex, Vertex> parent = new HashMap<>(); 
         List<Edge> edgesConsidered = new ArrayList<>();
@@ -78,7 +80,7 @@ public class ALT implements PathfindingAlgo {
             }
 
             if (head.v.equals(goal)) {
-                System.out.println("  --> Finished early at ");
+                System.out.println("  --> Finished early at " + iterations);
                 break;
             }
 
@@ -128,15 +130,25 @@ public class ALT implements PathfindingAlgo {
     private double pi_t(Vertex curr, Vertex goal) {
 
         double max = -INF_DIST;
-        for (Vertex l : distanceToLandmark.keySet()) {
+        for (Vertex l : reachableLandmarks) {
+            Map<Vertex, Double> distTo = distanceToLandmark.get(l);
+            Map<Vertex, Double> distFrom = distanceFromLandmark.get(l);
+
+            if (! distTo.containsKey(curr)
+             || ! distFrom.containsKey(curr)) {
+                 // This node either cannot reach l, or cannot be reached by l.
+                 // So skip l, since the calculations wouldn't make sense.
+                continue;
+             }
+
             // pi^l+ := dist(v, l) - dist(t, l)
-            double dist_vl = distanceToLandmark.get(l).getOrDefault(curr, 0.0);
-            double dist_tl = distanceToLandmark.get(l).getOrDefault(goal, 0.0);
+            double dist_vl = distTo.get(curr);
+            double dist_tl = distTo.get(goal);
             double pi_plus = dist_vl - dist_tl;
 
             // pi^l- := dist(l, t) - dist(l, v)
-            double dist_lt = distanceFromLandmark.get(l).getOrDefault(goal, 0.0);
-            double dist_lv = distanceFromLandmark.get(l).getOrDefault(curr, 0.0);
+            double dist_lt = distFrom.get(goal);
+            double dist_lv = distFrom.get(curr);
             double pi_minus = dist_lt - dist_lv;
 
             // System.out.println(dist_vl + "\n" + dist_tl + "\n" + dist_lt + "\n" + dist_lv + "\n\n");
@@ -144,6 +156,30 @@ public class ALT implements PathfindingAlgo {
             max = Math.max(max, Math.max(pi_plus, pi_minus));
         }
         return max;
+    }
+
+    private Collection<Vertex> findReachableTo(Vertex start, Vertex goal) {
+        // Return all landmarks that can reach both start and goal.
+        // If it can't reach one of them;
+        //   - it either can't reach the other either, or
+        //   - there is no path between start and goal.
+        Collection<Vertex> reachable = new ArrayList<>();
+
+        for (Vertex l : distanceToLandmark.keySet()) {
+            if ( ! distanceToLandmark.get(l).containsKey(start)
+            || ! distanceFromLandmark.get(l).containsKey(start) ) {
+                System.out.println("Landmark " + l + " cannot reach start");
+                continue; 
+            }
+            if ( ! distanceToLandmark.get(l).containsKey(goal)
+            || ! distanceFromLandmark.get(l).containsKey(goal) ) {
+                System.out.println("Landmark " + l + " cannot reach goal");
+                continue;
+            }
+            reachable.add(l);
+        }
+
+        return reachable;
     }
 
     
@@ -154,7 +190,6 @@ public class ALT implements PathfindingAlgo {
 
         Vertex a = new Vertex(56.1102309,10.2295427);
         Vertex b = new Vertex(56.0429021,10.2634393);
-
 
         PathfindingAlgo d = new ALT(graph);
         Solution solution = d.shortestPath(a, b);
@@ -191,19 +226,13 @@ public class ALT implements PathfindingAlgo {
 
 
         Map<Vertex, Double> bestDist = new HashMap<>();
-        // Map<Vertex, Vertex> predecessor = new HashMap<>(); 
 
         DistComparator comp = new DistComparator();
         PriorityQueue<Pair> pq = new PriorityQueue<>(comp);
 
         pq.add(new Pair(start, 0));
-
-        //g.getAllVertices().stream()
-        //    .map(v -> new Pair(v, INF_DIST))
-        //    .forEach(pq::add);
         
         Map<Vertex, Double> shortest = new HashMap<>();
-        List<Edge> expanded = new ArrayList<>();
 
         while (pq.size() > 0) {
 
@@ -220,12 +249,8 @@ public class ALT implements PathfindingAlgo {
                     double maybeNewBestDistance = head.dist + n.distance;
                     double previousBestDistance = bestDist.getOrDefault(n.v, INF_DIST);
 
-                    expanded.add(new Edge(head.v, n.v, maybeNewBestDistance));
-
-
                     if (maybeNewBestDistance < previousBestDistance) {
                         bestDist.put(n.v, maybeNewBestDistance);
-                        // predecessor.put(n.v, head.v);
 
                         // put back in PQ with new dist, but leave the old, "wrong" dist in there too.
                         pq.add(new Pair(n.v, maybeNewBestDistance)); 
