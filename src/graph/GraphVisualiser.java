@@ -197,10 +197,14 @@ public class GraphVisualiser extends Canvas {
             // float h = (index * 1.0f) / (this.visited.size() * 1.0f); // hue
 
             // Color according to distance in algorithm
-            float h = (float) ((edge.getDist()-minDist) / (maxDist - minDist));
+            double hRaw = ((edge.getDist()-minDist) / (maxDist - minDist));
+            double hLoDist = 0.2; // 72 degrees: slightly yellowish green
+            double hHiDist = 1.0; // 360 degrees: red
+            double hTranslated = hLoDist + hRaw / (hLoDist + hHiDist);
 
             float s = 1; // saturation
             float b = 1; // brightness
+            float h = (float) hTranslated;
             g.setColor(Color.getHSBColor(h, s, b));
             
             Vertex node1 = edge.getStart();
