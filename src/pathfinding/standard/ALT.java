@@ -22,12 +22,12 @@ public class ALT implements PathfindingAlgo {
     // For visual
     private List<Edge> edgesConsidered;
 
-    public ALT(Graph graph) {
+    public ALT(Graph graph, int noLandmarks) {
         this.graph = graph;
 
         Graph ginv = GraphUtils.invertGraph(graph);
 
-        List<Vertex> landmarks = landmark(graph, 5);
+        List<Vertex> landmarks = landmark(graph, noLandmarks);
         // List<Vertex> landmarks = new ArrayList<>();
         // landmarks.add(GraphUtils.findNearestVertex(graph, 56.21684389259911, 9.517964491806737));
         // landmarks.add(new Vertex(56.0929669, 10.0084564));
@@ -182,24 +182,6 @@ public class ALT implements PathfindingAlgo {
         return reachable;
     }
 
-    
-    
-
-    public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
-
-        Vertex a = new Vertex(56.1102309,10.2295427);
-        Vertex b = new Vertex(56.0429021,10.2634393);
-
-        PathfindingAlgo d = new ALT(graph);
-        Solution solution = d.shortestPath(a, b);
-
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
-        vis.drawPath(solution.getShortestPath());
-        vis.drawVisited(solution.getVisited());
-        vis.visualize("ALT");
-
-    }
 
     public static List<Vertex> landmark(Graph g, int k){
         List<Vertex> landmarks = new ArrayList<>();  
@@ -260,4 +242,25 @@ public class ALT implements PathfindingAlgo {
         return shortest;
     }
 
+
+    
+    public static void main(String[] args) {
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+
+        Vertex a = new Vertex(56.2323578,10.1029619);
+        Vertex b = new Vertex(56.1540562,10.1826677);
+
+        PathfindingAlgo d = new ALT(graph, 5);
+        Solution solution = d.shortestPath(a, b);
+
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        vis.drawPath(solution.getShortestPath());
+        vis.drawVisited(solution.getVisited());
+        vis.visualize("ALT");
+
+    }
+
 }
+
+
+

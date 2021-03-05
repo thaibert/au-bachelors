@@ -134,7 +134,7 @@ public class TestAll {
         algos[DIJKSTRA_OURS] = new Dijkstra(g);
         algos[ASTAR] = new Astar(g);
         algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
-        algos[ALT] = new ALT(g);
+        algos[ALT] = new ALT(g, 5); // TODO how many landmarks
 
         int runs = (int) 1e3;
 
