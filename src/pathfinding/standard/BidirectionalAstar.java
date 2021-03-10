@@ -55,8 +55,8 @@ public class BidirectionalAstar implements PathfindingAlgo {
         PriorityQueue<Pair> pq_b = new PriorityQueue<>(comp);
 
 
-        pq_f.add(new Pair(start, heuristic(start, goal)));
-        pq_b.add(new Pair(goal, heuristic(start, goal)));
+        pq_f.add(new Pair(start, 0));
+        pq_b.add(new Pair(goal, 0));
 
         int num = 0;
         while (pq_f.size() > 0 && pq_b.size() > 0) {
@@ -74,15 +74,15 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
             // TODO early exit?
 
-            if (min_f.dist + min_b.dist >= 
-                mu + potentialBackward(start, goal, goal) + potentialForward(start, goal, goal)) {
-                System.out.println("min_f.dist + min_b.dist = " + (min_f.dist + min_b.dist));
+            if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= 
+                mu + potentialBackward(goal, start, start) - potentialForward(start, goal, goal) ) {
+                System.out.println("min_f.dist + min_b.dist = " + (dist_f.get(min_f.v) + dist_b.get(min_b.v)));
                 //System.out.println("pb(start, goal, goal)   = " + potentialBackward(start, goal, goal));
                 //System.out.println("hav(goal,goal)          = " + GraphUtils.haversineDist(goal, goal));
                 //System.out.println("hav(start,goal)         = " + GraphUtils.haversineDist(start, goal));
-                System.out.println("pf(start,goal,goal)     = " +  potentialForward(start, goal, goal));
+                System.out.println("pf(start,goal,goal)     = " +  potentialForward(start, goal, start));
 
-                System.out.println("mu + potentialBackward  = " + (mu + potentialBackward(start, goal, goal) + potentialForward(start, goal, goal) ));
+                System.out.println("mu + potentialBackward  = " + (mu + potentialBackward(goal, start, goal) + potentialForward(start, goal, goal) ));
                 System.out.println("Entered exit");
                 break;
             }
@@ -93,7 +93,7 @@ public class BidirectionalAstar implements PathfindingAlgo {
                 double tent_gScore = dist_f.getOrDefault(min_f.v, INF_DIST) + reduced_distance;
 
                 // What exactly should be entered into the pq
-                double potentialNewFscore = tent_gScore + potentialForward(start, goal, n.v);
+                double potentialNewFscore = tent_gScore + heuristic(n.v, goal);
 
                 edgesConsidered.add(new Edge(min_f.v, n.v, potentialNewFscore));
                 if (tent_gScore < dist_f.getOrDefault(n.v, INF_DIST)) {
@@ -111,11 +111,11 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
             g.getNeighboursOf(min_b.v).forEach(n -> {
                 
-                double reduced_distance = n.distance - potentialBackward(goal, start, min_b.v) + potentialBackward(goal, start, n.v);
+                double reduced_distance = n.distance - potentialBackward(goal, start, n.v) + potentialBackward(goal, start, min_b.v);
                 double tent_gScore = dist_b.getOrDefault(min_b.v, INF_DIST) + reduced_distance;
 
                 // What exactly should be entered into the pq
-                double potentialNewFscore = tent_gScore + potentialBackward(goal, start, n.v);
+                double potentialNewFscore = tent_gScore + heuristic(n.v, start);
 
                 edgesConsidered.add(new Edge(min_b.v, n.v, potentialNewFscore));
                 if (tent_gScore < dist_b.getOrDefault(n.v, INF_DIST)) {
@@ -160,6 +160,8 @@ public class BidirectionalAstar implements PathfindingAlgo {
         Collections.reverse(out2);
         out2.addAll(out);
         
+        System.out.println(out2);
+
         System.out.println("      " + out2.size() + " nodes");
         System.out.println("      " + edgesConsidered.size() + " edges considered");
         System.out.println("      " + comp.getComparisons() + " comparisons");
@@ -197,9 +199,9 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
 
         BidirectionalAstar d = new BidirectionalAstar(graph);
-        Solution solution = d.shortestPath(Location.Silkeborg, Location.Randersvej);
+        Solution solution = d.shortestPath(Location.Viborgvej, Location.Randersvej);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Aarhus);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("A* bidirectional");

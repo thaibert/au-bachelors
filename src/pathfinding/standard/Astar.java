@@ -81,6 +81,9 @@ public class Astar implements PathfindingAlgo {
 
         Solution solution = new Solution(out, edgesConsidered);
 
+        System.out.println(out);
+
+
         return solution;
 
     }
@@ -93,9 +96,9 @@ public class Astar implements PathfindingAlgo {
         Vertex b = new Vertex(56.1636085,10.1177374);
 
         Astar d = new Astar(graph);
-        Solution solution = d.shortestPath(a, b);
+        Solution solution = d.shortestPath(Location.Viborgvej, Location.Randersvej);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.GreaterAarhus);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Aarhus);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("A*");
