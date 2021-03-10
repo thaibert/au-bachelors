@@ -176,7 +176,7 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
 
 
         BidirectionalDijkstra d = new BidirectionalDijkstra(graph);
-        Solution solution = d.shortestPath(a, b);
+        Solution solution = d.shortestPath(Location.Silkeborg, Location.Randersvej);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
