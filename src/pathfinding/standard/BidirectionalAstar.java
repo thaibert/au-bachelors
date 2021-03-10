@@ -75,13 +75,14 @@ public class BidirectionalAstar implements PathfindingAlgo {
             // TODO early exit?
 
             if (min_f.dist + min_b.dist >= 
-                mu + potentialBackward(start, goal, goal)) {
+                mu + potentialBackward(start, goal, goal) + potentialForward(start, goal, goal)) {
                 System.out.println("min_f.dist + min_b.dist = " + (min_f.dist + min_b.dist));
                 //System.out.println("pb(start, goal, goal)   = " + potentialBackward(start, goal, goal));
                 //System.out.println("hav(goal,goal)          = " + GraphUtils.haversineDist(goal, goal));
                 //System.out.println("hav(start,goal)         = " + GraphUtils.haversineDist(start, goal));
+                System.out.println("pf(start,goal,goal)     = " +  potentialForward(start, goal, goal));
 
-                System.out.println("mu + potentialBackward  = " + (mu + potentialBackward(start, goal, goal)));
+                System.out.println("mu + potentialBackward  = " + (mu + potentialBackward(start, goal, goal) + potentialForward(start, goal, goal) ));
                 System.out.println("Entered exit");
                 break;
             }
