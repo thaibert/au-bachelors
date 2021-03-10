@@ -75,7 +75,7 @@ public class BidirectionalAstar implements PathfindingAlgo {
             // TODO early exit?
 
             if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= 
-                mu + potentialBackward(goal, start, start) - potentialForward(start, goal, goal) ) {
+                mu + potentialBackward(goal, start, start) + potentialForward(start, goal, goal) ) {
                 System.out.println("min_f.dist + min_b.dist = " + (dist_f.get(min_f.v) + dist_b.get(min_b.v)));
                 //System.out.println("pb(start, goal, goal)   = " + potentialBackward(start, goal, goal));
                 //System.out.println("hav(goal,goal)          = " + GraphUtils.haversineDist(goal, goal));
@@ -90,6 +90,8 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
             g.getNeighboursOf(min_f.v).forEach(n -> {
                 double reduced_distance = n.distance - potentialForward(start, goal, min_f.v) + potentialForward(start, goal, n.v);
+                System.out.println("Origianal distance:       " + n.distance);
+                System.out.println("Reduced forward distance: " + reduced_distance);
                 double tent_gScore = dist_f.getOrDefault(min_f.v, INF_DIST) + reduced_distance;
 
                 // What exactly should be entered into the pq
@@ -111,8 +113,12 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
             g.getNeighboursOf(min_b.v).forEach(n -> {
                 
-                double reduced_distance = n.distance - potentialBackward(goal, start, n.v) + potentialBackward(goal, start, min_b.v);
+                double reduced_distance = n.distance + potentialBackward(goal, start, n.v) - potentialBackward(goal, start, min_b.v);
                 double tent_gScore = dist_b.getOrDefault(min_b.v, INF_DIST) + reduced_distance;
+                
+                System.out.println("Origianal distance:        " + n.distance);
+                System.out.println("Reduced backward distance: " + reduced_distance);
+
 
                 // What exactly should be entered into the pq
                 double potentialNewFscore = tent_gScore + heuristic(n.v, start);
@@ -206,6 +212,7 @@ public class BidirectionalAstar implements PathfindingAlgo {
         vis.drawVisited(solution.getVisited());
         vis.visualize("A* bidirectional");
     }
-
+    // 69.244900669
+    // 69.244900669
     
 }
