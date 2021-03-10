@@ -111,11 +111,11 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
             g.getNeighboursOf(min_b.v).forEach(n -> {
                 
-                double reduced_distance = n.distance - potentialBackward(start, goal, min_b.v) + potentialBackward(start, goal, n.v);
+                double reduced_distance = n.distance - potentialBackward(goal, start, min_b.v) + potentialBackward(goal, start, n.v);
                 double tent_gScore = dist_b.getOrDefault(min_b.v, INF_DIST) + reduced_distance;
 
                 // What exactly should be entered into the pq
-                double potentialNewFscore = tent_gScore + potentialBackward(start, goal, n.v);
+                double potentialNewFscore = tent_gScore + potentialBackward(goal, start, n.v);
 
                 edgesConsidered.add(new Edge(min_b.v, n.v, potentialNewFscore));
                 if (tent_gScore < dist_b.getOrDefault(n.v, INF_DIST)) {
