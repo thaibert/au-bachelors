@@ -90,8 +90,6 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
             g.getNeighboursOf(min_f.v).forEach(n -> {
                 double reduced_distance = n.distance - potentialForward(start, goal, min_f.v) + potentialForward(start, goal, n.v);
-                System.out.println("Origianal distance:       " + n.distance);
-                System.out.println("Reduced forward distance: " + reduced_distance);
                 double tent_gScore = dist_f.getOrDefault(min_f.v, INF_DIST) + reduced_distance;
 
                 // What exactly should be entered into the pq
@@ -113,11 +111,8 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
             g.getNeighboursOf(min_b.v).forEach(n -> {
                 
-                double reduced_distance = n.distance + potentialBackward(goal, start, n.v) - potentialBackward(goal, start, min_b.v);
+                double reduced_distance = n.distance - potentialBackward(start, goal, n.v) + potentialBackward(start, goal, min_b.v);
                 double tent_gScore = dist_b.getOrDefault(min_b.v, INF_DIST) + reduced_distance;
-                
-                System.out.println("Origianal distance:        " + n.distance);
-                System.out.println("Reduced backward distance: " + reduced_distance);
 
 
                 // What exactly should be entered into the pq
@@ -166,25 +161,35 @@ public class BidirectionalAstar implements PathfindingAlgo {
         Collections.reverse(out2);
         out2.addAll(out);
         
-        System.out.println(out2);
+        System.out.println(out);
 
+        System.out.println("      " + out.size() + " nodes");
         System.out.println("      " + out2.size() + " nodes");
+
         System.out.println("      " + edgesConsidered.size() + " edges considered");
         System.out.println("      " + comp.getComparisons() + " comparisons");
         System.out.println("      " + mu + " distance");
 
-        Solution solution = new Solution(out, edgesConsidered);
+        Solution solution = new Solution(out2, edgesConsidered);
 
         return solution;
     }
 
 
     private double potentialForward(Vertex start, Vertex goal, Vertex v){
+        if (v == goal) {
+            return 0;
+        }
+
         double est = (heuristic(v, goal) - heuristic(start, v))/2; 
         return est;
     }
 
     private double potentialBackward(Vertex start, Vertex goal, Vertex v){
+        if (v == start) {
+            return 0;
+        }
+
         double est = potentialForward(start, goal, v);
         return -est;
     }
@@ -212,7 +217,5 @@ public class BidirectionalAstar implements PathfindingAlgo {
         vis.drawVisited(solution.getVisited());
         vis.visualize("A* bidirectional");
     }
-    // 69.244900669
-    // 69.244900669
     
 }
