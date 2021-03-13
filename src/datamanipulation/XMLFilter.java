@@ -6,6 +6,8 @@ import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import javax.xml.stream.events.*;
 
+import org.apache.commons.compress.compressors.*;
+
 import java.util.*;
 
 public class XMLFilter {
@@ -20,6 +22,7 @@ public class XMLFilter {
 
 
     public static void filter(String osmFile, String outPrefix) {
+        long startTime, endTime;
         Map<String, List<String>> wayID_to_nds = new HashMap<>();
         Set<String> onewayStreets = new HashSet<>();
 
@@ -27,15 +30,22 @@ public class XMLFilter {
         Map<String, Integer> refsPerNode = new HashMap<>();
 
         int events = 0;
+        startTime = System.currentTimeMillis();
         try {
             System.out.println("--> 1st pass of " + osmFile);
             XMLInputFactory factory = XMLInputFactory.newInstance();
-            XMLEventReader eventReader = factory.createXMLEventReader(new FileReader(osmFile));
+            
+            FileInputStream fin = new FileInputStream(osmFile);
+            BufferedInputStream bis = new BufferedInputStream(fin);
+            InputStream bzip2 = new CompressorStreamFactory().createCompressorInputStream(bis);
+            
+            XMLEventReader eventReader = factory.createXMLEventReader(bzip2);
             
 
             String curr_wayID = "";
             boolean isCarRoad = false;
             List<String> curr_refs = new ArrayList<>();
+
 
             while(eventReader.hasNext()) {
                 events++;
@@ -105,11 +115,14 @@ public class XMLFilter {
                 // if (event.getEventType() == XMLStreamConstants.CHARACTERS) {//todo does it ever appear? }
             }
             System.out.println(); // The "progress bar" dots have no newline, so print one here.
+            bzip2.close();
 
         } catch(Exception e) {
             e.printStackTrace();
             return;
         }
+        endTime = System.currentTimeMillis();
+        System.out.printf("  --> first pass took %d seconds\n", (int) ((endTime-startTime)/1000));
         System.out.printf("  --> %10d events processed\n", events);
 
         Set<String> appears = new HashSet<>();
@@ -126,10 +139,16 @@ public class XMLFilter {
 
 
         // Run through again, this time get nodes out
+        startTime = System.currentTimeMillis();
         try {
             System.out.println("--> 2nd pass");
             XMLInputFactory factory = XMLInputFactory.newInstance();
-            XMLEventReader eventReader = factory.createXMLEventReader(new FileReader(osmFile));
+            
+            FileInputStream fin = new FileInputStream(osmFile);
+            BufferedInputStream bis = new BufferedInputStream(fin);
+            InputStream bzip2 = new CompressorStreamFactory().createCompressorInputStream(bis);
+            
+            XMLEventReader eventReader = factory.createXMLEventReader(bzip2);
 
             while(eventReader.hasNext()) {
                 XMLEvent event = eventReader.nextEvent();
@@ -152,15 +171,22 @@ public class XMLFilter {
                     }
                 }
             }
+            bzip2.close();
 
         } catch (Exception e) {
             e.printStackTrace();
             return;
         }
+        endTime = System.currentTimeMillis();
+
+        System.out.printf("  --> second pass took %d seconds\n", (int) ((endTime-startTime)/1000));
+
+
 
 
 
         // WRITE TO CSV
+        startTime = System.currentTimeMillis();
 
         System.out.println("--> Writing  " + outPrefix + "-all-roads.csv");
         File csv1 = new File(outPrefix + "-all-roads.csv");
@@ -200,11 +226,12 @@ public class XMLFilter {
             e.printStackTrace();
             return;
         }
+        endTime = System.currentTimeMillis();
+        System.out.printf("  --> writing took %d seconds\n", (int) ((endTime-startTime)/1000));
 
     }
 
     public static void main(String[] args) {
-        filter("denmark-latest.osm", "denmark");
-        // filter("aarhus-silkeborg.osm", "aarhus-silkeborg");
+        filter("denmark-latest.osm.bz2", "denmark");
     }
 }
