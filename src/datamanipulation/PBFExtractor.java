@@ -19,46 +19,118 @@ import crosby.binary.osmosis.OsmosisReader;
 
 public class PBFExtractor {
 
-    public static void main(String[] args) throws FileNotFoundException {
-        String filePrefix = "denmark-latest";
+    public static final String FILE_PREFIX = "denmark-latest";
+    public static final int NODES_PER_CHUNK = (int) 1e6;
+    // 1e6 = 1 000 000 nodes per chunk gives ~12mb chunk files and 32mb csv files
 
 
-        InputStream inputStream1 = new FileInputStream(filePrefix + ".osm.pbf");
-        OsmosisReader reader1 = new OsmosisReader(inputStream1);
-        FirstPassSink firstPass =  new FirstPassSink();
+    public static void main(String[] args) {
+        System.out.println("Starting 1st pass");
+        FirstPassSink firstPass = firstPass(FILE_PREFIX);
 
-        long start = System.currentTimeMillis();
-        reader1.setSink(firstPass);
-        reader1.run();
-        long time = (System.currentTimeMillis() - start) / 1000;
-        System.out.printf("1st pass took %d seconds\n", time);
-
-
-
-
-/*
-        InputStream inputStream2 = new FileInputStream(filePrefix + ".osm.pbf");
-        OsmosisReader reader2 = new OsmosisReader(inputStream2);
-        SecondPassSink secondPass = new SecondPassSink(firstPass);
-
-        start = System.currentTimeMillis();
-        reader2.setSink(secondPass);
-        reader2.run();
-        time = (System.currentTimeMillis() - start) / 1000;
-        System.out.printf("2nd pass took %d seconds\n", time);
-        writeToCSV(filePrefix, secondPass);
-        */
-
-
-
+        System.out.println("Starting 2nd pass");
+        secondPass(FILE_PREFIX, firstPass);
 
         System.out.println("done");
     }
 
-    private static void writeToCSV(String outPrefix, SecondPassSink secondPass) {
-        System.out.println("Writing to csv");
-        System.out.println("--> Writing  " + outPrefix + "-all-roads.csv");
-        File csv1 = new File(outPrefix + "-all-roads.csv");
+    private static FirstPassSink firstPass(String filePrefix) {
+        // Stream the pbf file and pass it to the FirstPassSink
+        // This class handles chunking the saved ways and node ids
+
+        InputStream inputStream = null;
+        try{
+            inputStream = new FileInputStream(filePrefix + ".osm.pbf");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+        OsmosisReader pbfReader = new OsmosisReader(inputStream);
+        FirstPassSink firstPass =  new FirstPassSink();
+        
+
+        long start = System.currentTimeMillis();
+        pbfReader.setSink(firstPass);
+        pbfReader.run();
+        long time = (System.currentTimeMillis() - start) / 1000;
+        System.out.printf("1st pass took %d seconds\n", time);
+
+        System.out.println("Created " + firstPass.getChunksCreated() + " chunks");
+        return firstPass;
+    }
+
+    private static void secondPass(String filePrefix, FirstPassSink firstPass) {
+        // For each generated chunk of node IDs, stream the pbf file once. 
+        // For each chunk, fill the data structures that SecondPassSink needs with the given data
+        // For now just a simple BufferedReader and string manipulation
+        // When the Sink is done, save a csv file corresponding to the chunk.
+        
+        for (int i = 0; i < firstPass.getChunksCreated(); i++) {
+            
+            InputStream chunkStream = null;
+            try{
+                chunkStream = new FileInputStream("out/" + filePrefix + "-chunk"+i);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                return;
+            }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(chunkStream));
+
+            Map<String, List<String>> wayIDtoNodeIDs = new HashMap<>();
+            Set<String> onewayStreets = new HashSet<>();
+
+            try {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // System.out.println(line);
+                    // Lines coming in like:
+                    // wayID:oneway,node1,node2,node3
+                    // where node1 etc. are node IDs
+
+                    String[] split = line.split(":");
+                    String wayID = split[0];
+                    String onewayAndNodes = split[1];
+
+                    split = onewayAndNodes.split(",");
+                    String oneway = split[0];
+                    if ("1".equals(oneway)) {
+                        onewayStreets.add(wayID);
+                    }
+
+                    List<String> nodeIDs = new ArrayList<>();
+                    for (int node = 1; node < split.length; node++) {
+                        nodeIDs.add(split[node]);
+                    }
+
+                    wayIDtoNodeIDs.put(wayID, nodeIDs);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            // Data has been read in now, pass it on to the Sink!
+            InputStream inputStream = null;
+            try {
+                inputStream = new FileInputStream(filePrefix + ".osm.pbf");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                return;
+            }
+            OsmosisReader pbfReader = new OsmosisReader(inputStream);
+            SecondPassSink secondPass = new SecondPassSink(wayIDtoNodeIDs, onewayStreets);
+
+            long start = System.currentTimeMillis();
+            System.out.print("  " + i + ": ");
+            pbfReader.setSink(secondPass);
+            pbfReader.run();
+            long time = (System.currentTimeMillis() - start) / 1000;
+            System.out.printf("chunk %d took %d seconds\n", i, time);
+            writeToCSV("out/" + filePrefix + "-roads" + i + ".csv", secondPass);
+        }
+    }
+
+    private static void writeToCSV(String filename, SecondPassSink secondPass) {
+        File csv1 = new File(filename);
 
         try (PrintWriter pw = new PrintWriter(csv1)) {
             pw.write("lat,lon,wayID,oneway,\n");
@@ -88,9 +160,9 @@ class FirstPassSink implements Sink {
     private static Collection<String> roundabouts = Arrays.asList(
         new String[]{"roundabout", "mini-roundabout", "circular"} );
 
-    static final int NODES_PER_CHUNK = (int) 1e6;
     private int nodesBuffered = 0;
     private int currentChunk = 0;
+    private final int nodesPerChunk = PBFExtractor.NODES_PER_CHUNK;
 
     // Map<String, Collection<String>> nodesInWays = new HashMap<>(); // nodeID -> set(wayID)
     // Map<String, List<String>> wayIDtoNodeID = new HashMap<>(); // wayID -> List(nodeID)
@@ -171,7 +243,7 @@ class FirstPassSink implements Sink {
             System.out.println("Unknown Entity!: " + entityContainer.getEntity().toString());
         }
 
-        if (nodesBuffered > NODES_PER_CHUNK) {
+        if (nodesBuffered > nodesPerChunk) {
             // Reached size limit, write to file.
             saveChunk();
         }
@@ -188,12 +260,13 @@ class FirstPassSink implements Sink {
 
     private void saveChunk() {
         new File("out/").mkdir(); // make the out/ dir if it isn't already present
-        System.out.println("  chunk " + currentChunk);
+        System.out.print(currentChunk); // mix it in with the dots :)
 
         String out_dir = "out/";
-        File csv1 = new File(out_dir + "denmark-latest" + "-chunk" + currentChunk);
+        String filePrefix = PBFExtractor.FILE_PREFIX;
+        File csv = new File(out_dir + filePrefix + "-chunk" + currentChunk);
 
-        try (PrintWriter pw = new PrintWriter(csv1)) {
+        try (PrintWriter pw = new PrintWriter(csv)) {
             pw.write("wayID:oneway,nodeID,nodeID,...\n");
             
             buffer.forEach((wayID, nodeIDs) -> {
@@ -216,6 +289,10 @@ class FirstPassSink implements Sink {
         buffer = new HashMap<>();
         onewayStreets = new HashSet<>();
     }
+
+    public int getChunksCreated() {
+        return this.currentChunk;
+    }
 }
 
 
@@ -229,11 +306,9 @@ class SecondPassSink implements Sink {
 
     int iterations = 0;
 
-    public SecondPassSink(FirstPassSink firstPass) {
-        // Copy required data from first pass
-        onewayStreets = firstPass.onewayStreets;
-        // nodesInWays = firstPass.nodesInWays;
-        wayIDtoNodeID = firstPass.wayIDtoNodeID;
+    public SecondPassSink(Map<String, List<String>> wayIDtoNodeIDs, Set<String> onewayStreets) {
+        this.onewayStreets = onewayStreets;
+        this.wayIDtoNodeID = wayIDtoNodeIDs;
 
         nodeIDtoCoords = new HashMap<>();
         nodesInHighways = new HashSet<>();
@@ -242,7 +317,6 @@ class SecondPassSink implements Sink {
         for (List<String> nodes : wayIDtoNodeID.values()) {
             nodesInHighways.addAll(nodes);
         }
-        System.out.println("Done creating secondpasssink");
     }
  
     @Override
@@ -273,7 +347,7 @@ class SecondPassSink implements Sink {
 
         } else if (entityContainer instanceof WayContainer || entityContainer instanceof RelationContainer) {
         } else {
-            System.out.println("Unknown Entity!: " + entityContainer.getEntity().toString());
+            // System.out.println("Unknown Entity!: " + entityContainer.getEntity().toString());
         }
     }
  
