@@ -35,6 +35,8 @@ public class PBFExtractor {
 
 
 
+
+/*
         InputStream inputStream2 = new FileInputStream(filePrefix + ".osm.pbf");
         OsmosisReader reader2 = new OsmosisReader(inputStream2);
         SecondPassSink secondPass = new SecondPassSink(firstPass);
@@ -44,8 +46,11 @@ public class PBFExtractor {
         reader2.run();
         time = (System.currentTimeMillis() - start) / 1000;
         System.out.printf("2nd pass took %d seconds\n", time);
-
         writeToCSV(filePrefix, secondPass);
+        */
+
+
+
 
         System.out.println("done");
     }
@@ -83,8 +88,13 @@ class FirstPassSink implements Sink {
     private static Collection<String> roundabouts = Arrays.asList(
         new String[]{"roundabout", "mini-roundabout", "circular"} );
 
+    static final int NODES_PER_CHUNK = (int) 1e6;
+    private int nodesBuffered = 0;
+    private int currentChunk = 0;
+
     // Map<String, Collection<String>> nodesInWays = new HashMap<>(); // nodeID -> set(wayID)
-    Map<String, List<String>> wayIDtoNodeID = new HashMap<>(); // wayID -> List(nodeID)
+    // Map<String, List<String>> wayIDtoNodeID = new HashMap<>(); // wayID -> List(nodeID)
+    Map<String, List<String>> buffer = new HashMap<>();  // wayID -> list(nodeID)
     Set<String> onewayStreets = new HashSet<>();
 
     int iterations = 0;
@@ -135,7 +145,9 @@ class FirstPassSink implements Sink {
                     .map((WayNode wn) -> Long.toString(wn.getNodeId()))
                     .collect(Collectors.toList());
 
-                wayIDtoNodeID.put(curr_wayID, nodes);
+                // wayIDtoNodeID.put(curr_wayID, nodes);
+                buffer.put(curr_wayID, nodes);
+                nodesBuffered += nodes.size();
 
                 // // Get nodeIDs of all refs in this way, put them in a list.
                 // way.getWayNodes().forEach((WayNode wn) -> {
@@ -158,6 +170,11 @@ class FirstPassSink implements Sink {
         } else {
             System.out.println("Unknown Entity!: " + entityContainer.getEntity().toString());
         }
+
+        if (nodesBuffered > NODES_PER_CHUNK) {
+            // Reached size limit, write to file.
+            saveChunk();
+        }
     }
  
     @Override
@@ -166,6 +183,38 @@ class FirstPassSink implements Sink {
  
     @Override
     public void close() {
+        saveChunk(); // flush the rest
+    }
+
+    private void saveChunk() {
+        new File("out/").mkdir(); // make the out/ dir if it isn't already present
+        System.out.println("  chunk " + currentChunk);
+
+        String out_dir = "out/";
+        File csv1 = new File(out_dir + "denmark-latest" + "-chunk" + currentChunk);
+
+        try (PrintWriter pw = new PrintWriter(csv1)) {
+            pw.write("wayID:oneway,nodeID,nodeID,...\n");
+            
+            buffer.forEach((wayID, nodeIDs) -> {
+                String nodes = "";
+                for (String nodeID : nodeIDs) {
+                    nodes = nodes + "," + nodeID;
+                }
+                pw.write(wayID + ":" 
+                    + (onewayStreets.contains(wayID) ? 1 : 0)
+                    + nodes
+                    + "\n");
+            });
+            
+        } catch(Exception e) {
+            System.out.println("--> " + e);
+            return;
+        }
+        currentChunk++;
+        nodesBuffered = 0;
+        buffer = new HashMap<>();
+        onewayStreets = new HashSet<>();
     }
 }
 
