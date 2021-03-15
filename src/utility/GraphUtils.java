@@ -37,6 +37,20 @@ public class GraphUtils {
         return bestSoFar;
     }
 
+    public static Vertex findNearestVertex(Graph g, Vertex v) {
+        Collection<Vertex> vertices = g.getAllVertices();
+
+        Vertex bestSoFar = null;
+        double bestDist = Double.MAX_VALUE;
+        for (Vertex u : vertices) {
+            if (haversineDist(u, v) < bestDist) {
+                bestSoFar = u;
+                bestDist = haversineDist(u, v);
+            }
+        }
+        return bestSoFar;
+    }
+
     public static double haversineDist(Vertex a, Vertex b) {
         double radius = 6371000; // ~6371 km
         double DEGREES_TO_RADIANS = Math.PI / 360;
