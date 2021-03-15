@@ -92,5 +92,66 @@ public class GraphUtils {
         }
         return sum;
     }
+
+    public static Graph pruneGraphOfChains(Graph g) {
+        Graph g_inv = invertGraph(g);
+        Collection<Vertex> vertices = g.getAllVertices();
+        Iterator<Vertex> it = vertices.iterator();
+
+        Set<Vertex> removed = new HashSet<>();
+
+        while (it.hasNext()) {
+            Vertex curr = it.next();
+
+            Collection<Neighbor> incoming = g_inv.getNeighboursOf(curr);
+            Collection<Neighbor> outgoing = g.getNeighboursOf(curr);
+            if (incoming.size() == 1 || outgoing.size() == 1) {
+                // We're a middle link in a chain
+                Neighbor in = incoming.iterator().next();
+                Neighbor out = outgoing.iterator().next();
+
+                removed.add(curr);
+
+                // Find start of chain
+                double distBack = 0;
+                Neighbor potentialLinkBefore = in; // neighbor on inverted graph
+                while (g_inv.getNeighboursOf(potentialLinkBefore.v).size() == 1
+                    && g.getNeighboursOf(potentialLinkBefore.v).size() == 1
+                    && ! g_inv.getNeighboursOf(potentialLinkBefore.v).equals(g.getNeighboursOf(potentialLinkBefore.v))) {
+                        // Looking at a node with 1 in, 1 out, and in != out.
+                        // found another middle link
+                        distBack += potentialLinkBefore.distance;
+                        removed.add(potentialLinkBefore.v);
+                        potentialLinkBefore = g_inv.getNeighboursOf(potentialLinkBefore.v).iterator().next();
+                }
+                distBack += potentialLinkBefore.distance;
+                Neighbor chainStart = potentialLinkBefore;
+
+                // Find end of chain
+                double distForward = 0;
+                Neighbor potentialLinkAfter = out; // neighbor on normal graph
+                while (g_inv.getNeighboursOf(potentialLinkAfter.v).size() == 1
+                    && g.getNeighboursOf(potentialLinkAfter.v).size() == 1
+                    && ! g_inv.getNeighboursOf(potentialLinkAfter.v).equals(g.getNeighboursOf(potentialLinkAfter.v))) {
+                        // Looking at a node with 1 in, 1 out, and in != out.
+                        // found another middle link
+                        distForward += potentialLinkAfter.distance;
+                        removed.add(potentialLinkAfter.v);
+                        potentialLinkAfter = g.getNeighboursOf(potentialLinkAfter.v).iterator().next();
+                }
+                distForward += potentialLinkBefore.distance;
+                Neighbor chainEnd = potentialLinkBefore;
+
+                double chainDist = distBack + distForward;
+                // TODO: we have start -> end now with the real dist.
+                // What to do next? Add to new graph?
+
+
+            }
+            // todo undirected chain: check if incoming == outgoing != empty?
+        }
+
+        return null;
+    }
     
 }
