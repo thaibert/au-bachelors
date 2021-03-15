@@ -178,7 +178,7 @@ class SecondPassSink implements Sink {
     Map<String, String> nodeIDtoCoords;
     Set<String> nodesInHighways;
 
-    int events = 0;
+    int iterations = 0;
 
     public SecondPassSink(FirstPassSink firstPass) {
         // Copy required data from first pass
@@ -202,6 +202,11 @@ class SecondPassSink implements Sink {
     
     @Override
     public void process(EntityContainer entityContainer) {
+        iterations++;
+        if (iterations % 1e6 == 0) {
+            System.out.print(".");
+        }
+
         if (entityContainer instanceof NodeContainer) {
 
             Node node = ((NodeContainer) entityContainer).getEntity();
@@ -215,10 +220,6 @@ class SecondPassSink implements Sink {
                 float lon = (float) node.getLongitude();
                 String latlon = lat + "," + lon;
                 nodeIDtoCoords.put(nodeID, latlon);
-            }
-
-            if (nodeIDtoCoords.keySet().size() % (nodesInHighways.size()/10) == 0) {
-                // TODO progress bar in percent?
             }
 
         } else if (entityContainer instanceof WayContainer || entityContainer instanceof RelationContainer) {
