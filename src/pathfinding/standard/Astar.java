@@ -90,7 +90,7 @@ public class Astar implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-intersectionsg.csv");
 
         Vertex a = new Vertex(56.0999867,9.582729);
         Vertex b = new Vertex(56.1636085,10.1177374);
