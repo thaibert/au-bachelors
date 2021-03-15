@@ -26,6 +26,7 @@ hs_err_pid*
 
 *.osm
 *.bz2
+*.pbf
 *.svg
 *.csv
 *.png
