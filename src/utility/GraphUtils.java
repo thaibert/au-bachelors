@@ -94,19 +94,45 @@ public class GraphUtils {
     }
 
     public static Graph pruneGraphOfChains(Graph g) {
+        System.out.println("pruning graph");
         Graph g_inv = invertGraph(g);
         Collection<Vertex> vertices = g.getAllVertices();
         Iterator<Vertex> it = vertices.iterator();
 
+        System.out.println("  inverted graph, starting now");
+
         Set<Vertex> removed = new HashSet<>();
 
+        Graph newGraph = new SimpleGraph();
+
+        int iterations = 0;
         while (it.hasNext()) {
+            iterations++;
+            if (iterations % 100000 == 0) {
+                System.out.print(".");
+            }
+
+
             Vertex curr = it.next();
+            
+            if (removed.contains(curr)) {
+                // We have pruned this node - loop again
+                continue;
+            }
 
             Collection<Neighbor> incoming = g_inv.getNeighboursOf(curr);
             Collection<Neighbor> outgoing = g.getNeighboursOf(curr);
-            if (incoming.size() == 1 || outgoing.size() == 1) {
-                // We're a middle link in a chain
+
+            boolean isMiddleLink = incoming.size() == 1 
+                                && outgoing.size() == 1
+                                && ! incoming.equals(outgoing);
+            
+            if (! isMiddleLink) {
+                // A normal node
+
+
+            } else {
+                // We're a middle link in a chain!
                 Neighbor in = incoming.iterator().next();
                 Neighbor out = outgoing.iterator().next();
 
@@ -115,11 +141,17 @@ public class GraphUtils {
                 // Find start of chain
                 double distBack = 0;
                 Neighbor potentialLinkBefore = in; // neighbor on inverted graph
+                int links = 0;
                 while (g_inv.getNeighboursOf(potentialLinkBefore.v).size() == 1
                     && g.getNeighboursOf(potentialLinkBefore.v).size() == 1
-                    && ! g_inv.getNeighboursOf(potentialLinkBefore.v).equals(g.getNeighboursOf(potentialLinkBefore.v))) {
+                    && ! g_inv.getNeighboursOf(potentialLinkBefore.v).equals(g.getNeighboursOf(potentialLinkBefore.v))
+                    && ! removed.contains(potentialLinkBefore.v)) {
                         // Looking at a node with 1 in, 1 out, and in != out.
                         // found another middle link
+                        links++;
+                        if (links > 1000) {
+                            System.out.println(potentialLinkBefore.v); // Todo remove debug code
+                        }
                         distBack += potentialLinkBefore.distance;
                         removed.add(potentialLinkBefore.v);
                         potentialLinkBefore = g_inv.getNeighboursOf(potentialLinkBefore.v).iterator().next();
@@ -130,28 +162,68 @@ public class GraphUtils {
                 // Find end of chain
                 double distForward = 0;
                 Neighbor potentialLinkAfter = out; // neighbor on normal graph
+                links = 0;
                 while (g_inv.getNeighboursOf(potentialLinkAfter.v).size() == 1
                     && g.getNeighboursOf(potentialLinkAfter.v).size() == 1
-                    && ! g_inv.getNeighboursOf(potentialLinkAfter.v).equals(g.getNeighboursOf(potentialLinkAfter.v))) {
+                    && ! g_inv.getNeighboursOf(potentialLinkAfter.v).equals(g.getNeighboursOf(potentialLinkAfter.v))
+                    && ! removed.contains(potentialLinkAfter.v)) {
                         // Looking at a node with 1 in, 1 out, and in != out.
                         // found another middle link
+                        links++;
+                        if (links > 1000) {
+                            System.out.println(links); // todo remove debug code
+                        }
                         distForward += potentialLinkAfter.distance;
                         removed.add(potentialLinkAfter.v);
                         potentialLinkAfter = g.getNeighboursOf(potentialLinkAfter.v).iterator().next();
                 }
-                distForward += potentialLinkBefore.distance;
-                Neighbor chainEnd = potentialLinkBefore;
+                distForward += potentialLinkAfter.distance;
+                Neighbor chainEnd = potentialLinkAfter;
 
                 double chainDist = distBack + distForward;
-                // TODO: we have start -> end now with the real dist.
-                // What to do next? Add to new graph?
 
+                // System.out.println("chain: " + chainStart.v + "-->" + chainEnd.v + "    dist: " + chainDist);
+                if (chainDist < haversineDist(chainStart.v, chainEnd.v)) {
+                    System.out.println(chainDist + " < " + haversineDist(chainStart.v, chainEnd.v));
+                    System.out.println("  " + chainStart.v + "-->" + chainEnd.v);
+                }
 
+                newGraph.addVertex(chainStart.v);
+                newGraph.addVertex(chainEnd.v);
+                newGraph.addEdge(chainStart.v, chainEnd.v, chainDist);
             }
             // todo undirected chain: check if incoming == outgoing != empty?
         }
 
-        return null;
+        // All nodes that were removed have been marked.
+        // Now copy everything else over
+        it = vertices.iterator();
+        System.out.println("  copying intersections over");
+
+        while (it.hasNext()) {
+            Vertex curr = it.next();
+
+            if (removed.contains(curr)) {
+                continue;
+            }
+
+            newGraph.addVertex(curr);
+            for (Neighbor n : g.getNeighboursOf(curr)) {
+                if (! removed.contains(n.v)) {
+                    newGraph.addVertex(n.v);
+                    newGraph.addEdge(curr, n.v, n.distance);
+                }
+            }
+
+        }
+
+
+
+        System.out.println("\nnodes: " + g.getAllVertices().size());
+        System.out.println("pruned: " + removed.size());
+        System.out.println("new graph: " + newGraph.getAllVertices().size());
+
+        return newGraph;
     }
     
 }
