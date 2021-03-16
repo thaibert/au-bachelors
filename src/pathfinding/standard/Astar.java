@@ -90,15 +90,15 @@ public class Astar implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-latest-roads.csv");
 
-        Vertex a = new Vertex(56.0999867,9.582729);
-        Vertex b = new Vertex(56.1636085,10.1177374);
+        Vertex a = GraphUtils.findNearestVertex(graph,Location.Skagen);
+        Vertex b = GraphUtils.findNearestVertex(graph,Location.CPH);
 
         Astar d = new Astar(graph);
-        Solution solution = d.shortestPath(Location.Viborgvej, Location.Randersvej);
+        Solution solution = d.shortestPath(a, b);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.intersection);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("A*");

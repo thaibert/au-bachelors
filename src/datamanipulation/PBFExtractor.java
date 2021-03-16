@@ -27,9 +27,15 @@ public class PBFExtractor {
     public static void main(String[] args) {
         System.out.println("Starting 1st pass");
         FirstPassSink firstPass = firstPass(FILE_PREFIX);
+        int chunks = firstPass.getChunksCreated();
 
         System.out.println("Starting 2nd pass");
-        secondPass(FILE_PREFIX, firstPass);
+        secondPass(FILE_PREFIX, chunks);
+
+
+        System.out.println("Combining in 1 csv file");
+        combineCSVs(chunks);
+        
 
         System.out.println("done");
     }
@@ -59,13 +65,13 @@ public class PBFExtractor {
         return firstPass;
     }
 
-    private static void secondPass(String filePrefix, FirstPassSink firstPass) {
+    private static void secondPass(String filePrefix, int chunks) {
         // For each generated chunk of node IDs, stream the pbf file once. 
         // For each chunk, fill the data structures that SecondPassSink needs with the given data
         // For now just a simple BufferedReader and string manipulation
         // When the Sink is done, save a csv file corresponding to the chunk.
-        
-        for (int i = 0; i < firstPass.getChunksCreated(); i++) {
+
+        for (int i = 0; i < chunks; i++) {
             
             InputStream chunkStream = null;
             try{
@@ -80,7 +86,7 @@ public class PBFExtractor {
             Set<String> onewayStreets = new HashSet<>();
 
             try {
-                String line;
+                String line = reader.readLine(); // skip first header line
                 while ((line = reader.readLine()) != null) {
                     // System.out.println(line);
                     // Lines coming in like:
@@ -104,6 +110,7 @@ public class PBFExtractor {
 
                     wayIDtoNodeIDs.put(wayID, nodeIDs);
                 }
+                reader.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -129,6 +136,33 @@ public class PBFExtractor {
         }
     }
 
+    private static void combineCSVs(int no_of_chunks) {
+        File csv = new File(FILE_PREFIX + "-roads.csv");
+
+        try (PrintWriter pw = new PrintWriter(csv)) {
+            pw.write("lat,lon,wayID,oneway,\n");
+            for (int i = 0; i < no_of_chunks; i++) {
+                InputStream chunkStream = null;
+                try{
+                    chunkStream = new FileInputStream("out/" + FILE_PREFIX + "-roads"+i + ".csv");
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                BufferedReader reader = new BufferedReader(new InputStreamReader(chunkStream));
+                String line = reader.readLine(); // skip header line
+                while ((line = reader.readLine()) != null) {
+                    pw.write(line + "\n");
+                }
+                reader.close();
+            }
+            
+        } catch(Exception e) {
+            System.out.println("--> " + e);
+            return;
+        }
+    }
+
     private static void writeToCSV(String filename, SecondPassSink secondPass) {
         File csv1 = new File(filename);
 
@@ -138,6 +172,10 @@ public class PBFExtractor {
             secondPass.wayIDtoNodeID.forEach((wayID, nodes) -> {
                 for (String nodeID : nodes) {
                     String latlon = secondPass.nodeIDtoCoords.get(nodeID);
+                    if (latlon == null) {
+                        System.out.println("null!!!");
+                        System.out.println("way " + wayID + "   " + nodes);
+                    }
                     int oneway = secondPass.onewayStreets.contains(wayID) ? 1 : 0;
 
                     pw.write(latlon + "," + wayID + "," + oneway + ",\n");
