@@ -20,15 +20,16 @@ import crosby.binary.osmosis.OsmosisReader;
 public class PBFExtractor {
 
     public static final String FILE_PREFIX = "denmark-latest";
-    public static final int NODES_PER_CHUNK = (int) 1e6;
+    public static final int NODES_PER_CHUNK = (int) 2e7;
     // 1e6 = 1 000 000 nodes per chunk gives ~12mb chunk files and 32mb csv files
 
 
     public static void main(String[] args) {
         System.out.println("Starting 1st pass");
-        FirstPassSink firstPass = firstPass(FILE_PREFIX);
-        int chunks = firstPass.getChunksCreated();
+        //FirstPassSink firstPass = firstPass(FILE_PREFIX);
+        //int chunks = firstPass.getChunksCreated();
 
+        int chunks = 1;
         System.out.println("Starting 2nd pass");
         secondPass(FILE_PREFIX, chunks);
 

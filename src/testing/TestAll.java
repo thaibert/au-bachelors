@@ -128,7 +128,8 @@ public class TestAll {
 
 
     public static void main(String[] args) {
-        Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph g = GraphPopulatorV2.populateGraph("europe-210314-roads.csv");
+        Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
         algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g);
         algos[DIJKSTRA_OURS] = new Dijkstra(g);
