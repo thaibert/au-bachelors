@@ -75,14 +75,14 @@ public class BidirectionalAstar implements PathfindingAlgo {
             // TODO early exit?
 
             if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= 
-                mu + potentialBackward(goal, start, start) + potentialForward(start, goal, goal) ) {
+                mu + potentialBackward(goal, start, start) + potentialForward(start, goal, goal) + 1000000 ) {
                 System.out.println("min_f.dist + min_b.dist = " + (dist_f.get(min_f.v) + dist_b.get(min_b.v)));
                 //System.out.println("pb(start, goal, goal)   = " + potentialBackward(start, goal, goal));
                 //System.out.println("hav(goal,goal)          = " + GraphUtils.haversineDist(goal, goal));
                 //System.out.println("hav(start,goal)         = " + GraphUtils.haversineDist(start, goal));
                 System.out.println("pf(start,goal,goal)     = " +  potentialForward(start, goal, start));
 
-                System.out.println("mu + potentialBackward  = " + (mu + potentialBackward(goal, start, goal) + potentialForward(start, goal, goal) ));
+                System.out.println("mu + potentialBackward  = " + (mu + potentialBackward(goal, start, start) + potentialForward(start, goal, goal) ));
                 System.out.println("Entered exit");
                 break;
             }
@@ -95,7 +95,7 @@ public class BidirectionalAstar implements PathfindingAlgo {
                 // What exactly should be entered into the pq
                 double potentialNewFscore = tent_gScore + potentialForward(start, goal, n.v);
 
-                edgesConsidered.add(new Edge(min_f.v, n.v, potentialNewFscore));
+                edgesConsidered.add(new Edge(min_f.v, n.v, tent_gScore));
                 if (tent_gScore < dist_f.getOrDefault(n.v, INF_DIST)) {
                     pred_f.put(n.v, min_f.v);
                     dist_f.put(n.v, tent_gScore);
