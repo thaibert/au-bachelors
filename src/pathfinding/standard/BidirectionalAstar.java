@@ -89,11 +89,11 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
 
             g.getNeighboursOf(min_f.v).forEach(n -> {
-                double reduced_distance = n.distance - potentialForward(start, goal, min_f.v) + potentialForward(start, goal, n.v);
+                double reduced_distance = n.distance;
                 double tent_gScore = dist_f.getOrDefault(min_f.v, INF_DIST) + reduced_distance;
 
                 // What exactly should be entered into the pq
-                double potentialNewFscore = tent_gScore + heuristic(n.v, goal);
+                double potentialNewFscore = tent_gScore + potentialForward(start, goal, n.v);
 
                 edgesConsidered.add(new Edge(min_f.v, n.v, potentialNewFscore));
                 if (tent_gScore < dist_f.getOrDefault(n.v, INF_DIST)) {
@@ -111,12 +111,12 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
             g.getNeighboursOf(min_b.v).forEach(n -> {
                 
-                double reduced_distance = n.distance - potentialBackward(start, goal, n.v) + potentialBackward(start, goal, min_b.v);
+                double reduced_distance = n.distance;
                 double tent_gScore = dist_b.getOrDefault(min_b.v, INF_DIST) + reduced_distance;
 
 
                 // What exactly should be entered into the pq
-                double potentialNewFscore = tent_gScore + heuristic(n.v, start);
+                double potentialNewFscore = tent_gScore + potentialBackward(start, goal, n.v);
 
                 edgesConsidered.add(new Edge(min_b.v, n.v, potentialNewFscore));
                 if (tent_gScore < dist_b.getOrDefault(n.v, INF_DIST)) {
