@@ -75,7 +75,7 @@ public class BidirectionalAstar implements PathfindingAlgo {
             // TODO early exit?
 
             if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= 
-                mu + potentialBackward(goal, start, start) + potentialForward(start, goal, goal) + 1000000 ) {
+                mu + potentialBackward(goal, start, start) + potentialForward(start, goal, goal) ) {
                 System.out.println("min_f.dist + min_b.dist = " + (dist_f.get(min_f.v) + dist_b.get(min_b.v)));
                 //System.out.println("pb(start, goal, goal)   = " + potentialBackward(start, goal, goal));
                 //System.out.println("hav(goal,goal)          = " + GraphUtils.haversineDist(goal, goal));
@@ -97,10 +97,15 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
                 edgesConsidered.add(new Edge(min_f.v, n.v, tent_gScore));
                 if (tent_gScore < dist_f.getOrDefault(n.v, INF_DIST)) {
+                    System.out.println("Added to forward prio que");
+
                     pred_f.put(n.v, min_f.v);
                     dist_f.put(n.v, tent_gScore);
 
                     pq_f.add(new Pair(n.v, potentialNewFscore));
+                }
+                else {
+                    System.out.println("Did not add to forward prio que");
                 }
 
                 if (s_b.contains(n.v) && dist_f.get(min_f.v) + reduced_distance + dist_b.get(n.v) < mu) {
@@ -109,7 +114,7 @@ public class BidirectionalAstar implements PathfindingAlgo {
                 }
             });
 
-            g.getNeighboursOf(min_b.v).forEach(n -> {
+            ginv.getNeighboursOf(min_b.v).forEach(n -> {
                 
                 double reduced_distance = n.distance;
                 double tent_gScore = dist_b.getOrDefault(min_b.v, INF_DIST) + reduced_distance;
@@ -120,10 +125,14 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
                 edgesConsidered.add(new Edge(min_b.v, n.v, potentialNewFscore));
                 if (tent_gScore < dist_b.getOrDefault(n.v, INF_DIST)) {
+                    System.out.println("Added to backward prio que");
                     pred_b.put(n.v, min_b.v);
                     dist_b.put(n.v, tent_gScore);
 
                     pq_b.add(new Pair(n.v, potentialNewFscore));
+                }
+                else {
+                    System.out.println("Did not add to backward prio que");
                 }
 
                 if (s_f.contains(n.v) && dist_b.get(min_b.v) + reduced_distance + dist_f.get(n.v) < mu) {
