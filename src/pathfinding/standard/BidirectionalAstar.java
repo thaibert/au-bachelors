@@ -75,14 +75,15 @@ public class BidirectionalAstar implements PathfindingAlgo {
             // TODO early exit?
 
             if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= 
-                mu + potentialBackward(goal, start, start) + potentialForward(start, goal, goal) ) {
+                mu + potentialBackward(start, goal, goal)) {
                 System.out.println("min_f.dist + min_b.dist = " + (dist_f.get(min_f.v) + dist_b.get(min_b.v)));
                 //System.out.println("pb(start, goal, goal)   = " + potentialBackward(start, goal, goal));
                 //System.out.println("hav(goal,goal)          = " + GraphUtils.haversineDist(goal, goal));
                 //System.out.println("hav(start,goal)         = " + GraphUtils.haversineDist(start, goal));
-                System.out.println("pf(start,goal,goal)     = " +  potentialForward(start, goal, start));
+                System.out.println("pf(start,goal,goal)     = " + potentialForward(start, goal, goal));
+                System.out.println("pb(start, goal, goal)   = " + potentialBackward(start, goal, goal));
 
-                System.out.println("mu + potentialBackward  = " + (mu + potentialBackward(goal, start, start) + potentialForward(start, goal, goal) ));
+                System.out.println("mu + potentialBackward  = " + (mu + potentialBackward(goal, start, start)));
                 System.out.println("Entered exit");
                 break;
             }
@@ -186,18 +187,13 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
 
     private double potentialForward(Vertex start, Vertex goal, Vertex v){
-        if (v == goal) {
-            return 0;
-        }
 
         double est = (heuristic(v, goal) - heuristic(start, v))/2; 
         return est;
     }
 
     private double potentialBackward(Vertex start, Vertex goal, Vertex v){
-        if (v == start) {
-            return 0;
-        }
+
 
         double est = potentialForward(start, goal, v);
         return -est;
