@@ -117,10 +117,14 @@ public class Dijkstra implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-all-roads.csv");
+
+
+        Vertex a = new Vertex(56.0443399,9.9034907);
+        Vertex b = new Vertex(56.1799122,9.5522613);
 
         PathfindingAlgo d = new Dijkstra(graph);
-        Solution solution = d.shortestPath(Location.Silkeborg, Location.Randersvej);
+        Solution solution = d.shortestPath(Location.Skagen, Location.CPH);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());

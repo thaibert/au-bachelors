@@ -14,12 +14,14 @@ public class TestAll {
     static final int DIJKSTRA_BIDIRECTIONAL = 2;
     static final int ASTAR = 3;
     static final int ALT = 4;
+    static final int ASTAR_BIDIRECTIONAL = 5;
 
     static String[] names = new String[]{"TradDijk   ", 
                                          "OurDijk    ", 
                                          "BidirecDijk", 
                                          "A*         ",
-                                         "ALT        "};
+                                         "ALT        ",
+                                         "BidrecAstar"};
     static int numAlgos = names.length;
 
     static PathfindingAlgo[] algos = new PathfindingAlgo[numAlgos];
@@ -128,14 +130,15 @@ public class TestAll {
 
 
     public static void main(String[] args) {
-        Graph g = GraphPopulatorV2.populateGraph("europe-210314-roads.csv");
-        Graph gpruned = GraphUtils.pruneGraphOfChains(g);
+        Graph g = GraphPopulatorV2.populateGraph("aarhus-silkeborg-intersections.csv");
+        //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
         algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g);
         algos[DIJKSTRA_OURS] = new Dijkstra(g);
         algos[ASTAR] = new Astar(g);
         algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
         algos[ALT] = new ALT(g, 5); // TODO how many landmarks
+        algos[ASTAR_BIDIRECTIONAL] = new BidirectionalAstar(g);
 
         int runs = (int) 1e3;
 

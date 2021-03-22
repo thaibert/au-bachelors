@@ -98,15 +98,11 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
                 edgesConsidered.add(new Edge(min_f.v, n.v, tent_gScore));
                 if (tent_gScore < dist_f.getOrDefault(n.v, INF_DIST)) {
-                    System.out.println("Added to forward prio que");
 
                     pred_f.put(n.v, min_f.v);
                     dist_f.put(n.v, tent_gScore);
 
                     pq_f.add(new Pair(n.v, potentialNewFscore));
-                }
-                else {
-                    System.out.println("Did not add to forward prio que");
                 }
 
                 if (s_b.contains(n.v) && dist_f.get(min_f.v) + reduced_distance + dist_b.get(n.v) < mu) {
@@ -124,16 +120,12 @@ public class BidirectionalAstar implements PathfindingAlgo {
                 // What exactly should be entered into the pq
                 double potentialNewFscore = tent_gScore + potentialBackward(start, goal, n.v);
 
-                edgesConsidered.add(new Edge(min_b.v, n.v, potentialNewFscore));
+                edgesConsidered.add(new Edge(min_b.v, n.v, tent_gScore));
                 if (tent_gScore < dist_b.getOrDefault(n.v, INF_DIST)) {
-                    System.out.println("Added to backward prio que");
                     pred_b.put(n.v, min_b.v);
                     dist_b.put(n.v, tent_gScore);
 
                     pq_b.add(new Pair(n.v, potentialNewFscore));
-                }
-                else {
-                    System.out.println("Did not add to backward prio que");
                 }
 
                 if (s_f.contains(n.v) && dist_b.get(min_b.v) + reduced_distance + dist_f.get(n.v) < mu) {
@@ -207,7 +199,7 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
     public static void main(String[] args) {
         // We need to be able to utilize the inverted graph, so for now we ignore space efficiency and just create 2 graphs
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-all-roads.csv");
 
 
         Vertex a = new Vertex(56.1570293,9.814296);
@@ -215,9 +207,9 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
 
         BidirectionalAstar d = new BidirectionalAstar(graph);
-        Solution solution = d.shortestPath(Location.Viborgvej, Location.Randersvej);
+        Solution solution = d.shortestPath(Location.Skagen, Location.CPH);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Aarhus);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("A* bidirectional");

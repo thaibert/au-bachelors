@@ -245,15 +245,15 @@ public class ALT implements PathfindingAlgo {
 
     
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-all-roads.csv");
 
-        Vertex a = new Vertex(56.2323578,10.1029619);
-        Vertex b = new Vertex(56.1540562,10.1826677);
+        Vertex a = new Vertex(56.0440049,9.9025227);
+        Vertex b = new Vertex(56.1814955,10.2042923);
 
         PathfindingAlgo d = new ALT(graph, 5);
-        Solution solution = d.shortestPath(a, b);
+        Solution solution = d.shortestPath(Location.Skagen, Location.CPH);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("ALT");
