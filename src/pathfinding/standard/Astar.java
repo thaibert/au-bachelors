@@ -48,7 +48,7 @@ public class Astar implements PathfindingAlgo {
                 double tent_gScore = dist.getOrDefault(min.v, INF_DIST) + n.distance;
                 double potentialNewFscore = tent_gScore + heuristic(n.v, goal);
 
-                edgesConsidered.add(new Edge(min.v, n.v, potentialNewFscore));
+                edgesConsidered.add(new Edge(min.v, n.v, tent_gScore));
                 if (tent_gScore < dist.getOrDefault(n.v, INF_DIST)) {
                     pred.put(n.v, min.v);
                     dist.put(n.v, tent_gScore);
@@ -81,7 +81,6 @@ public class Astar implements PathfindingAlgo {
 
         Solution solution = new Solution(out, edgesConsidered);
 
-        System.out.println(out);
 
 
         return solution;
@@ -97,7 +96,7 @@ public class Astar implements PathfindingAlgo {
         Vertex b = new Vertex(56.1814955,10.2042923);
 
         Astar d = new Astar(graph);
-        Solution solution = d.shortestPath(Location.Skagen, Location.CPH);
+        Solution solution = d.shortestPath(Location.Esbjerg, Location.CPH);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());

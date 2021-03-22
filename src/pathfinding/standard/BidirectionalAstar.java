@@ -163,7 +163,6 @@ public class BidirectionalAstar implements PathfindingAlgo {
         Collections.reverse(out2);
         out2.addAll(out);
         
-        System.out.println(out);
 
         System.out.println("      " + out.size() + " nodes");
         System.out.println("      " + out2.size() + " nodes");
@@ -207,7 +206,7 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
 
         BidirectionalAstar d = new BidirectionalAstar(graph);
-        Solution solution = d.shortestPath(Location.Skagen, Location.CPH);
+        Solution solution = d.shortestPath(Location.Esbjerg, Location.CPH);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());
