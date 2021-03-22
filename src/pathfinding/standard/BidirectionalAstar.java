@@ -72,18 +72,10 @@ public class BidirectionalAstar implements PathfindingAlgo {
             s_f.add(min_f.v); 
             s_b.add(min_b.v);
 
-            // TODO early exit?
+            // TODO Something about not exploring the same nodes in forward and backwards search?
 
             if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= 
                 mu + potentialBackward(start, goal, goal)) {
-                System.out.println("min_f.dist + min_b.dist = " + (dist_f.get(min_f.v) + dist_b.get(min_b.v)));
-                //System.out.println("pb(start, goal, goal)   = " + potentialBackward(start, goal, goal));
-                //System.out.println("hav(goal,goal)          = " + GraphUtils.haversineDist(goal, goal));
-                //System.out.println("hav(start,goal)         = " + GraphUtils.haversineDist(start, goal));
-                System.out.println("pf(start,goal,goal)     = " + potentialForward(start, goal, goal));
-                System.out.println("pb(start, goal, goal)   = " + potentialBackward(start, goal, goal));
-
-                System.out.println("mu + potentialBackward  = " + (mu + potentialBackward(goal, start, start)));
                 System.out.println("Entered exit");
                 break;
             }
