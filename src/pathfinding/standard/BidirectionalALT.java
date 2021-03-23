@@ -103,12 +103,11 @@ public class BidirectionalALT implements PathfindingAlgo{
             s_f.add(min_f.v); 
             s_b.add(min_b.v);
 
-            //TODO early stop
-            if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= 
-            mu /*+ potentialBackward(start, goal, goal)*/) {
-            System.out.println("Entered exit");
-            break;
-        }
+            //TODO is this early stop right???
+            if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= mu*2) {
+                System.out.println("Entered exit");
+                break;
+            }
 
             for (Neighbor n : graph.getNeighboursOf(min_f.v)) {
                 // RELAX
@@ -316,11 +315,11 @@ public class BidirectionalALT implements PathfindingAlgo{
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
-        Vertex a = new Vertex(56.0440049,9.9025227);
-        Vertex b = new Vertex(56.1814955,10.2042923);
+        Vertex a = new Vertex(56.1378248, 10.1709604);
+        Vertex b = new Vertex(56.1899393, 10.1083791);
 
         PathfindingAlgo d = new BidirectionalALT(graph, 5);
-        Solution solution = d.shortestPath(Location.Silkeborg, Location.Randersvej);
+        Solution solution = d.shortestPath(b, a);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
