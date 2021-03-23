@@ -129,6 +129,7 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
         }
 
+        // Get out the shortest path
         System.out.println("  --> backtracking solution");
         List<Vertex> out = new ArrayList<>();
 
