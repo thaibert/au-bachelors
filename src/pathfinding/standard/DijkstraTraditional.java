@@ -95,7 +95,7 @@ public class DijkstraTraditional implements PathfindingAlgo {
         System.out.println("      " + out.size() + " nodes");
         System.out.println("      " + edgesConsidered.size() + " edges considered");
         System.out.println("      " + comp.getComparisons() + " comparisons");
-        System.out.println("      " + bestDist.get(goal));
+        System.out.println("      " + bestDist.get(goal) + " distance");
 
         Solution solution = new Solution(out, edgesConsidered);
 
@@ -106,14 +106,13 @@ public class DijkstraTraditional implements PathfindingAlgo {
 
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
-
-        Vertex a = new Vertex(56.1578254, 10.0616485); // herningmotorvejen
-        Vertex b = new Vertex(56.1592914, 10.0695802); // afkørsel fra rundkørslen
+        Vertex a = new Vertex(56.1782273,10.2070914); 
+        Vertex b = new Vertex(56.2429053,9.8655351); 
 
         PathfindingAlgo d = new DijkstraTraditional(graph);
         Solution solution = d.shortestPath(a, b);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.GreaterAarhus);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("Dijkstra traditional");
