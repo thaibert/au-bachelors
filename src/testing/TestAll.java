@@ -15,13 +15,15 @@ public class TestAll {
     static final int ASTAR = 3;
     static final int ALT = 4;
     static final int ASTAR_BIDIRECTIONAL = 5;
+    static final int ALT_BIDIRECTIONAL = 6;
 
     static String[] names = new String[]{"TradDijk   ", 
                                          "OurDijk    ", 
                                          "BidirecDijk", 
                                          "A*         ",
                                          "ALT        ",
-                                         "BidrecAstar"};
+                                         "BidrecAstar",
+                                         "BidrecALT  "};
     static int numAlgos = names.length;
 
     static PathfindingAlgo[] algos = new PathfindingAlgo[numAlgos];
@@ -139,6 +141,7 @@ public class TestAll {
         algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
         algos[ALT] = new ALT(g, 5); // TODO how many landmarks
         algos[ASTAR_BIDIRECTIONAL] = new BidirectionalAstar(g);
+        algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, 5);  //TODO how many landmarks
 
         int runs = (int) 1e3;
 
