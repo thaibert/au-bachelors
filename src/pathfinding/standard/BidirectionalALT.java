@@ -94,7 +94,7 @@ public class BidirectionalALT implements PathfindingAlgo{
         while(pq_f.size() > 0 && pq_b.size() > 0){
             num++;
             if (num % 1000 == 0) {
-                System.out.println("    --> " + num);
+                //System.out.println("    --> " + num);
             }
 
             Pair min_f = pq_f.poll();
@@ -104,7 +104,7 @@ public class BidirectionalALT implements PathfindingAlgo{
             s_b.add(min_b.v);
 
             //TODO is this early stop right???
-            if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= mu*2) {
+            if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= mu) {
                 System.out.println("Entered exit");
                 break;
             }
@@ -143,7 +143,7 @@ public class BidirectionalALT implements PathfindingAlgo{
                     pred_b.put(n.v, min_b.v);
 
                     if (! s_b.contains(n.v)) {
-                        pq_b.add(new Pair(n.v, maybeNewBestDistance + pi_t(n.v, goal))); 
+                        pq_b.add(new Pair(n.v, maybeNewBestDistance + pi_t(n.v, start))); 
                     }
                 }
 
@@ -315,16 +315,16 @@ public class BidirectionalALT implements PathfindingAlgo{
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
-        Vertex a = new Vertex(56.1378248, 10.1709604);
-        Vertex b = new Vertex(56.1899393, 10.1083791);
+        Vertex a = new Vertex(56.1782273,10.2070914); 
+        Vertex b = new Vertex(56.2429053,9.8655351); 
 
         PathfindingAlgo d = new BidirectionalALT(graph, 5);
-        Solution solution = d.shortestPath(b, a);
+        Solution solution = d.shortestPath(a, b);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
-        vis.visualize("ALT");
+        vis.visualize("Bidirec ALT");
 
     }
     
