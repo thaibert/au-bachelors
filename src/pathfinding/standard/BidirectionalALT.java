@@ -60,6 +60,10 @@ public class BidirectionalALT implements PathfindingAlgo{
 
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
+        mu = INF_DIST;
+        bestVertex = null;
+
+        // Bailout and optimization of landmarks.
         reachableLandmarks = findReachableTo(start, goal);
         System.out.println(reachableLandmarks.size());
         if (reachableLandmarks.size() == 0) {
@@ -67,11 +71,92 @@ public class BidirectionalALT implements PathfindingAlgo{
             return new Solution(new ArrayList<>(), new ArrayList<>());
         }
 
+        dist_f = new HashMap<>();
+        pred_f = new HashMap<>();
+        dist_b = new HashMap<>();
+        pred_b = new HashMap<>();
+        s_f = new HashSet<>();
+        s_b = new HashSet<>();
 
-        //TODO the actual algorithm :D
+        edgesConsidered = new ArrayList<>();
+
+        dist_f.put(start, 0.0);
+        dist_b.put(goal, 0.0);
+
+        DistComparator comp = new DistComparator();
+        PriorityQueue<Pair> pq_f = new PriorityQueue<>(comp);
+        PriorityQueue<Pair> pq_b = new PriorityQueue<>(comp);
+
+        pq_f.add(new Pair(start, 0));
+        pq_b.add(new Pair(goal, 0));
+
+        int num = 0;
+        while(pq_f.size() > 0 && pq_b.size() > 0){
+            num++;
+            if (num % 1000 == 0) {
+                System.out.println("    --> " + num);
+            }
+
+            Pair min_f = pq_f.poll();
+            Pair min_b = pq_b.poll();
+
+            s_f.add(min_f.v); 
+            s_b.add(min_b.v);
+
+            //TODO early stop
+            if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= 
+            mu /*+ potentialBackward(start, goal, goal)*/) {
+            System.out.println("Entered exit");
+            break;
+        }
+
+            for (Neighbor n : graph.getNeighboursOf(min_f.v)) {
+                // RELAX
+                double maybeNewBestDistance = dist_f.get(min_f.v) + n.distance; // dist(s,v) + len(v,u)
+                double previousBestDistance = dist_f.getOrDefault(n.v, INF_DIST); // dist(s,u)
+
+                edgesConsidered.add(new Edge(min_f.v, n.v, maybeNewBestDistance));
+
+                if (maybeNewBestDistance < previousBestDistance) {
+                    dist_f.put(n.v, maybeNewBestDistance);
+                    pred_f.put(n.v, min_f.v);
+
+                    if (! s_f.contains(n.v)) {
+                        pq_f.add(new Pair(n.v, maybeNewBestDistance + pi_t(n.v, goal))); 
+                    }
+                }
+
+                if (s_b.contains(n.v) && maybeNewBestDistance + dist_b.get(n.v) < mu) {
+                    mu = maybeNewBestDistance + dist_b.get(n.v);
+                    bestVertex = n.v;
+                }
+            }
+
+            for (Neighbor n : ginv.getNeighboursOf(min_b.v)) {
+                // RELAX
+                double maybeNewBestDistance = dist_b.get(min_b.v) + n.distance; // dist(s,v) + len(v,u)
+                double previousBestDistance = dist_b.getOrDefault(n.v, INF_DIST); // dist(s,u)
+
+                edgesConsidered.add(new Edge(min_b.v, n.v, maybeNewBestDistance));
+
+                if (maybeNewBestDistance < previousBestDistance) {
+                    dist_b.put(n.v, maybeNewBestDistance);
+                    pred_b.put(n.v, min_b.v);
+
+                    if (! s_b.contains(n.v)) {
+                        pq_b.add(new Pair(n.v, maybeNewBestDistance + pi_t(n.v, goal))); 
+                    }
+                }
+
+                if (s_f.contains(n.v) && maybeNewBestDistance + dist_f.get(n.v) < mu) {
+                    mu = maybeNewBestDistance + dist_f.get(n.v);
+                    bestVertex = n.v;
+                }
+            }
+        }
 
 
-
+    
 
         // Get out the shortest path
         System.out.println("  --> backtracking solution");
@@ -114,6 +199,36 @@ public class BidirectionalALT implements PathfindingAlgo{
     }
 
 
+    private double pi_t(Vertex curr, Vertex goal) {
+
+        double max = -INF_DIST;
+        for (Vertex l : reachableLandmarks) {
+            Map<Vertex, Double> distTo = distanceToLandmark.get(l);
+            Map<Vertex, Double> distFrom = distanceFromLandmark.get(l);
+
+            if (! distTo.containsKey(curr)
+             || ! distFrom.containsKey(curr)) {
+                 // This node either cannot reach l, or cannot be reached by l.
+                 // So skip l, since the calculations wouldn't make sense.
+                continue;
+             }
+
+            // pi^l+ := dist(v, l) - dist(t, l)
+            double dist_vl = distTo.get(curr);
+            double dist_tl = distTo.get(goal);
+            double pi_plus = dist_vl - dist_tl;
+
+            // pi^l- := dist(l, t) - dist(l, v)
+            double dist_lt = distFrom.get(goal);
+            double dist_lv = distFrom.get(curr);
+            double pi_minus = dist_lt - dist_lv;
+
+            // System.out.println(dist_vl + "\n" + dist_tl + "\n" + dist_lt + "\n" + dist_lv + "\n\n");
+
+            max = Math.max(max, Math.max(pi_plus, pi_minus));
+        }
+        return max;
+    }
 
     private Collection<Vertex> findReachableTo(Vertex start, Vertex goal) {
         // Return all landmarks that can reach both start and goal.
@@ -199,15 +314,15 @@ public class BidirectionalALT implements PathfindingAlgo{
     }
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-all-roads.csv");
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
         Vertex a = new Vertex(56.0440049,9.9025227);
         Vertex b = new Vertex(56.1814955,10.2042923);
 
         PathfindingAlgo d = new BidirectionalALT(graph, 5);
-        Solution solution = d.shortestPath(Location.Skagen, Location.CPH);
+        Solution solution = d.shortestPath(Location.Silkeborg, Location.Randersvej);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("ALT");
