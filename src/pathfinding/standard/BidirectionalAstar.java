@@ -191,17 +191,16 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
     public static void main(String[] args) {
         // We need to be able to utilize the inverted graph, so for now we ignore space efficiency and just create 2 graphs
-        Graph graph = GraphPopulator.populateGraph("denmark-all-roads.csv");
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
-
-        Vertex a = new Vertex(56.1570293,9.814296);
-        Vertex b = new Vertex(56.1582726,9.8152893);
+        Vertex a = new Vertex(56.1336391,9.7235112);
+        Vertex b = new Vertex(56.1906785,10.0880127);
 
 
         BidirectionalAstar d = new BidirectionalAstar(graph);
-        Solution solution = d.shortestPath(Location.Esbjerg, Location.CPH);
+        Solution solution = d.shortestPath(a, b);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("A* bidirectional");

@@ -132,7 +132,7 @@ public class TestAll {
 
 
     public static void main(String[] args) {
-        Graph g = GraphPopulatorV2.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
         algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g);
