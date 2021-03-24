@@ -107,8 +107,8 @@ public class DijkstraTraditional implements PathfindingAlgo {
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
-        Vertex a = new Vertex(56.1440379,9.4941576); 
-        Vertex b = new Vertex(56.1888315,10.2230141); 
+        Vertex a = new Vertex(56.1336391,9.7235112);
+        Vertex b = new Vertex(56.1906785,10.0880127);
 
         PathfindingAlgo d = new DijkstraTraditional(graph);
         Solution solution = d.shortestPath(a, b);

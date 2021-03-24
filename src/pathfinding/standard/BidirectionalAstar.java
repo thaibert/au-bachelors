@@ -81,9 +81,13 @@ public class BidirectionalAstar implements PathfindingAlgo {
                 System.out.println("Entered exit");
                 break; 
             }*/
-
+            if (potentialForward(start, goal, min_f.v)+potentialBackward(start, goal, min_f.v) != 0){
+                System.out.println("pf - pb != 0");
+                System.out.println("diff : " + (potentialForward(start, goal, min_f.v)+potentialBackward(start, goal, min_f.v)));
+            }
             if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= 
                 mu + potentialBackward(start, goal, goal)) {
+                System.out.println("Potential added: " + potentialBackward(start, goal, goal));
                 System.out.println("Entered exit");
                 break;
             }
@@ -180,15 +184,15 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
     private double potentialForward(Vertex start, Vertex goal, Vertex v){
 
-        double est = (heuristic(v, goal) - heuristic(start, v))/2; 
+        double est = (heuristic(v, goal) - heuristic(start, v))/2 + heuristic(start, goal)/2; 
         return est;
     }
 
     private double potentialBackward(Vertex start, Vertex goal, Vertex v){
 
 
-        double est = potentialForward(start, goal, v);
-        return -est;
+        double est = (heuristic(start, v) - heuristic(v, goal))/2 + heuristic(start, goal)/2;
+        return est;
     }
 
     // TODO what is the heuristic suposed to be for bidirectional A*
