@@ -10,7 +10,8 @@ public class GraphPopulatorV2 {
     final static double radius = 6371000;
 
     public static Graph populateGraph(String filename) {
-        System.out.println("--> Populating graph");
+        System.out.println("--> Populating graph V2 DOES NOT WORK CURRENTLY");
+
         Graph graph = new SimpleGraph();
 
         addAll(filename, graph);
