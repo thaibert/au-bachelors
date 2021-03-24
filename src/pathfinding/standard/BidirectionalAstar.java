@@ -61,10 +61,10 @@ public class BidirectionalAstar implements PathfindingAlgo {
         int num = 0;
         while (pq_f.size() > 0 && pq_b.size() > 0) {
             // Testing purpose
-            num++;
-            if (num % 1000 == 0) {
-                System.out.println("    --> " + num);
-            }
+            //num++;
+            //if (num % 1000 == 0) {
+                //System.out.println("    --> " + num);
+            //}
 
             Pair min_f = pq_f.poll();
             Pair min_b = pq_b.poll();     
@@ -74,17 +74,8 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
             // TODO Something about not exploring the same nodes in forward and backwards search?
 
-            /*double distance_f = dist_f.get(min_f.v) + potentialForward(start, goal, min_f.v);
-            double distance_b = dist_b.get(min_b.v) + potentialBackward(start, goal, min_b.v);
 
-            if (distance_f >= mu || distance_b >= mu){
-                System.out.println("Entered exit");
-                break; 
-            }*/
-            if (potentialForward(start, goal, min_f.v)+potentialBackward(start, goal, min_f.v) != 0){
-                System.out.println("pf - pb != 0");
-                System.out.println("diff : " + (potentialForward(start, goal, min_f.v)+potentialBackward(start, goal, min_f.v)));
-            }
+            //TODO er det her rigtigt?
             if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= 
                 mu + potentialBackward(start, goal, goal)) {
                 System.out.println("Potential added: " + potentialBackward(start, goal, goal));
@@ -97,15 +88,16 @@ public class BidirectionalAstar implements PathfindingAlgo {
                 double reduced_distance = n.distance;
                 double tent_gScore = dist_f.getOrDefault(min_f.v, INF_DIST) + reduced_distance;
 
-                // What exactly should be entered into the pq
+                // TODO Is this the right thing added?
                 double potentialNewFscore = tent_gScore + potentialForward(start, goal, n.v);
 
-                edgesConsidered.add(new Edge(min_f.v, n.v, tent_gScore));
+                edgesConsidered.add(new Edge(min_f.v, n.v, potentialNewFscore));
                 if (tent_gScore < dist_f.getOrDefault(n.v, INF_DIST)) {
 
                     pred_f.put(n.v, min_f.v);
                     dist_f.put(n.v, tent_gScore);
 
+                    //TODO add selv hvis backward har set den her node?
                     pq_f.add(new Pair(n.v, potentialNewFscore));
                 }
 
@@ -121,14 +113,15 @@ public class BidirectionalAstar implements PathfindingAlgo {
                 double tent_gScore = dist_b.getOrDefault(min_b.v, INF_DIST) + reduced_distance;
 
 
-                // What exactly should be entered into the pq
-                double potentialNewFscore = tent_gScore + potentialBackward(start, goal, n.v);
+                // TODO Is this the right thing added?
+                double potentialNewFscore = tent_gScore + potentialBackward(start, goal, n.v) ;
 
-                edgesConsidered.add(new Edge(min_b.v, n.v, tent_gScore));
+                //edgesConsidered.add(new Edge(min_b.v, n.v, tent_gScore));
                 if (tent_gScore < dist_b.getOrDefault(n.v, INF_DIST)) {
                     pred_b.put(n.v, min_b.v);
                     dist_b.put(n.v, tent_gScore);
 
+                    //TODO add selv hvis forward har set den her node?
                     pq_b.add(new Pair(n.v, potentialNewFscore));
                 }
 
@@ -210,9 +203,9 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
 
         BidirectionalAstar d = new BidirectionalAstar(graph);
-        Solution solution = d.shortestPath(a, b);
+        Solution solution = d.shortestPath(Location.Viborgvej, Location.Randersvej);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Aarhus);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("A* bidirectional");
