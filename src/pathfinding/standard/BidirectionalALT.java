@@ -107,7 +107,7 @@ public class BidirectionalALT implements PathfindingAlgo{
             double distance_f = dist_f.get(min_f.v) + pi_t(min_f.v, goal);
             double distance_b = dist_b.get(min_b.v) + pi_t(min_b.v, start);
 
-            if (distance_b > mu && distance_f > mu) {
+            if (distance_b >= mu && distance_f >= mu) {
                 System.out.println("Entered exit");
                 break;
             }

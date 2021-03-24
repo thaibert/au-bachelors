@@ -74,6 +74,14 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
             // TODO Something about not exploring the same nodes in forward and backwards search?
 
+            /*double distance_f = dist_f.get(min_f.v) + potentialForward(start, goal, min_f.v);
+            double distance_b = dist_b.get(min_b.v) + potentialBackward(start, goal, min_b.v);
+
+            if (distance_f >= mu || distance_b >= mu){
+                System.out.println("Entered exit");
+                break; 
+            }*/
+
             if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= 
                 mu + potentialBackward(start, goal, goal)) {
                 System.out.println("Entered exit");
