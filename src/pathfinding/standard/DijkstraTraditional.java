@@ -26,23 +26,48 @@ public class DijkstraTraditional implements PathfindingAlgo {
         //      for each vertex v in G.Adj[u]
         //          Relax(u,v,w)   
 
+        /* Invariants:
+            All edges are non-negative
+            Q = V - S at the start of each iteration of the while loop
+            Each edge is extracted from Q and added to S exactly once 
+        */
 
+        Collection<Vertex> VminusS = new HashSet<>(g.getAllVertices()); 
 
         Map<Vertex, Double> bestDist = new HashMap<>();
+        bestDist.put(start, 0.0);
         Map<Vertex, Vertex> predecessor = new HashMap<>(); 
         List<Edge> edgesConsidered = new ArrayList<>();
 
         DistComparator comp = new DistComparator();
         PriorityQueue<Pair> pq = new PriorityQueue<>(comp);
 
+        Collection<Vertex> Q = new HashSet<>(g.getAllVertices()); // Initially all vertices are added
+        g.getAllVertices().stream()
+            .map(p -> new Pair(p, INF_DIST))
+            .forEach(p -> {
+                pq.add(p);
+                assert(p.dist >= 0); // All weights are non-negative
+            });
+        pq.remove(new Pair(start, INF_DIST)); // Update start's weight
         pq.add(new Pair(start, 0));
 
-        //g.getAllVertices().stream()
-        //    .map(v -> new Pair(v, INF_DIST))
-        //    .forEach(pq::add);
+        assert(pq.peek() != null && pq.peek().dist >= 0); // All weights are non-negative
+
         
         int iterations = 0;
         while (pq.size() > 0) {
+            {
+                // INVARIANT CHECK: Q = V - S
+                // Q: vertices in the priority queue
+                // V: set of all vertices in the graph
+                // S: set of all vertices whose shortest path has been found
+
+                // Q = V - S   equiv to    Q \subset V - S   &&   V - S \subset Q
+                assert(Q.containsAll(VminusS)); // V-S \subset Q
+                assert(VminusS.containsAll(Q)); // Q \subset V-S
+            }
+
             iterations++;
 
             if (iterations % 1000 == 0) {
@@ -50,6 +75,13 @@ public class DijkstraTraditional implements PathfindingAlgo {
             }
 
             Pair head = pq.poll();
+            Q.remove(head.v);
+            assert(head != null && head.dist >= 0); // All weights are non-negative
+
+            assert(VminusS.contains(head.v)); // Each edge is only extracted once; v \in V-S ==> v \notin S
+            VminusS.remove(head.v); // Put v in S ==> V-S loses v
+
+            
 
             if (head.v.equals(goal)) {
                 System.out.println("  --> Finished early at " + iterations);
@@ -66,11 +98,16 @@ public class DijkstraTraditional implements PathfindingAlgo {
                     edgesConsidered.add(new Edge(head.v, n.v, maybeNewBestDistance));
 
                     if (maybeNewBestDistance < previousBestDistance) {
+                        // Update v.d and v.pi
                         bestDist.put(n.v, maybeNewBestDistance);
                         predecessor.put(n.v, head.v);
+                        
+                        // Remove pair of (v, oldDist) and insert (v, newDist) instead
+                        pq.remove(new Pair(n.v, previousBestDistance));
 
-                        // put back in PQ with new dist, but leave the old, "wrong" dist in there too.
-                        pq.add(new Pair(n.v, maybeNewBestDistance)); 
+                        Pair newPair = new Pair(n.v, maybeNewBestDistance);
+                        pq.add(newPair);
+                        assert(newPair.dist >= 0); 
                     }
                 });
         }
