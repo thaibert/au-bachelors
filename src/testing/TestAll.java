@@ -84,7 +84,7 @@ public class TestAll {
         boolean[] solutionsEqual = new boolean[numAlgos];
         boolean hasDifference = false;
         for (int i = 0; i < numAlgos; i++) {
-            boolean isEqual = solutions[0].getShortestPath().equals(solutions[i].getShortestPath());
+            boolean isEqual = solutions[DIJKSTRA_TRADITIONAL].getShortestPath().equals(solutions[i].getShortestPath());
             solutionsEqual[i] = isEqual;
             if (! isEqual) {
                 hasDifference = true;
