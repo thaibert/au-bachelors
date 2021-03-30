@@ -84,7 +84,7 @@ public class TestAll {
         boolean[] solutionsEqual = new boolean[numAlgos];
         boolean hasDifference = false;
         for (int i = 0; i < numAlgos; i++) {
-            boolean isEqual = solutions[0].getShortestPath().equals(solutions[i].getShortestPath());
+            boolean isEqual = solutions[DIJKSTRA_TRADITIONAL].getShortestPath().equals(solutions[i].getShortestPath());
             solutionsEqual[i] = isEqual;
             if (! isEqual) {
                 hasDifference = true;
@@ -95,9 +95,9 @@ public class TestAll {
         if (hasDifference) {
             System.out.println(" not equal!");
 
-            List<Vertex> path = solutions[0].getShortestPath();
+            List<Vertex> path = solutions[DIJKSTRA_TRADITIONAL].getShortestPath();
             System.out.printf("%s has %5d nodes and a distance of %8.2f meters\n", 
-                names[0], 
+                names[DIJKSTRA_TRADITIONAL], 
                 path.size(), 
             GraphUtils.pathDistance(path));
 
@@ -127,6 +127,7 @@ public class TestAll {
                 System.out.println(e);
             }
         }
+        System.out.print("  [" + solutions[DIJKSTRA_TRADITIONAL].getShortestPath().size() + " nodes]");
         System.out.println();   
     }
 
@@ -145,6 +146,7 @@ public class TestAll {
 
         int runs = (int) 1e3;
 
+        System.out.println();
         for (int i = 0; i < runs; i++) {
             System.out.print(" -> " + i);
             try {
