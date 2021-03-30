@@ -30,11 +30,17 @@ public class BidirectionalAstar implements PathfindingAlgo {
     private Vertex bestVertex; 
     private double mu;
 
+    //TODO testing something
+    boolean phaseTwo;
+
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
         // TODO Auto-generated method stub
         mu = INF_DIST;
         bestVertex = null;
+
+        //TODO testing something
+        phaseTwo = false;
   
 
         dist_f = new HashMap<>();
@@ -83,6 +89,10 @@ public class BidirectionalAstar implements PathfindingAlgo {
                 break;
             }
 
+            if (mu != INF_DIST) {
+                System.out.println("Just testing early terminating points!");
+                phaseTwo = true;
+            }
 
             g.getNeighboursOf(min_f.v).forEach(n -> {
                 double reduced_distance = n.distance;
@@ -91,14 +101,16 @@ public class BidirectionalAstar implements PathfindingAlgo {
                 // TODO Is this the right thing added?
                 double potentialNewFscore = tent_gScore + potentialForward(start, goal, n.v);
 
-                edgesConsidered.add(new Edge(min_f.v, n.v, potentialNewFscore));
+                edgesConsidered.add(new Edge(min_f.v, n.v, tent_gScore));
                 if (tent_gScore < dist_f.getOrDefault(n.v, INF_DIST)) {
 
                     pred_f.put(n.v, min_f.v);
                     dist_f.put(n.v, tent_gScore);
 
                     //TODO add selv hvis backward har set den her node?
-                    pq_f.add(new Pair(n.v, potentialNewFscore));
+                    if(!phaseTwo) {
+                        pq_f.add(new Pair(n.v, potentialNewFscore));
+                    }
                 }
 
                 if (s_b.contains(n.v) && dist_f.get(min_f.v) + reduced_distance + dist_b.get(n.v) < mu) {
@@ -116,13 +128,15 @@ public class BidirectionalAstar implements PathfindingAlgo {
                 // TODO Is this the right thing added?
                 double potentialNewFscore = tent_gScore + potentialBackward(start, goal, n.v) ;
 
-                //edgesConsidered.add(new Edge(min_b.v, n.v, tent_gScore));
+                edgesConsidered.add(new Edge(min_b.v, n.v, tent_gScore));
                 if (tent_gScore < dist_b.getOrDefault(n.v, INF_DIST)) {
                     pred_b.put(n.v, min_b.v);
                     dist_b.put(n.v, tent_gScore);
 
                     //TODO add selv hvis forward har set den her node?
-                    pq_b.add(new Pair(n.v, potentialNewFscore));
+                    if (!phaseTwo) {
+                        pq_b.add(new Pair(n.v, potentialNewFscore));
+                    }
                 }
 
                 if (s_f.contains(n.v) && dist_b.get(min_b.v) + reduced_distance + dist_f.get(n.v) < mu) {
@@ -184,7 +198,7 @@ public class BidirectionalAstar implements PathfindingAlgo {
     private double potentialBackward(Vertex start, Vertex goal, Vertex v){
 
 
-        double est = (heuristic(start, v) - heuristic(v, goal))/2 + heuristic(start, goal)/2;
+        double est = (heuristic(start, v) - heuristic(v, goal))/2 + heuristic(start, goal)/2;;
         return est;
     }
 
@@ -198,14 +212,17 @@ public class BidirectionalAstar implements PathfindingAlgo {
         // We need to be able to utilize the inverted graph, so for now we ignore space efficiency and just create 2 graphs
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
-        Vertex a = new Vertex(56.1336391,9.7235112);
-        Vertex b = new Vertex(56.1906785,10.0880127);
+        //Vertex a = new Vertex(56.1336391,9.7235112);
+        //Vertex b = new Vertex(56.1906785,10.0880127);
 
+        //56.0337, 56.2794, 9.4807, 10.259
 
+        Vertex a = GraphUtils.findNearestVertex(graph, 56.0337, 9.4807);
+        Vertex b = GraphUtils.findNearestVertex(graph, 56.2794, 10.259);
         BidirectionalAstar d = new BidirectionalAstar(graph);
-        Solution solution = d.shortestPath(Location.Viborgvej, Location.Randersvej);
+        Solution solution = d.shortestPath(a, b);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Aarhus);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("A* bidirectional");
