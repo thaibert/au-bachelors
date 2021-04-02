@@ -4,6 +4,8 @@ import graph.*;
 import java.util.*;
 
 public class GraphUtils {
+    private static final double INF_DIST = Double.MAX_VALUE;
+
 
     public static Graph invertGraph(Graph g) {
         Collection<Vertex> vertices = g.getAllVertices();
@@ -226,4 +228,86 @@ public class GraphUtils {
         return newGraph;
     }
     
+
+
+    public static List<Map<Vertex, Map<Vertex, Double>>> randomLandmarks(Graph g, int noOfLandmarks){
+        Graph ginv = invertGraph(g);
+
+        Map<Vertex, Map<Vertex, Double>> distanceToLandmark = new HashMap<>();
+        Map<Vertex, Map<Vertex, Double>> distanceFromLandmark = new HashMap<>();
+
+        List<Vertex> landmarks = new ArrayList<>();  
+
+        for (int i = 0; i < noOfLandmarks; i++) {
+            landmarks.add(GraphUtils.pickRandomVertex(g));
+        }
+
+
+        landmarks.forEach( l -> {
+            System.out.print(".");
+            Map<Vertex, Double> normal = dijkstra(g, l);
+            Map<Vertex, Double> inv = dijkstra(ginv, l);
+
+            distanceFromLandmark.put(l, normal);
+            distanceToLandmark.put(l, inv);
+        });
+
+        ArrayList<Map<Vertex, Map<Vertex, Double>>> temp = new ArrayList<Map<Vertex, Map<Vertex, Double>>>();
+        temp.add(distanceToLandmark);
+        temp.add(distanceFromLandmark);
+
+        return temp;
+    }
+
+
+
+    public static Map<Vertex, Double> dijkstra(Graph g, Vertex start){
+
+        //  Pseudocode from CLRS
+        //  Initialize-Single-Source(G, s) (s = source)
+        //  S = Ø
+        //  Q = G.V
+        //  While Q != Ø
+        //      u = Extract-Min(Q)    
+        //      S = S U {u}
+        //      for each vertex v in G.Adj[u]
+        //          Relax(u,v,w)   
+
+
+
+        Map<Vertex, Double> bestDist = new HashMap<>();
+
+        DistComparator comp = new DistComparator();
+        PriorityQueue<Pair> pq = new PriorityQueue<>(comp);
+
+        pq.add(new Pair(start, 0));
+        
+        Map<Vertex, Double> shortest = new HashMap<>();
+
+        while (pq.size() > 0) {
+
+            Pair head = pq.poll();
+            if (head.dist < shortest.getOrDefault(head.v, INF_DIST)) {
+                shortest.put(head.v, head.dist);
+            }
+
+
+            g.getNeighboursOf(head.v)
+                .forEach(n -> {
+                    // RELAX
+
+                    double maybeNewBestDistance = head.dist + n.distance;
+                    double previousBestDistance = bestDist.getOrDefault(n.v, INF_DIST);
+
+                    if (maybeNewBestDistance < previousBestDistance) {
+                        bestDist.put(n.v, maybeNewBestDistance);
+
+                        // put back in PQ with new dist, but leave the old, "wrong" dist in there too.
+                        pq.add(new Pair(n.v, maybeNewBestDistance)); 
+                    }
+                });
+        }
+        return shortest;
+    }
 }
+
