@@ -25,24 +25,18 @@ public class ALT implements PathfindingAlgo {
     public ALT(Graph graph, int noLandmarks) {
         this.graph = graph;
 
-        Graph ginv = GraphUtils.invertGraph(graph);
-
-        List<Vertex> landmarks = landmark(graph, noLandmarks);
         // List<Vertex> landmarks = new ArrayList<>();
         // landmarks.add(GraphUtils.findNearestVertex(graph, 56.21684389259911, 9.517964491806737));
         // landmarks.add(new Vertex(56.0929669, 10.0084564));
 
-        distanceToLandmark = new HashMap<>();
-        distanceFromLandmark = new HashMap<>();
 
-        landmarks.forEach( l -> {
-            System.out.print(".");
-            Map<Vertex, Double> normal = dijkstra(graph, l);
-            Map<Vertex, Double> inv = dijkstra(ginv, l);
 
-            distanceFromLandmark.put(l, normal);
-            distanceToLandmark.put(l, inv);
-        });
+        // in the list is two maps, to and from
+        List<Map<Vertex, Map<Vertex, Double>>> landmarks = GraphUtils.randomLandmarks(graph, noLandmarks);
+
+        distanceToLandmark = landmarks.get(0);
+        distanceFromLandmark = landmarks.get(1);
+
     }
 
     @Override
