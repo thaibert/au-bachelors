@@ -82,17 +82,19 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
 
             //TODO er det her rigtigt?
-            if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= 
+            /*if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= 
                 mu + potentialBackward(start, goal, goal)) {
                 System.out.println("Potential added: " + potentialBackward(start, goal, goal));
                 System.out.println("Entered exit");
                 break;
-            }
+            }*/
 
             if (mu != INF_DIST) {
-                System.out.println("Just testing early terminating points!");
+                //System.out.println("Just testing early terminating points!");
                 phaseTwo = true;
             }
+
+
 
             g.getNeighboursOf(min_f.v).forEach(n -> {
                 double reduced_distance = n.distance;
@@ -112,10 +114,13 @@ public class BidirectionalAstar implements PathfindingAlgo {
                         pq_f.add(new Pair(n.v, potentialNewFscore));
                     }
                 }
-
-                if (s_b.contains(n.v) && dist_f.get(min_f.v) + reduced_distance + dist_b.get(n.v) < mu) {
-                    mu = dist_f.get(min_f.v) + reduced_distance + dist_b.get(n.v);
-                    bestVertex = n.v;
+                
+                if (s_b.contains(n.v) ) {
+                    double newBest = dist_f.get(min_f.v) + reduced_distance + dist_b.get(n.v);
+                    if (newBest < mu) {
+                        mu = newBest;
+                        bestVertex = n.v;
+                    }
                 }
             });
 
@@ -139,9 +144,12 @@ public class BidirectionalAstar implements PathfindingAlgo {
                     }
                 }
 
-                if (s_f.contains(n.v) && dist_b.get(min_b.v) + reduced_distance + dist_f.get(n.v) < mu) {
-                    mu = dist_b.get(min_b.v) + reduced_distance + dist_f.get(n.v);
-                    bestVertex = n.v;
+                if (s_f.contains(n.v)) {
+                    double newBest = dist_b.get(min_b.v) + reduced_distance + dist_f.get(n.v);
+                    if (newBest < mu) {
+                        mu = newBest;
+                        bestVertex = n.v;
+                    }
                 }
 
             });
@@ -175,7 +183,6 @@ public class BidirectionalAstar implements PathfindingAlgo {
         Collections.reverse(out2);
         out2.addAll(out);
         
-
         System.out.println("      " + out.size() + " nodes");
         System.out.println("      " + out2.size() + " nodes");
 
@@ -209,7 +216,6 @@ public class BidirectionalAstar implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        // We need to be able to utilize the inverted graph, so for now we ignore space efficiency and just create 2 graphs
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
         //Vertex a = new Vertex(56.1336391,9.7235112);
