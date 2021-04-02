@@ -218,7 +218,7 @@ public class NBA implements PathfindingAlgo{
         }
     }
 
-    // Think 1 is enough, but i'm honestly unsure if this one is consistent as they mention it should be in the text on it.
+    // TODO Think 1 is enough, but i'm honestly unsure if this one is consistent as they mention it should be in the text on it.
     public double hf(Vertex v, Vertex to){
         // TODO
         return GraphUtils.haversineDist(v, to);
