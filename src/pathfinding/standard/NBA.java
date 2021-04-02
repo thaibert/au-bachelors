@@ -218,6 +218,7 @@ public class NBA implements PathfindingAlgo{
         }
     }
 
+    // Think 1 is enough, but i'm honestly unsure if this one is consistent as they mention it should be in the text on it.
     public double hf(Vertex v, Vertex to){
         // TODO
         return GraphUtils.haversineDist(v, to);
@@ -231,7 +232,7 @@ public class NBA implements PathfindingAlgo{
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-all-roads.csv");
 
         //Vertex a = new Vertex(56.1336391,9.7235112);
         //Vertex b = new Vertex(56.1906785,10.0880127);
@@ -241,9 +242,9 @@ public class NBA implements PathfindingAlgo{
         Vertex a = GraphUtils.findNearestVertex(graph, 56.0337, 9.4807);
         Vertex b = GraphUtils.findNearestVertex(graph, 56.2794, 10.259);
         NBA d = new NBA(graph);
-        Solution solution = d.shortestPath(a, b);
+        Solution solution = d.shortestPath(Location.Skagen, Location.CPH);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("A* bidirectional");
