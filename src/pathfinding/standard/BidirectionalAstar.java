@@ -231,6 +231,8 @@ public class BidirectionalAstar implements PathfindingAlgo {
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
+        vis.drawMeetingNode(solution.getMeetingNode());
+
         vis.visualize("A* bidirectional");
     }
     
