@@ -81,7 +81,7 @@ public class Dijkstra implements PathfindingAlgo {
 
         if (pred.get(goal) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered);
+            return new Solution(new ArrayList<>(), edgesConsidered, null);
         }
 
         Vertex temp = goal;
@@ -94,7 +94,7 @@ public class Dijkstra implements PathfindingAlgo {
         System.out.println("      " + edgesConsidered.size() + " edges considered");
         System.out.println("      " + comp.getComparisons() + " comparisons");
 
-        Solution solution = new Solution(out, edgesConsidered);
+        Solution solution = new Solution(out, edgesConsidered, null);
 
         return solution;
     }

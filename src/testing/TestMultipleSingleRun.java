@@ -65,29 +65,28 @@ public class TestMultipleSingleRun {
         } catch(Exception e) {
             System.setOut(originalStream);
             e.printStackTrace();
-            Solution emptySolution = new Solution(new ArrayList<>(), new ArrayList<>());
+            Solution emptySolution = new Solution(new ArrayList<>(), new ArrayList<>(), null);
             for (int i = 0; i < numAlgos; i++) {
                 solutions[i] = emptySolution;
             }
         }
 
+        System.setOut(originalStream);
+
         boolean[] solutionsEqual = new boolean[numAlgos];
-        boolean hasDifference = false;
         for (int i = 0; i < numAlgos; i++) {
             boolean isEqual = solutions[DIJKSTRA_TRADITIONAL].getShortestPath().equals(solutions[i].getShortestPath());
             solutionsEqual[i] = isEqual;
         }
 
         // TODO wrap so only on when assertions are on
-        System.out.println(" not equal!");
-
         List<Vertex> path = solutions[DIJKSTRA_TRADITIONAL].getShortestPath();
         System.out.printf("%s has %5d nodes and a distance of %8.2f meters\n", 
             names[DIJKSTRA_TRADITIONAL], 
             path.size(), 
         GraphUtils.pathDistance(path));
 
-        
+
         // Draw them and print if something is different
         for (int i = 0; i < numAlgos; i++) {
             if (! solutionsEqual[i]) {
@@ -100,10 +99,10 @@ public class TestMultipleSingleRun {
             GraphVisualiser vis2 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
             vis2.drawVisited(solutions[i].getVisited());
             vis2.drawPath(solutions[i].getShortestPath());
+            vis2.drawMeetingNode(solutions[i].getMeetingNode());
             vis2.visualize(names[i]);
         }
 
-        System.out.print("  [" + solutions[DIJKSTRA_TRADITIONAL].getShortestPath().size() + " nodes]");
         System.out.println();
 
 
@@ -122,25 +121,23 @@ public class TestMultipleSingleRun {
         algos[ASTAR_BIDIRECTIONAL] = new NBA(g);
         algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, 5);  //TODO how many landmarks
 
-        double sec = 1e9; // nanoseconds per second
 
         Vertex a = Location.Silkeborg;
         Vertex b = Location.Viborgvej;
 
         testMultipleSingleRun(g, a, b);
 
-        System.out.println("[*] Done!");
+        // Print info about the runs
+        double sec = 1e9; // nanoseconds per second
 
+        System.out.println("[*] Done!");
         for (int i = 0; i < numAlgos; i++) {
             System.out.printf("     Total time taken for %s:      %8.3f seconds \n", names[i], (double) totalTimes[i] / sec);
         }
         System.out.println();
-
-
         for (int i = 0; i < numAlgos; i++) {
             System.out.printf("     Edges expanded for %s     %8d edges \n", names[i], (long) totalExpanded[i]);
         }
-
 
     }
 

@@ -74,7 +74,7 @@ public class TestAll {
         } catch(Exception e) {
             System.setOut(originalStream);
             e.printStackTrace();
-            Solution emptySolution = new Solution(new ArrayList<>(), new ArrayList<>());
+            Solution emptySolution = new Solution(new ArrayList<>(), new ArrayList<>(), null);
             for (int i = 0; i < numAlgos; i++) {
                 solutions[i] = emptySolution;
             }

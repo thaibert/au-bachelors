@@ -46,7 +46,7 @@ public class ALT implements PathfindingAlgo {
         System.out.println(reachableLandmarks.size());
         if (reachableLandmarks.size() == 0) {
             // bailout early
-            return new Solution(new ArrayList<>(), new ArrayList<>());
+            return new Solution(new ArrayList<>(), new ArrayList<>(), null);
         }
 
         Map<Vertex, Double> dist = new HashMap<>();
@@ -102,7 +102,7 @@ public class ALT implements PathfindingAlgo {
 
         if (parent.get(goal) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered);
+            return new Solution(new ArrayList<>(), edgesConsidered, null);
         }
 
         Vertex temp = goal;
@@ -116,7 +116,7 @@ public class ALT implements PathfindingAlgo {
         System.out.println("      " + distComparator.getComparisons() + " comparisons");
         System.out.println("      " + dist.get(goal));
 
-        Solution solution = new Solution(out, edgesConsidered);
+        Solution solution = new Solution(out, edgesConsidered, null);
 
         return solution;
     }

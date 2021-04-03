@@ -7,10 +7,12 @@ public class Solution {
 
     private List<Vertex> shortestPath;
     private List<Edge> visited;
+    private Vertex meetingNode;
     
-    public Solution(List<Vertex> path, List<Edge> visited){
+    public Solution(List<Vertex> path, List<Edge> visited, Vertex meetingNode){
         this.shortestPath = path;
         this.visited = visited;
+        this.meetingNode = meetingNode;
     }
 
 	public List<Vertex> getShortestPath() {
@@ -21,5 +23,8 @@ public class Solution {
         return visited;
     }
     
+    public Vertex getMeetingNode() {
+        return meetingNode;
+    }
 }
 

@@ -68,7 +68,7 @@ public class BidirectionalALT implements PathfindingAlgo{
         System.out.println(reachableLandmarks.size());
         if (reachableLandmarks.size() == 0) {
             // bailout early
-            return new Solution(new ArrayList<>(), new ArrayList<>());
+            return new Solution(new ArrayList<>(), new ArrayList<>(), null);
         }
 
         dist_f = new HashMap<>();
@@ -171,7 +171,7 @@ public class BidirectionalALT implements PathfindingAlgo{
         /* TODO something that checks if we actually found something */
         if (pred_f.get(bestVertex) == null && pred_b.get(bestVertex) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered);
+            return new Solution(new ArrayList<>(), edgesConsidered, bestVertex);
         }
 
         Vertex temp = bestVertex;
@@ -199,7 +199,7 @@ public class BidirectionalALT implements PathfindingAlgo{
         System.out.println("      " + comp.getComparisons() + " comparisons");
         System.out.println("      " + mu + " distance");
 
-        Solution solution = new Solution(out2, edgesConsidered);
+        Solution solution = new Solution(out2, edgesConsidered, bestVertex);
 
         return solution;
     }

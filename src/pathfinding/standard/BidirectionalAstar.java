@@ -163,7 +163,7 @@ public class BidirectionalAstar implements PathfindingAlgo {
         /* TODO something that checks if we actually found something */
         if (pred_f.get(bestVertex) == null && pred_b.get(bestVertex) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered);
+            return new Solution(new ArrayList<>(), edgesConsidered, bestVertex);
         }
 
         Vertex temp = bestVertex;
@@ -190,7 +190,7 @@ public class BidirectionalAstar implements PathfindingAlgo {
         System.out.println("      " + comp.getComparisons() + " comparisons");
         System.out.println("      " + mu + " distance");
 
-        Solution solution = new Solution(out2, edgesConsidered);
+        Solution solution = new Solution(out2, edgesConsidered, bestVertex);
 
         return solution;
     }

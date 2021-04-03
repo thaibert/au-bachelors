@@ -64,7 +64,7 @@ public class Astar implements PathfindingAlgo {
 
         if (pred.get(goal) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered);
+            return new Solution(new ArrayList<>(), edgesConsidered, null);
         }
         List<Vertex> out = new ArrayList<>();
 
@@ -79,7 +79,7 @@ public class Astar implements PathfindingAlgo {
         System.out.println("      " + comp.getComparisons() + " comparisons");
         System.out.println("      " + dist.getOrDefault(goal, INF_DIST));
 
-        Solution solution = new Solution(out, edgesConsidered);
+        Solution solution = new Solution(out, edgesConsidered, null);
 
 
 

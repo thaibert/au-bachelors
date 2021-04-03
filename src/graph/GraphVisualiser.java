@@ -27,6 +27,7 @@ public class GraphVisualiser extends Canvas {
     private Graph graph;
     private List<Vertex> shortestPath;
     private List<Edge> visited;
+    private Vertex meetingNode;
 
     public GraphVisualiser(Graph graph, BoundingBox bbox) {
         this.graph = graph;
@@ -83,6 +84,10 @@ public class GraphVisualiser extends Canvas {
         this.visited = visited;
     }
 
+    public void drawMeetingNode(Vertex v){
+        this.meetingNode = v; 
+    }
+
     // ================== public use methods end here ==================
 
     public void paint(Graphics g) {
@@ -94,6 +99,7 @@ public class GraphVisualiser extends Canvas {
         if (this.shortestPath != null) {
             drawPath(g);
             drawStartGoal(g);
+            drawMeetingNode(g);
         }
     }
 
@@ -224,6 +230,22 @@ public class GraphVisualiser extends Canvas {
             index++;
         }
     }
+
+    private void drawMeetingNode(Graphics g){
+        if (meetingNode == null){
+            return;
+        }
+
+        Vertex v = meetingNode;
+        String v_lat = Double.toString(v.getLatitude());
+        String v_lon = Double.toString(v.getLongitude());
+        int[] v_coords = convertToXAndY(new String[] { v_lat, v_lon });
+        g.setColor(Color.BLACK);
+        g.fillOval(v_coords[0] - (radius+4) / 2, v_coords[1] - (radius+4) / 2, radius+4, radius+4);
+        g.setColor(Color.CYAN);
+        g.fillOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
+
+    } 
 
     public static int[] convertToXAndY(String[] arg){
         

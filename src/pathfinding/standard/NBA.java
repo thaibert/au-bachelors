@@ -91,7 +91,7 @@ public class NBA implements PathfindingAlgo{
         /* TODO something that checks if we actually found something */
         if (pred_f.get(touchNode) == null && pred_b.get(touchNode) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered);
+            return new Solution(new ArrayList<>(), edgesConsidered, null);
         }
 
         Vertex temp = touchNode;
@@ -118,7 +118,7 @@ public class NBA implements PathfindingAlgo{
         System.out.println("      " + comp.getComparisons() + " comparisons");
         System.out.println("      " + bestPathLength + " distance");
 
-        Solution solution = new Solution(out2, edgesConsidered);
+        Solution solution = new Solution(out2, edgesConsidered, touchNode);
 
         return solution;
     }
@@ -247,6 +247,7 @@ public class NBA implements PathfindingAlgo{
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
+        vis.drawMeetingNode(solution.getMeetingNode());
         vis.visualize("A* bidirectional");
     }
 
