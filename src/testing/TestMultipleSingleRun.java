@@ -117,7 +117,7 @@ public class TestMultipleSingleRun {
         algos[DIJKSTRA_OURS] = new Dijkstra(g);
         algos[ASTAR] = new Astar(g);
         algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
-        algos[ALT] = new ALT(g, 5); // TODO how many landmarks
+        algos[ALT] = new ALT(g, 1, 5); // TODO how many landmarks
         algos[ASTAR_BIDIRECTIONAL] = new NBA(g);
         algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, 5);  //TODO how many landmarks
 

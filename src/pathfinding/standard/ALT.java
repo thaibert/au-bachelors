@@ -22,17 +22,24 @@ public class ALT implements PathfindingAlgo {
     // For visual
     private List<Edge> edgesConsidered;
 
-    public ALT(Graph graph, int noLandmarks) {
+    public ALT(Graph graph, int landmarkSelectionType, int noLandmarks) {
         this.graph = graph;
 
         // List<Vertex> landmarks = new ArrayList<>();
         // landmarks.add(GraphUtils.findNearestVertex(graph, 56.21684389259911, 9.517964491806737));
         // landmarks.add(new Vertex(56.0929669, 10.0084564));
 
-
+        List<Map<Vertex, Map<Vertex, Double>>> landmarks;
 
         // in the list is two maps, to and from
-        List<Map<Vertex, Map<Vertex, Double>>> landmarks = GraphUtils.randomLandmarks(graph, noLandmarks);
+        if (landmarkSelectionType == 0){
+            landmarks = GraphUtils.randomLandmarks(graph, noLandmarks);
+        } else if (landmarkSelectionType == 1){
+            landmarks = GraphUtils.farthestLandmarks(graph, noLandmarks);
+        } else {
+            System.out.println("Please provide a viable integer for selecting landmarks");
+            landmarks = new ArrayList<>();
+        }
 
         distanceToLandmark = landmarks.get(0);
         distanceFromLandmark = landmarks.get(1);
@@ -244,7 +251,7 @@ public class ALT implements PathfindingAlgo {
         Vertex a = new Vertex(56.0440049,9.9025227);
         Vertex b = new Vertex(56.1814955,10.2042923);
 
-        PathfindingAlgo d = new ALT(graph, 5);
+        PathfindingAlgo d = new ALT(graph, 1, 5);
         Solution solution = d.shortestPath(Location.Skagen, Location.CPH);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
