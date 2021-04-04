@@ -273,20 +273,29 @@ public class GraphUtils {
         // We use the farthest-landmark picking idea for this one
     
         // Random landmark to get started
+        System.out.println("Searching for landmarks");
+
         Vertex random = GraphUtils.pickRandomVertex(g);
         landmarks.add(random);
 
         for (int i = 0; i < noOfLandmarks; i++){
+            System.out.print(".");
             double max = 0;
             Vertex maxLandmark = null;
             for (Vertex v: g.getAllVertices()){
                 double dist = 0;
                 // At most noOfLandmarks iterations, or maybe noOfLandsmarks -1
                 for (Vertex e: landmarks){
+                    if (v == null){
+                        System.out.println("v == null");
+                    }
+                    if (e == null){
+                        System.out.println("e == null");
+                    }
                     dist += haversineDist(v, e); 
                 }
     
-                if (dist < max) {
+                if (dist > max) {
                     max = dist;
                     maxLandmark = v;
                 }
@@ -297,6 +306,7 @@ public class GraphUtils {
             }
         }
 
+        System.out.println("Found landmarks\nCalculating distances");
 
         // Phase 2, calc distance to and from landmarks from all other vertices
         landmarks.forEach( l -> {
