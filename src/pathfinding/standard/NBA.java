@@ -241,7 +241,7 @@ public class NBA implements PathfindingAlgo{
 
         Vertex a = GraphUtils.findNearestVertex(graph, 56.0337, 9.4807);
         Vertex b = GraphUtils.findNearestVertex(graph, 56.2794, 10.259);
-        NBA d = new NBA(graph);
+        PathfindingAlgo d = new NBA(graph);
         Solution solution = d.shortestPath(Location.Skagen, Location.CPH);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);

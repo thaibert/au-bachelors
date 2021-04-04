@@ -77,7 +77,7 @@ public class ALT implements PathfindingAlgo {
             settled.add(head.v);
 
             if (iterations % 1000 == 0) {
-                System.out.println("    --> " + iterations + ",   pq size: " + pq.size());
+                //System.out.println("    --> " + iterations + ",   pq size: " + pq.size());
             }
 
             if (head.v.equals(goal)) {
@@ -251,7 +251,7 @@ public class ALT implements PathfindingAlgo {
         Vertex a = new Vertex(56.0440049,9.9025227);
         Vertex b = new Vertex(56.1814955,10.2042923);
 
-        PathfindingAlgo d = new ALT(graph, 1, 5);
+        PathfindingAlgo d = new ALT(graph, 0, 5);
         Solution solution = d.shortestPath(Location.Skagen, Location.CPH);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);

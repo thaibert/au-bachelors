@@ -286,12 +286,6 @@ public class GraphUtils {
                 double dist = 0;
                 // At most noOfLandmarks iterations, or maybe noOfLandsmarks -1
                 for (Vertex e: landmarks){
-                    if (v == null){
-                        System.out.println("v == null");
-                    }
-                    if (e == null){
-                        System.out.println("e == null");
-                    }
                     dist += haversineDist(v, e); 
                 }
     
