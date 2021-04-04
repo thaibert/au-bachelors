@@ -260,6 +260,62 @@ public class GraphUtils {
     }
 
 
+    // This one does not scale up well to large graphs!
+    public static List<Map<Vertex, Map<Vertex, Double>>> farthestLandmarks(Graph g, int noOfLandmarks){
+        Graph ginv = invertGraph(g);
+
+        Map<Vertex, Map<Vertex, Double>> distanceToLandmark = new HashMap<>();
+        Map<Vertex, Map<Vertex, Double>> distanceFromLandmark = new HashMap<>();
+
+        List<Vertex> landmarks = new ArrayList<>();  
+
+        // Phase 1, pick the landmarks.
+        // We use the farthest-landmark picking idea for this one
+    
+        // Random landmark to get started
+        Vertex random = GraphUtils.pickRandomVertex(g);
+        landmarks.add(random);
+
+        for (int i = 0; i < noOfLandmarks; i++){
+            double max = 0;
+            Vertex maxLandmark = null;
+            for (Vertex v: g.getAllVertices()){
+                double dist = 0;
+                // At most noOfLandmarks iterations, or maybe noOfLandsmarks -1
+                for (Vertex e: landmarks){
+                    dist += haversineDist(v, e); 
+                }
+    
+                if (dist < max) {
+                    max = dist;
+                    maxLandmark = v;
+                }
+            }
+            landmarks.add(maxLandmark);
+            if (i == 0) {
+                landmarks.remove(random);
+            }
+        }
+
+
+        // Phase 2, calc distance to and from landmarks from all other vertices
+        landmarks.forEach( l -> {
+            System.out.print(".");
+            Map<Vertex, Double> normal = dijkstra(g, l);
+            Map<Vertex, Double> inv = dijkstra(ginv, l);
+
+            distanceFromLandmark.put(l, normal);
+            distanceToLandmark.put(l, inv);
+        });
+
+        ArrayList<Map<Vertex, Map<Vertex, Double>>> temp = new ArrayList<Map<Vertex, Map<Vertex, Double>>>();
+        temp.add(distanceToLandmark);
+        temp.add(distanceFromLandmark);
+
+        return temp;
+    }
+
+
 
     public static Map<Vertex, Double> dijkstra(Graph g, Vertex start){
 
