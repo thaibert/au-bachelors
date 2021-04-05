@@ -92,8 +92,8 @@ public class GraphVisualiser extends Canvas {
         this.meetingNode = v; 
     }
 
-    public void drawPoint(Vertex v) {
-        this.landmarks.add(v);
+    public void drawPoint(List<Vertex> v) {
+        this.landmarks = v;
     }
 
     // ================== public use methods end here ==================
