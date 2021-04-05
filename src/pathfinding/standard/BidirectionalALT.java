@@ -18,52 +18,57 @@ public class BidirectionalALT implements PathfindingAlgo{
     private Map<Vertex, Map<Vertex, Double>> distanceFromLandmark;
     private Collection<Vertex> reachableLandmarks;
 
+    PriorityQueue<Pair> pq_f;
+    PriorityQueue<Pair> pq_b;
+
     private Map<Vertex, Double> dist_f;
-    private Map<Vertex, Vertex> pred_f; // S in the algo is pred.keySet()
     private Map<Vertex, Double> dist_b;
-    private Map<Vertex, Vertex> pred_b; // S in the algo is pred.keySet()
+    private Map<Vertex, Vertex> pred_f; 
+    private Map<Vertex, Vertex> pred_b; 
 
-    private Set<Vertex> s_f;
-    private Set<Vertex> s_b;
+    private Set<Vertex> closed;
 
+    private double bestPathLength;
+    private double fA;
+    private double fB;
+    private Vertex touchNode;
+
+    private Vertex start;
+    private Vertex goal;
 
     private List<Edge> edgesConsidered;
 
-    private Vertex bestVertex; 
-    private double mu;
+    private List<Map<Vertex, Map<Vertex, Double>>> landmarks;
 
-    public BidirectionalALT(Graph graph, int noLandmarks) {
+
+    public BidirectionalALT(Graph graph, int landmarkSelectionType, int noLandmarks) {
         this.graph = graph;
 
         
         Graph ginv = GraphUtils.invertGraph(graph);
         this.ginv = ginv;
 
-        List<Vertex> landmarks = landmark(graph, noLandmarks);
         // List<Vertex> landmarks = new ArrayList<>();
         // landmarks.add(GraphUtils.findNearestVertex(graph, 56.21684389259911, 9.517964491806737));
         // landmarks.add(new Vertex(56.0929669, 10.0084564));
 
-        distanceToLandmark = new HashMap<>();
-        distanceFromLandmark = new HashMap<>();
+        // in the list is two maps, to and from
+        if (landmarkSelectionType == 0){
+            landmarks = GraphUtils.randomLandmarks(graph, noLandmarks);
+        } else if (landmarkSelectionType == 1){
+            landmarks = GraphUtils.farthestLandmarks(graph, noLandmarks);
+        } else {
+            System.out.println("Please provide a viable integer for selecting landmarks");
+            landmarks = new ArrayList<>();
+        }
 
-        landmarks.forEach( l -> {
-            System.out.print(".");
-            Map<Vertex, Double> normal = dijkstra(graph, l);
-            Map<Vertex, Double> inv = dijkstra(ginv, l);
-
-            distanceFromLandmark.put(l, normal);
-            distanceToLandmark.put(l, inv);
-        });
+        distanceToLandmark = landmarks.get(0);
+        distanceFromLandmark = landmarks.get(1);
     }
 
 
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
-        mu = INF_DIST;
-        bestVertex = null;
-
-        // Bailout and optimization of landmarks.
         reachableLandmarks = findReachableTo(start, goal);
         System.out.println(reachableLandmarks.size());
         if (reachableLandmarks.size() == 0) {
@@ -71,117 +76,64 @@ public class BidirectionalALT implements PathfindingAlgo{
             return new Solution(new ArrayList<>(), new ArrayList<>(), null);
         }
 
+
+        // TODO visuellisering
+        this.start = start;
+        this.goal = goal;
+
+        bestPathLength = INF_DIST;
+        
+
+        // SETUP
+        edgesConsidered = new ArrayList<>();
+
+        closed = new HashSet<>();
+        
         dist_f = new HashMap<>();
         pred_f = new HashMap<>();
         dist_b = new HashMap<>();
         pred_b = new HashMap<>();
-        s_f = new HashSet<>();
-        s_b = new HashSet<>();
 
-        edgesConsidered = new ArrayList<>();
+        DistComparator comp = new DistComparator();
+        pq_f = new PriorityQueue<>(comp);
+        pq_b = new PriorityQueue<>(comp);
+
+        fB = fA = hf(start, goal);
 
         dist_f.put(start, 0.0);
         dist_b.put(goal, 0.0);
-
-        DistComparator comp = new DistComparator();
-        PriorityQueue<Pair> pq_f = new PriorityQueue<>(comp);
-        PriorityQueue<Pair> pq_b = new PriorityQueue<>(comp);
-
         pq_f.add(new Pair(start, 0));
         pq_b.add(new Pair(goal, 0));
 
-        int num = 0;
-        while(pq_f.size() > 0 && pq_b.size() > 0){
-            num++;
-            if (num % 1000 == 0) {
-                //System.out.println("    --> " + num);
+        // ALGO
+        while (pq_f.size() > 0 && pq_b.size() > 0) {
+            if(pq_f.size() < pq_b.size()){
+                expandForwad();
+            }else{
+                expandBackward();
             }
-
-            Pair min_f = pq_f.poll();
-            Pair min_b = pq_b.poll();
-
-            s_f.add(min_f.v); 
-            s_b.add(min_b.v);
-
-            //TODO is this early stop right???
-            double distance_f = dist_f.get(min_f.v) + pi_t(min_f.v, goal);
-            double distance_b = dist_b.get(min_b.v) + pi_t(min_b.v, start);
-
-            if (distance_b >= mu && distance_f >= mu) {
-                System.out.println("Entered exit");
-                break;
-            }
-            /*if (dist_f.get(min_f.v) + dist_b.get(min_b.v) >= mu) {
-                System.out.println("Entered exit");
-                break;
-            }*/
-
-            for (Neighbor n : graph.getNeighboursOf(min_f.v)) {
-                // RELAX
-                double maybeNewBestDistance = dist_f.get(min_f.v) + n.distance; // dist(s,v) + len(v,u)
-                double previousBestDistance = dist_f.getOrDefault(n.v, INF_DIST); // dist(s,u)
-
-                edgesConsidered.add(new Edge(min_f.v, n.v, maybeNewBestDistance));
-
-                if (maybeNewBestDistance < previousBestDistance) {
-                    dist_f.put(n.v, maybeNewBestDistance);
-                    pred_f.put(n.v, min_f.v);
-
-                    if (! s_f.contains(n.v)) {
-                        pq_f.add(new Pair(n.v, maybeNewBestDistance + pi_t(n.v, goal))); 
-                    }
-                }
-
-                if (s_b.contains(n.v) && maybeNewBestDistance + dist_b.get(n.v) < mu) {
-                    mu = maybeNewBestDistance + dist_b.get(n.v);
-                    bestVertex = n.v;
-                }
-            }
-
-            for (Neighbor n : ginv.getNeighboursOf(min_b.v)) {
-                // RELAX
-                double maybeNewBestDistance = dist_b.get(min_b.v) + n.distance; // dist(s,v) + len(v,u)
-                double previousBestDistance = dist_b.getOrDefault(n.v, INF_DIST); // dist(s,u)
-
-                edgesConsidered.add(new Edge(min_b.v, n.v, maybeNewBestDistance));
-
-                if (maybeNewBestDistance < previousBestDistance) {
-                    dist_b.put(n.v, maybeNewBestDistance);
-                    pred_b.put(n.v, min_b.v);
-
-                    if (! s_b.contains(n.v)) {
-                        pq_b.add(new Pair(n.v, maybeNewBestDistance + pi_t(n.v, start))); 
-                    }
-                }
-
-                if (s_f.contains(n.v) && maybeNewBestDistance + dist_f.get(n.v) < mu) {
-                    mu = maybeNewBestDistance + dist_f.get(n.v);
-                    bestVertex = n.v;
-                }
-            }
-        }
+        } 
 
 
-    
-
-        // Get out the shortest path
+        // FINDING BEST PATH
+        // TODO take out in method?
         System.out.println("  --> backtracking solution");
         List<Vertex> out = new ArrayList<>();
 
         /* TODO something that checks if we actually found something */
-        if (pred_f.get(bestVertex) == null && pred_b.get(bestVertex) == null) {
+        if (pred_f.get(touchNode) == null && pred_b.get(touchNode) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered, bestVertex);
+            return new Solution(new ArrayList<>(), edgesConsidered, null);
         }
 
-        Vertex temp = bestVertex;
+        Vertex temp = touchNode;
         while (! start.equals(temp)) {
             out.add(temp);
             temp = pred_f.get(temp);
         }
 
         List<Vertex> out2 = new ArrayList<>();
-        temp = bestVertex;
+        temp = touchNode;
         while (! goal.equals(temp)) {
             temp = pred_b.get(temp);
             out2.add(temp);
@@ -191,19 +143,120 @@ public class BidirectionalALT implements PathfindingAlgo{
         Collections.reverse(out2);
         out2.addAll(out);
         
-
         System.out.println("      " + out.size() + " nodes");
         System.out.println("      " + out2.size() + " nodes");
 
         System.out.println("      " + edgesConsidered.size() + " edges considered");
         System.out.println("      " + comp.getComparisons() + " comparisons");
-        System.out.println("      " + mu + " distance");
+        System.out.println("      " + bestPathLength + " distance");
 
-        Solution solution = new Solution(out2, edgesConsidered, bestVertex);
+        Solution solution = new Solution(out2, edgesConsidered, touchNode);
 
         return solution;
     }
 
+    public void expandForwad(){
+        Pair currentPair = pq_f.poll();
+
+        if (closed.contains(currentPair.v)){
+            return;
+        }
+
+        closed.add(currentPair.v);
+        double dist = dist_f.getOrDefault(currentPair.v, INF_DIST);
+        if(dist + hf(currentPair.v, goal) >= bestPathLength 
+        || dist + fB - hf(currentPair.v, start) >= bestPathLength){
+            // Reject node 
+        } else {
+            // Stabilize
+            graph.getNeighboursOf(currentPair.v).forEach(n -> {
+                if (closed.contains(n.v)){
+                    return; // TODO possibly fucking everything up, it should be continue, but that is not allowed
+                }
+
+                double tentDist = dist + n.distance;
+
+                // For counting amount of edges considered
+                edgesConsidered.add(new Edge(currentPair.v, n.v, tentDist));
+                
+                if (dist_f.getOrDefault(n.v, INF_DIST) > tentDist) {
+                    dist_f.put(n.v, tentDist);
+                    pred_f.put(n.v, currentPair.v);
+                    pq_f.add(new Pair(n.v, tentDist + hf(n.v, goal)));
+
+                // Checking if we found new best
+                if (dist_b.containsKey(n.v)) {
+                    double pathLength = tentDist + dist_b.get(n.v);
+                    if (bestPathLength > pathLength) {
+                        bestPathLength = pathLength;
+                        touchNode = n.v;
+                    }
+                }
+                }
+
+
+
+            });
+        }
+
+        if (!pq_f.isEmpty()) {
+            fA = pq_f.peek().dist;
+        }
+
+    }
+
+    public void expandBackward(){
+        Pair currentPair = pq_b.poll();
+
+        if (closed.contains(currentPair.v)){
+            return;
+        }
+
+        closed.add(currentPair.v);
+        double dist = dist_b.getOrDefault(currentPair.v, INF_DIST);
+        if (dist + hb(currentPair.v, start) >= bestPathLength
+        || dist + fA - hb(currentPair.v, goal) >= bestPathLength){
+            // Reject
+        } else {
+            ginv.getNeighboursOf(currentPair.v).forEach(n -> {
+                if (closed.contains(n.v)){
+                    return; // TODO this might fuck shit up, should be continue but it can't be
+                }
+
+                double tentDist = dist + n.distance;
+                
+                // For counting amount of edges considered
+                edgesConsidered.add(new Edge(currentPair.v, n.v, tentDist));
+
+                if (dist_b.getOrDefault(n.v, INF_DIST) > tentDist){
+                    dist_b.put(n.v, tentDist);
+                    pred_b.put(n.v, currentPair.v);
+                    pq_b.add(new Pair(n.v, tentDist + hb(n.v, start)));
+
+                    //Checking if we found new best
+                    if (dist_f.containsKey(n.v)){
+                        double pathLength = tentDist + dist_f.get(n.v);
+                        if (pathLength < bestPathLength){
+                            bestPathLength = pathLength;
+                            touchNode = n.v;
+                        }
+                    }
+                }
+            });
+        }
+
+        if (!pq_b.isEmpty()) {
+            fB = pq_b.peek().dist;
+        }
+    }
+
+    public double hf(Vertex v, Vertex to){
+        return pi_t(v, to);
+    }
+
+    public double hb(Vertex v, Vertex to){
+        return pi_t(v, to);
+    }
 
     private double pi_t(Vertex curr, Vertex goal) {
 
@@ -319,17 +372,22 @@ public class BidirectionalALT implements PathfindingAlgo{
         return shortest;
     }
 
+    public Set<Vertex> getLandmarks(){
+        return landmarks.get(0).keySet();
+    }
+
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
         Vertex a = new Vertex(56.1782273,10.2070914); 
         Vertex b = new Vertex(56.2429053,9.8655351); 
 
-        PathfindingAlgo d = new BidirectionalALT(graph, 5);
-        Solution solution = d.shortestPath(a, b);
+        BidirectionalALT d = new BidirectionalALT(graph, 1, 5);
+        Solution solution = d.shortestPath(Location.Silkeborg, Location.Viborgvej);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
+        vis.drawPoint(d.getLandmarks());
         vis.drawVisited(solution.getVisited());
         vis.drawMeetingNode(solution.getMeetingNode());
 

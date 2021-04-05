@@ -119,7 +119,7 @@ public class TestMultipleSingleRun {
         algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
         algos[ALT] = new ALT(g, 1, 5); // TODO how many landmarks
         algos[ASTAR_BIDIRECTIONAL] = new NBA(g);
-        algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, 5);  //TODO how many landmarks
+        algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, 1, 5);  //TODO how many landmarks
 
 
         Vertex a = Location.Silkeborg;

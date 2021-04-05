@@ -256,7 +256,7 @@ public class ALT implements PathfindingAlgo {
         ALT d = new ALT(graph, 1, 5);
         Solution solution = d.shortestPath(Location.Silkeborg, Location.Viborgvej);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPoint(d.getLandmarks());
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
