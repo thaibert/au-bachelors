@@ -76,7 +76,7 @@ public class TestDifferentLandmarks {
         boolean[] solutionsEqual = new boolean[numAlgos];
         boolean hasDifference = false;
         for (int i = 0; i < numAlgos; i++) {
-            boolean isEqual = solutions[DIJKSTRA_TRADITIONAL].getShortestPath().equals(solutions[i].getShortestPath());
+            boolean isEqual = solutions[ALT_RANDOM].getShortestPath().equals(solutions[i].getShortestPath());
             solutionsEqual[i] = isEqual;
             if (! isEqual) {
                 hasDifference = true;
@@ -87,9 +87,9 @@ public class TestDifferentLandmarks {
         if (hasDifference) {
             System.out.println(" not equal!");
 
-            List<Vertex> path = solutions[DIJKSTRA_TRADITIONAL].getShortestPath();
+            List<Vertex> path = solutions[ALT_RANDOM].getShortestPath();
             System.out.printf("%s has %5d nodes and a distance of %8.2f meters\n", 
-                names[DIJKSTRA_TRADITIONAL], 
+                names[ALT_RANDOM], 
                 path.size(), 
             GraphUtils.pathDistance(path));
 
