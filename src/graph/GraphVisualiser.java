@@ -25,6 +25,10 @@ public class GraphVisualiser extends Canvas {
     final static int radius = 12*zoom_level;
 
     private Graph graph;
+
+    // For landmark drawing
+    private List<Vertex> landmarks;
+
     private List<Vertex> shortestPath;
     private List<Edge> visited;
     private Vertex meetingNode;
@@ -88,6 +92,10 @@ public class GraphVisualiser extends Canvas {
         this.meetingNode = v; 
     }
 
+    public void drawPoint(Vertex v) {
+        this.landmarks.add(v);
+    }
+
     // ================== public use methods end here ==================
 
     public void paint(Graphics g) {
@@ -99,7 +107,12 @@ public class GraphVisualiser extends Canvas {
         if (this.shortestPath != null) {
             drawPath(g);
             drawStartGoal(g);
+        }
+        if (this.meetingNode != null){
             drawMeetingNode(g);
+        }
+        if (this.landmarks.size() > 0){
+            drawPoint(g);
         }
     }
 
@@ -232,9 +245,6 @@ public class GraphVisualiser extends Canvas {
     }
 
     private void drawMeetingNode(Graphics g){
-        if (meetingNode == null){
-            return;
-        }
 
         Vertex v = meetingNode;
         String v_lat = Double.toString(v.getLatitude());
@@ -246,6 +256,18 @@ public class GraphVisualiser extends Canvas {
         g.fillOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
 
     } 
+
+    private void drawPoint(Graphics g){
+        for (Vertex v: landmarks){
+            String v_lat = Double.toString(v.getLatitude());
+            String v_lon = Double.toString(v.getLongitude());
+            int[] v_coords = convertToXAndY(new String[] { v_lat, v_lon });
+            g.setColor(Color.BLACK);
+            g.fillOval(v_coords[0] - (radius+4) / 2, v_coords[1] - (radius+4) / 2, radius+4, radius+4);
+            g.setColor(Color.PINK);
+            g.fillOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
+        }
+    }
 
     public static int[] convertToXAndY(String[] arg){
         
