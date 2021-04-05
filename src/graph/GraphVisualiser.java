@@ -27,7 +27,7 @@ public class GraphVisualiser extends Canvas {
     private Graph graph;
 
     // For landmark drawing
-    private Set<Vertex> landmarks;
+    private Set<Vertex> landmarks = new HashSet<>();
 
     private List<Vertex> shortestPath;
     private List<Edge> visited;
