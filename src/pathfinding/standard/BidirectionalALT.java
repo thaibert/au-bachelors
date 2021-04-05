@@ -12,7 +12,7 @@ public class BidirectionalALT implements PathfindingAlgo{
     private static final double INF_DIST = Double.MAX_VALUE;
 
     private Graph graph;
-    private Graph ginv; 
+    private Graph ginv;  
 
     private Map<Vertex, Map<Vertex, Double>> distanceToLandmark;
     private Map<Vertex, Map<Vertex, Double>> distanceFromLandmark;
