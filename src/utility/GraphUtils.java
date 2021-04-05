@@ -260,8 +260,10 @@ public class GraphUtils {
     }
 
 
-    // This one does not scale up well to large graphs!
+    
     public static List<Map<Vertex, Map<Vertex, Double>>> farthestLandmarks(Graph g, int noOfLandmarks){
+        // TODO THIS DOESN'T WORK AS INTENDED !!!!
+
         Graph ginv = invertGraph(g);
 
         Map<Vertex, Map<Vertex, Double>> distanceToLandmark = new HashMap<>();
@@ -278,6 +280,10 @@ public class GraphUtils {
         Vertex random = GraphUtils.pickRandomVertex(g);
         landmarks.add(random);
 
+        //Keep track of all distances from landmarks to other vertices, so we can find the one furthest away
+        List<Map<Vertex, Double>> distances = new ArrayList<>();
+        distances.add(dijkstra(g, random));
+
         for (int i = 0; i < noOfLandmarks; i++){
             System.out.print(".");
             double max = 0;
@@ -285,21 +291,25 @@ public class GraphUtils {
             for (Vertex v: g.getAllVertices()){
                 double dist = 0;
                 // At most noOfLandmarks iterations, or maybe noOfLandsmarks -1
-                for (Vertex e: landmarks){
-                    dist += haversineDist(v, e); 
+                for (int j = 0; j < landmarks.size(); j++){
+                    dist += distances.get(j).getOrDefault(v, 0.0); 
                 }
-    
-                if (dist > max) {
+                
+                if (dist/landmarks.size() > max) {
                     max = dist;
                     maxLandmark = v;
                 }
             }
-            landmarks.add(maxLandmark);
             if (i == 0) {
+                System.out.println("Entered i == 0");
                 landmarks.remove(random);
+                distances.clear();
             }
+            landmarks.add(maxLandmark);
+            distances.add(dijkstra(g, landmarks.get(i)));
         }
-
+        System.out.println("\nSize of landmarks: " + landmarks.size());
+        System.out.println(landmarks);
         System.out.println("Found landmarks\nCalculating distances");
 
         // Phase 2, calc distance to and from landmarks from all other vertices
