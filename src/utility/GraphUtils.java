@@ -295,7 +295,7 @@ public class GraphUtils {
                     dist += distances.get(j).getOrDefault(v, 0.0); 
                 }
                 
-                if (dist/landmarks.size() > max) {
+                if (dist/landmarks.size() > max && !landmarks.contains(v)) {
                     max = dist;
                     maxLandmark = v;
                 }
@@ -330,6 +330,15 @@ public class GraphUtils {
     }
 
 
+    public static List<Map<Vertex, Map<Vertex, Double>>> avoidLandmarks(Graph g, int noOfLandmarks){
+
+        return null;
+    }
+
+    public static List<Map<Vertex, Map<Vertex, Double>>> planerLandmarks(Graph g, int noOfLandmarks){
+        
+        return null;
+    }
 
     public static Map<Vertex, Double> dijkstra(Graph g, Vertex start){
 
