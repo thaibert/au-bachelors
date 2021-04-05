@@ -27,7 +27,7 @@ public class GraphVisualiser extends Canvas {
     private Graph graph;
 
     // For landmark drawing
-    private List<Vertex> landmarks;
+    private Set<Vertex> landmarks;
 
     private List<Vertex> shortestPath;
     private List<Edge> visited;
@@ -92,7 +92,7 @@ public class GraphVisualiser extends Canvas {
         this.meetingNode = v; 
     }
 
-    public void drawPoint(List<Vertex> v) {
+    public void drawPoint(Set<Vertex> v) {
         this.landmarks = v;
     }
 

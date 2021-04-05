@@ -12,6 +12,7 @@ public class ALT implements PathfindingAlgo {
 
     private Graph graph;
 
+    private List<Map<Vertex, Map<Vertex, Double>>> landmarks;
     private Map<Vertex, Map<Vertex, Double>> distanceToLandmark;
     private Map<Vertex, Map<Vertex, Double>> distanceFromLandmark;
     private Collection<Vertex> reachableLandmarks;
@@ -29,7 +30,6 @@ public class ALT implements PathfindingAlgo {
         // landmarks.add(GraphUtils.findNearestVertex(graph, 56.21684389259911, 9.517964491806737));
         // landmarks.add(new Vertex(56.0929669, 10.0084564));
 
-        List<Map<Vertex, Map<Vertex, Double>>> landmarks;
 
         // in the list is two maps, to and from
         if (landmarkSelectionType == 0){
@@ -243,18 +243,21 @@ public class ALT implements PathfindingAlgo {
         return shortest;
     }
 
-
+    public Set<Vertex> getLandmarks(){
+        return landmarks.get(0).keySet();
+    }
     
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-all-roads.csv");
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
         Vertex a = new Vertex(56.0440049,9.9025227);
         Vertex b = new Vertex(56.1814955,10.2042923);
 
-        PathfindingAlgo d = new ALT(graph, 0, 5);
-        Solution solution = d.shortestPath(Location.Skagen, Location.CPH);
+        ALT d = new ALT(graph, 1, 5);
+        Solution solution = d.shortestPath(Location.Silkeborg, Location.Viborgvej);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
+        vis.drawPoint(d.getLandmarks());
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("ALT");
