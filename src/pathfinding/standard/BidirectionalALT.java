@@ -107,6 +107,11 @@ public class BidirectionalALT implements PathfindingAlgo{
 
         // ALGO
         while (pq_f.size() > 0 && pq_b.size() > 0) {
+            //try{
+            //    Thread.sleep(4);
+            //} catch(Exception e){
+            //    e.printStackTrace();
+            //}
             if(pq_f.size() < pq_b.size()){
                 expandForwad();
             }else{
@@ -165,7 +170,7 @@ public class BidirectionalALT implements PathfindingAlgo{
         closed.add(currentPair.v);
         double dist = dist_f.getOrDefault(currentPair.v, INF_DIST);
         if(dist + hf(currentPair.v, goal) >= bestPathLength 
-        || dist + fB - hf(currentPair.v, start) >= bestPathLength){
+        || dist + fB - hf(start, currentPair.v) >= bestPathLength){
             // Reject node 
         } else {
             // Stabilize
@@ -214,8 +219,8 @@ public class BidirectionalALT implements PathfindingAlgo{
 
         closed.add(currentPair.v);
         double dist = dist_b.getOrDefault(currentPair.v, INF_DIST);
-        if (dist + hb(currentPair.v, start) >= bestPathLength
-        || dist + fA - hb(currentPair.v, goal) >= bestPathLength){
+        if (dist + hf(start, currentPair.v) >= bestPathLength
+        || dist + fA - hf(currentPair.v, goal) >= bestPathLength){
             // Reject
         } else {
             ginv.getNeighboursOf(currentPair.v).forEach(n -> {
@@ -231,7 +236,7 @@ public class BidirectionalALT implements PathfindingAlgo{
                 if (dist_b.getOrDefault(n.v, INF_DIST) > tentDist){
                     dist_b.put(n.v, tentDist);
                     pred_b.put(n.v, currentPair.v);
-                    pq_b.add(new Pair(n.v, tentDist + hb(n.v, start)));
+                    pq_b.add(new Pair(n.v, tentDist + hf(start, n.v)));
 
                     //Checking if we found new best
                     if (dist_f.containsKey(n.v)){
@@ -251,11 +256,17 @@ public class BidirectionalALT implements PathfindingAlgo{
     }
 
     public double hf(Vertex v, Vertex to){
-        return pi_t(v, to);
+        double temp = pi_t(v, to);
+        if (temp < 0) {
+            System.out.println("Front:" +temp); 
+        }
+        return temp;
     }
 
     public double hb(Vertex v, Vertex to){
-        return pi_t(v, to);
+        double temp = pi_t(v, to);
+        //System.out.println("Back:" + temp); 
+        return temp;
     }
 
     private double pi_t(Vertex curr, Vertex goal) {
@@ -271,6 +282,10 @@ public class BidirectionalALT implements PathfindingAlgo{
                  // So skip l, since the calculations wouldn't make sense.
                 continue;
              }
+            if (! distTo.containsKey(goal)
+             || ! distFrom.containsKey(goal)){
+                 continue;
+             }
 
             // pi^l+ := dist(v, l) - dist(t, l)
             double dist_vl = distTo.get(curr);
@@ -282,7 +297,7 @@ public class BidirectionalALT implements PathfindingAlgo{
             double dist_lv = distFrom.get(curr);
             double pi_minus = dist_lt - dist_lv;
 
-            // System.out.println(dist_vl + "\n" + dist_tl + "\n" + dist_lt + "\n" + dist_lv + "\n\n");
+            //System.out.println(dist_vl + "\n" + dist_tl + "\n" + dist_lt + "\n" + dist_lv + "\n\n");
 
             max = Math.max(max, Math.max(pi_plus, pi_minus));
         }
@@ -357,7 +372,6 @@ public class BidirectionalALT implements PathfindingAlgo{
             g.getNeighboursOf(head.v)
                 .forEach(n -> {
                     // RELAX
-
                     double maybeNewBestDistance = head.dist + n.distance;
                     double previousBestDistance = bestDist.getOrDefault(n.v, INF_DIST);
 
@@ -379,11 +393,12 @@ public class BidirectionalALT implements PathfindingAlgo{
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
-        Vertex a = new Vertex(56.1782273,10.2070914); 
-        Vertex b = new Vertex(56.2429053,9.8655351); 
+    
+        Vertex a = new Vertex(56.2095925,10.0379637); 
+        Vertex b = new Vertex(56.1371326,10.1842766); 
 
-        BidirectionalALT d = new BidirectionalALT(graph, 1, 5);
-        Solution solution = d.shortestPath(Location.Silkeborg, Location.Viborgvej);
+        BidirectionalALT d = new BidirectionalALT(graph, 1, 8);
+        Solution solution = d.shortestPath(a, b);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
