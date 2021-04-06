@@ -275,7 +275,7 @@ public class GraphUtils {
         // We use the farthest-landmark picking idea for this one
     
         // Random landmark to get started
-        System.out.println("Searching for landmarks");
+        //System.out.println("Searching for landmarks");
 
         Vertex random = GraphUtils.pickRandomVertex(g);
         landmarks.add(random);
@@ -301,16 +301,15 @@ public class GraphUtils {
                 }
             }
             if (i == 0) {
-                System.out.println("Entered i == 0");
                 landmarks.remove(random);
                 distances.clear();
             }
             landmarks.add(maxLandmark);
             distances.add(dijkstra(g, landmarks.get(i)));
         }
-        System.out.println("\nSize of landmarks: " + landmarks.size());
-        System.out.println(landmarks);
-        System.out.println("Found landmarks\nCalculating distances");
+        //System.out.println("\nSize of landmarks: " + landmarks.size());
+        //System.out.println(landmarks);
+        //System.out.println("Found landmarks\nCalculating distances");
 
         // Phase 2, calc distance to and from landmarks from all other vertices
         landmarks.forEach( l -> {
