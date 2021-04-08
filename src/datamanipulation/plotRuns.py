@@ -87,7 +87,8 @@ legend = axes.legend(handles=patches,loc='upper left')
 # plot the whole data frame
 #  csv:  algo, time, edges_expanded, no_nodes
 
-axes.scatter(data["no_nodes"], data["edges_expanded"], s=2000, 
+axes.scatter(data["no_nodes"], data["edges_expanded"], s=10, 
+    alpha=0.7,
     c=data["algo"].apply(lambda x: colors[x]))
 plt.show()
 
