@@ -14,6 +14,9 @@ from matplotlib import colors as mcolors
 
 fig = plt.figure(figsize=(10, 7))
 axes = fig.add_subplot(1,1,1)#, aspect='equal')
+axes.set_ylabel("Expanded edges")
+axes.set_xlabel("Path length (#nodes)")
+
 #axes.set_xlim([MIN_LON, MAX_LON])
 #axes.set_ylim([MIN_LAT, MAX_LAT])
 
