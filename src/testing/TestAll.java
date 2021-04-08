@@ -8,6 +8,7 @@ import pathfinding.standard.*;
 import java.io.*;
 import java.util.*;
 
+
 public class TestAll {
     static final int DIJKSTRA_TRADITIONAL = 0;
     static final int DIJKSTRA_OURS = 1;
@@ -33,8 +34,11 @@ public class TestAll {
     static long start;
     static long stop;
 
+    static File csv;
+    static PrintWriter pw;
 
-    static void testAllShortestPath(Graph g){
+
+    static void testAllShortestPath(Graph g) throws FileNotFoundException {
         // TODO in "actual" runs, we should comment in out in files, as it still takes time?
         // Disable printing while running 
         PrintStream originalStream = System.out;
@@ -62,13 +66,19 @@ public class TestAll {
 
         Solution[] solutions = new Solution[numAlgos];
         try {
-
             for (int i = 0; i < numAlgos; i++) {
                 start = System.nanoTime();
                 solutions[i] = algos[i].shortestPath(a, b);
                 stop = System.nanoTime();
                 totalTimes[i] += (stop - start);
                 totalExpanded[i] += solutions[i].getVisited().size();
+
+                // WRITE TO CSV
+                //  algo, time(ns), edges expanded, #nodes,
+                pw.write(names[i] + "," 
+                    + (stop-start) + "," 
+                    + solutions[i].getVisited().size() + ","
+                    + solutions[i].getShortestPath().size() + ",\n");
             }
 
         } catch(Exception e) {
@@ -131,8 +141,10 @@ public class TestAll {
         System.out.println();   
     }
 
+   
 
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws FileNotFoundException {
         Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
@@ -144,7 +156,12 @@ public class TestAll {
         algos[ASTAR_BIDIRECTIONAL] = new NBA(g);
         algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, 1, 5);  //TODO how many landmarks
 
-        int runs = (int) 1e3;
+        // Prepare data logging file
+        csv = new File("data-log.csv");
+        pw = new PrintWriter(csv);
+        pw.write("algo, time, edges_expanded, no_nodes,\n");
+
+        int runs = (int) 1e2;
 
         System.out.println();
         for (int i = 0; i < runs; i++) {
@@ -166,6 +183,9 @@ public class TestAll {
 
         System.out.println("[*] Done!");
         System.out.println("     Total runs: " + runs + "\n");
+
+        pw.flush();
+        pw.close();
 
         for (int i = 0; i < numAlgos; i++) {
             System.out.printf("     Total time taken for %s:      %8.3f seconds \n", names[i], (double) totalTimes[i] / sec);
