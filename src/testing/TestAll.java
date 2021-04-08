@@ -78,7 +78,7 @@ public class TestAll {
                 pw.write(names[i] + "," 
                     + (stop-start) + "," 
                     + solutions[i].getVisited().size() + ","
-                    + solutions[i].getShortestPath().size() + ",\n");
+                    + solutions[i].getShortestPath().size() + "\n");
             }
 
         } catch(Exception e) {
@@ -145,7 +145,7 @@ public class TestAll {
 
 
     public static void main(String[] args) throws FileNotFoundException {
-        Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph g = GraphPopulator.populateGraph("aarhus-intersections.csv");
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
         algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g);
@@ -159,7 +159,7 @@ public class TestAll {
         // Prepare data logging file
         csv = new File("data-log.csv");
         pw = new PrintWriter(csv);
-        pw.write("algo, time, edges_expanded, no_nodes,\n");
+        pw.write("algo,time,edges_expanded,no_nodes\n");
 
         int runs = (int) 1e2;
 
