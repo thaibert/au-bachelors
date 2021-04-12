@@ -258,7 +258,7 @@ public class BidirectionalALT implements PathfindingAlgo{
     public double hf(Vertex v, Vertex to){
         double temp = pi_t(v, to);
         if (temp < 0) {
-            System.out.println("Front:" +temp); 
+            //System.out.println("Front:" +temp); 
         }
         return temp;
     }
@@ -391,16 +391,16 @@ public class BidirectionalALT implements PathfindingAlgo{
     }
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-all-roads.csv");
 
     
         Vertex a = new Vertex(56.2095925,10.0379637); 
         Vertex b = new Vertex(56.1371326,10.1842766); 
 
-        BidirectionalALT d = new BidirectionalALT(graph, 1, 8);
-        Solution solution = d.shortestPath(a, b);
+        BidirectionalALT d = new BidirectionalALT(graph, 1, 16);
+        Solution solution = d.shortestPath(Location.CPH, Location.Esbjerg);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Europa);
         vis.drawPath(solution.getShortestPath());
         vis.drawPoint(d.getLandmarks());
         vis.drawVisited(solution.getVisited());

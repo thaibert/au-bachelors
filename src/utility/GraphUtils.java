@@ -289,13 +289,13 @@ public class GraphUtils {
             double max = 0;
             Vertex maxLandmark = null;
             for (Vertex v: g.getAllVertices()){
-                double dist = 0;
+                double dist = INF_DIST;
                 // At most noOfLandmarks iterations, or maybe noOfLandsmarks -1
                 for (int j = 0; j < landmarks.size(); j++){
-                    dist += distances.get(j).getOrDefault(v, 0.0); 
+                    dist = Math.min(distances.get(j).getOrDefault(v, 0.0), dist); 
                 }
                 
-                if (dist/landmarks.size() > max && !landmarks.contains(v)) {
+                if (dist > max && !landmarks.contains(v)) {
                     max = dist;
                     maxLandmark = v;
                 }
@@ -310,7 +310,7 @@ public class GraphUtils {
         //System.out.println("\nSize of landmarks: " + landmarks.size());
         //System.out.println(landmarks);
         //System.out.println("Found landmarks\nCalculating distances");
-
+        distances.clear(); // Performance
         // Phase 2, calc distance to and from landmarks from all other vertices
         landmarks.forEach( l -> {
             System.out.print(".");
