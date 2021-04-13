@@ -55,14 +55,14 @@ colors = {"TradDijk   ": "xkcd:baby poop green",
           "BidirecDijk": "blue",
           "A*         ": "cyan",
           "ALT        ": "yellow",
-          "BidrecAstar": "dimgrey",
+          "BidrecAstar": "magenta",
           "BidrecALT  ": "lime"}
 p1 = mpatches.Patch(color='xkcd:baby poop green', label="TradDijk   ")
 p2 = mpatches.Patch(color='red', label="OurDijk    ")
 p3 = mpatches.Patch(color='blue', label="BidirecDijk")
 p4 = mpatches.Patch(color='cyan', label="A*         ")
 p5 = mpatches.Patch(color='yellow', label="ALT        ")
-p6 = mpatches.Patch(color='dimgrey', label="BidrecAstar")
+p6 = mpatches.Patch(color='magenta', label="BidrecAstar")
 p7 = mpatches.Patch(color='lime', label="BidrecALT  ")
 
 
@@ -89,6 +89,7 @@ legend = axes.legend(handles=patches,loc='upper left')
 
 axes.scatter(data["no_nodes"], data["edges_expanded"], s=10, 
     alpha=0.7,
-    c=data["algo"].apply(lambda x: colors[x]))
+    c=data["algo"].apply(lambda x: colors[x]),
+    marker=".")
 plt.show()
 
