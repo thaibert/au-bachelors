@@ -27,7 +27,8 @@ public class GraphVisualiser extends Canvas {
     private Graph graph;
 
     // For landmark drawing
-    private Set<Vertex> landmarks = new HashSet<>();
+    private Collection<Vertex> activelandmarks = new HashSet<>();
+    private Collection<Vertex> landmarks = new HashSet<>();
 
     private List<Vertex> shortestPath;
     private List<Edge> visited;
@@ -92,8 +93,9 @@ public class GraphVisualiser extends Canvas {
         this.meetingNode = v; 
     }
 
-    public void drawPoint(Set<Vertex> v) {
-        this.landmarks = v;
+    public void drawPoint(Collection<Vertex> landmarks, Collection<Vertex> activeLandmarks) {
+        this.landmarks = landmarks;
+        this.activelandmarks = activeLandmarks;
     }
 
     // ================== public use methods end here ==================
@@ -111,7 +113,7 @@ public class GraphVisualiser extends Canvas {
         if (this.meetingNode != null){
             drawMeetingNode(g);
         }
-        if (this.landmarks.size() > 0){
+        if (this.landmarks.size() > 0 && this.activelandmarks.size() > 0){
             drawPoint(g);
         }
     }
@@ -265,6 +267,15 @@ public class GraphVisualiser extends Canvas {
             g.setColor(Color.BLACK);
             g.fillOval(v_coords[0] - (radius+4) / 2, v_coords[1] - (radius+4) / 2, radius+4, radius+4);
             g.setColor(Color.PINK);
+            g.fillOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
+        }
+        for (Vertex v: activelandmarks){
+            String v_lat = Double.toString(v.getLatitude());
+            String v_lon = Double.toString(v.getLongitude());
+            int[] v_coords = convertToXAndY(new String[] { v_lat, v_lon });
+            g.setColor(Color.BLACK);
+            g.fillOval(v_coords[0] - (radius+4) / 2, v_coords[1] - (radius+4) / 2, radius+4, radius+4);
+            g.setColor(Color.MAGENTA);
             g.fillOval(v_coords[0] - radius / 2, v_coords[1] - radius / 2, radius, radius);
         }
     }

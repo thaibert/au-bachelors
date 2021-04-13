@@ -3,7 +3,7 @@ import graph.*;
 import java.util.*;
 
 
-public class Pair {
+public class Pair implements Comparable<Pair>{
     public final Vertex v;
     public final double dist;
 
@@ -39,4 +39,10 @@ public class Pair {
 
         return (prime + vHash + distHash); 
     }
+
+    @Override
+    public int compareTo(Pair arg0) {
+        return Double.compare(this.dist, arg0.dist);
+    }
+
 }

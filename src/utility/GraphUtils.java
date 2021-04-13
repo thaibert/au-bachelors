@@ -230,7 +230,7 @@ public class GraphUtils {
     
 
 
-    public static List<Map<Vertex, Map<Vertex, Double>>> randomLandmarks(Graph g, int noOfLandmarks){
+    public static Landmarks randomLandmarks(Graph g, int noOfLandmarks){
         Graph ginv = invertGraph(g);
 
         Map<Vertex, Map<Vertex, Double>> distanceToLandmark = new HashMap<>();
@@ -252,16 +252,14 @@ public class GraphUtils {
             distanceToLandmark.put(l, inv);
         });
 
-        ArrayList<Map<Vertex, Map<Vertex, Double>>> temp = new ArrayList<Map<Vertex, Map<Vertex, Double>>>();
-        temp.add(distanceToLandmark);
-        temp.add(distanceFromLandmark);
+        Landmarks out = new Landmarks(distanceToLandmark, distanceFromLandmark);
 
-        return temp;
+        return out;
     }
 
 
     
-    public static List<Map<Vertex, Map<Vertex, Double>>> farthestLandmarks(Graph g, int noOfLandmarks){
+    public static Landmarks farthestLandmarks(Graph g, int noOfLandmarks){
         // TODO THIS DOESN'T WORK AS INTENDED !!!!
 
         Graph ginv = invertGraph(g);
@@ -321,11 +319,9 @@ public class GraphUtils {
             distanceToLandmark.put(l, inv);
         });
 
-        ArrayList<Map<Vertex, Map<Vertex, Double>>> temp = new ArrayList<Map<Vertex, Map<Vertex, Double>>>();
-        temp.add(distanceToLandmark);
-        temp.add(distanceFromLandmark);
+        Landmarks out = new Landmarks(distanceToLandmark, distanceFromLandmark);
 
-        return temp;
+        return out;
     }
 
 
