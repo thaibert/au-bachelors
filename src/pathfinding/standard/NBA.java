@@ -152,14 +152,14 @@ public class NBA implements PathfindingAlgo{
                     pred_f.put(n.v, currentPair.v);
                     pq_f.add(new Pair(n.v, tentDist + hf(n.v, goal)));
 
-                // Checking if we found new best
-                if (dist_b.containsKey(n.v)) {
-                    double pathLength = tentDist + dist_b.get(n.v);
-                    if (bestPathLength > pathLength) {
-                        bestPathLength = pathLength;
-                        touchNode = n.v;
+                    // Checking if we found new best
+                    if (dist_b.containsKey(n.v)) {
+                        double pathLength = tentDist + dist_b.get(n.v);
+                        if (bestPathLength > pathLength) {
+                            bestPathLength = pathLength;
+                            touchNode = n.v;
+                        }
                     }
-                }
                 }
 
 
