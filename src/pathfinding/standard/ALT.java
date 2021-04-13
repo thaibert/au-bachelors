@@ -55,10 +55,20 @@ public class ALT implements PathfindingAlgo {
         int iterations = 0;
         int iterationsSinceLastLandmarkUpdate = 0;
         while(pq.size() > 0){
-
             iterations++;
             iterationsSinceLastLandmarkUpdate++;
+
             Pair head = pq.poll();
+
+            if (originalPi == 0 && iterationsSinceLastLandmarkUpdate >= 100) {
+                 // If the first pi was 0, no landmarks could reach start.
+                // So try again after at least 100 opened edges. Maybe we can see the landmarks now!
+                iterationsSinceLastLandmarkUpdate = 0;
+               
+                Vertex curr = head.v;
+                landmarkSelector.updateLandmarks(curr, goal, 2);
+                originalPi = landmarkSelector.pi(curr, goal);
+            }
 
             settled.add(head.v);
 
@@ -166,18 +176,22 @@ public class ALT implements PathfindingAlgo {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
         Vertex a = new Vertex(56.0440049,9.9025227);
-        Vertex b = new Vertex(56.1814955,10.2042923);
+        Vertex b = new Vertex(56.0418177, 9.8967658); // 52 Skanderborg V 
 
-        a = GraphUtils.pickRandomVertex(graph);
-        b = GraphUtils.pickRandomVertex(graph);
+        // a = GraphUtils.pickRandomVertex(graph);
+        // b = GraphUtils.pickRandomVertex(graph);
 
         LandmarkSelector landmarkSelector = new LandmarkSelector(graph, 16, 1);
 
         ALT d = new ALT(graph, landmarkSelector);
-        Solution solution = d.shortestPath(a, b);
+        Solution solution = d.shortestPath(new Vertex(56.0418177, 9.8967658), Location.Viborgvej);
+        // Solution solution = d.shortestPath(GraphUtils.pickRandomVertex(graph), GraphUtils.pickRandomVertex(graph));
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPoint(landmarkSelector.getAllLandmarks(), landmarkSelector.getActiveLandmarks());
+        System.out.println("allLandmarks size:    " + landmarkSelector.getAllLandmarks().size());
+        System.out.println("activeLandmarks size: " + landmarkSelector.getActiveLandmarks().size());
+        
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("ALT");
