@@ -113,7 +113,7 @@ public class GraphVisualiser extends Canvas {
         if (this.meetingNode != null){
             drawMeetingNode(g);
         }
-        if (this.landmarks.size() > 0 && this.activelandmarks.size() > 0){
+        if (this.landmarks.size() > 0 || this.activelandmarks.size() > 0){
             drawPoint(g);
         }
     }
