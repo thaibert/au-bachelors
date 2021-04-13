@@ -28,7 +28,6 @@ public class LandmarkSelector {
 
         activeLandmarks = new HashSet<>();
 
-
     }
 
     public void updateLandmarks(Vertex curr, Vertex goal, int numberToAdd){
@@ -66,6 +65,7 @@ public class LandmarkSelector {
 
         Collections.sort(pairs);
         Collections.reverse(pairs);
+        //TODO:  keep all "old" landmarks, or update to only the best ones each time?
 
 
         pairs.stream()

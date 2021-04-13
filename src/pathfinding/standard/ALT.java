@@ -35,6 +35,8 @@ public class ALT implements PathfindingAlgo {
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
         landmarkSelector.updateLandmarks(start, goal, 2);
+        double originalPi = landmarkSelector.pi(start, goal);
+        int landmarkCheckpoint = 0; // ranges from 0-10
 
 
         Map<Vertex, Double> dist = new HashMap<>();
@@ -51,9 +53,11 @@ public class ALT implements PathfindingAlgo {
         Set<Vertex> settled = new HashSet<>();
 
         int iterations = 0;
+        int iterationsSinceLastLandmarkUpdate = 0;
         while(pq.size() > 0){
 
             iterations++;
+            iterationsSinceLastLandmarkUpdate++;
             Pair head = pq.poll();
 
             settled.add(head.v);
@@ -66,6 +70,8 @@ public class ALT implements PathfindingAlgo {
                 System.out.println("  --> Finished early at " + iterations);
                 break;
             }
+            
+            boolean landmarksUpdated = false;
 
             for (Neighbor n : graph.getNeighboursOf(head.v)) {
                 // RELAX
@@ -79,9 +85,43 @@ public class ALT implements PathfindingAlgo {
                     parent.put(n.v, head.v);
 
                     if (! settled.contains(n.v)) {
-                        pq.add(new Pair(n.v, maybeNewBestDistance + landmarkSelector.pi(n.v, goal))); 
+                        double pi = landmarkSelector.pi(n.v, goal);
+
+                        // b(10−i)/10,    b is original lower bound from s->t, i is checkpoint
+                        boolean tenPercentMore = pi < originalPi * (10 - landmarkCheckpoint) / 10;
+                        boolean enoughIterations = iterationsSinceLastLandmarkUpdate > 100;
+
+                        if (tenPercentMore && enoughIterations) {
+                            landmarksUpdated = true;
+                            landmarkCheckpoint++;
+                            iterationsSinceLastLandmarkUpdate = 0;
+                        }
+
+                        pq.add(new Pair(n.v, maybeNewBestDistance + pi)); 
                     }
                 }
+            }
+
+            if (landmarksUpdated) {
+                System.out.printf("Updated landmarks #%d @ iteration %d :)\n", landmarkCheckpoint, iterations);
+
+                landmarkSelector.updateLandmarks(head.v, goal, 1); // TODO return boolean to check whether pq copy is necessary?
+
+                PriorityQueue<Pair> newPQ = new PriorityQueue<>(distComparator);
+
+                Iterator<Pair> it = pq.iterator();
+                Set<Vertex> alreadyAdded = new HashSet<>();
+                while (it.hasNext()) {
+                    Pair next = it.next();
+                    if (alreadyAdded.contains(next.v)) {
+                        continue;
+                    }
+                    Vertex v = next.v;
+                    double d = dist.get(v) + landmarkSelector.pi(v, goal);
+
+                    newPQ.add(new Pair(v, d));
+                }
+                pq = newPQ;
             }
         }
 
