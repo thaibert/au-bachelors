@@ -103,25 +103,32 @@ public class ALT implements PathfindingAlgo {
             }
 
             if (landmarksUpdated) {
-                System.out.printf("Updated landmarks #%d @ iteration %d :)\n", landmarkCheckpoint, iterations);
+                System.out.printf("Updated landmarks #%d @ iteration %d", landmarkCheckpoint, iterations);
 
-                landmarkSelector.updateLandmarks(head.v, goal, 1); // TODO return boolean to check whether pq copy is necessary?
+                boolean addedLandmark = landmarkSelector.updateLandmarks(head.v, goal, 1);
 
-                PriorityQueue<Pair> newPQ = new PriorityQueue<>(distComparator);
+                if (addedLandmark) {
+                    System.out.println(" :)");
+                    PriorityQueue<Pair> newPQ = new PriorityQueue<>(distComparator);
+                
+                    Iterator<Pair> it = pq.iterator();
+                    Set<Vertex> alreadyAdded = new HashSet<>();
+                    while (it.hasNext()) {
+                        Pair next = it.next();
+                        if (alreadyAdded.contains(next.v)) {
+                            continue;
+                        }
+                        Vertex v = next.v;
+                        double d = dist.get(v) + landmarkSelector.pi(v, goal);
 
-                Iterator<Pair> it = pq.iterator();
-                Set<Vertex> alreadyAdded = new HashSet<>();
-                while (it.hasNext()) {
-                    Pair next = it.next();
-                    if (alreadyAdded.contains(next.v)) {
-                        continue;
+                        newPQ.add(new Pair(v, d));
                     }
-                    Vertex v = next.v;
-                    double d = dist.get(v) + landmarkSelector.pi(v, goal);
-
-                    newPQ.add(new Pair(v, d));
+                    pq = newPQ;
+                } else {
+                    System.out.println(" :("); // TODO better logging
                 }
-                pq = newPQ;
+
+                
             }
         }
 

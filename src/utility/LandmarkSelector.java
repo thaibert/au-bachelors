@@ -30,7 +30,7 @@ public class LandmarkSelector {
 
     }
 
-    public void updateLandmarks(Vertex curr, Vertex goal, int numberToAdd){
+    public boolean updateLandmarks(Vertex curr, Vertex goal, int numberToAdd){
         ArrayList<Pair> pairs = new ArrayList<>();
 
         for (Vertex l : distanceFromLandmark.keySet()) {
@@ -67,11 +67,14 @@ public class LandmarkSelector {
         Collections.reverse(pairs);
         //TODO:  keep all "old" landmarks, or update to only the best ones each time?
 
-
+        int sizeBefore = activeLandmarks.size();
         pairs.stream()
              .limit(numberToAdd)                // Takes first n things
              .map(p -> p.v)                     // Maps (v,dist) -> v 
              .forEach(activeLandmarks :: add);  // add to set
+        int sizeAfter = activeLandmarks.size();
+
+        return sizeAfter != sizeBefore;
     }
 
     public double pi(Vertex curr, Vertex goal) {
