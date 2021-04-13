@@ -148,13 +148,15 @@ public class TestAll {
         Graph g = GraphPopulator.populateGraph("aarhus-intersections.csv");
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
+        LandmarkSelector ls = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
+
         algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g);
         algos[DIJKSTRA_OURS] = new Dijkstra(g);
         algos[ASTAR] = new Astar(g);
         algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
-        algos[ALT] = new ALT(g, 1, 5); // TODO how many landmarks
+        algos[ALT] = new ALT(g, ls); 
         algos[ASTAR_BIDIRECTIONAL] = new NBA(g);
-        algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, 1, 5);  //TODO how many landmarks
+        algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, ls);
 
         // Prepare data logging file
         csv = new File("data-log.csv");

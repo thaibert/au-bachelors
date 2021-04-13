@@ -128,8 +128,12 @@ public class TestDifferentLandmarks {
         Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
-        algos[ALT_RANDOM] = new ALT(g, 0, noOfLandmarks);
-        algos[ALT_FARTHEST] = new ALT(g, 1, noOfLandmarks);
+        LandmarkSelector ls0 = new LandmarkSelector(g, 16, 0); // TODO how many landmarks
+        LandmarkSelector ls1 = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
+
+
+        algos[ALT_RANDOM] = new ALT(g, ls0);
+        algos[ALT_FARTHEST] = new ALT(g, ls1);
         
 
         int runs = (int) 1e3;

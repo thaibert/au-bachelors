@@ -14,6 +14,7 @@ public class LandmarkSelector {
     Landmarks allLandmarks;
 
     public LandmarkSelector(Graph g, int noOfLandmarks, int landmarkSelectionType){
+        // TODO enum
         if (landmarkSelectionType == 0) {
             allLandmarks = GraphUtils.randomLandmarks(g, noOfLandmarks);
         } else if (landmarkSelectionType == 1){
