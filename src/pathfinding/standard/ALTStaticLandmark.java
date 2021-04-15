@@ -7,7 +7,7 @@ import utility.*;
 
 import java.util.*;
 
-public class ALT implements PathfindingAlgo {
+public class ALTStaticLandmark implements PathfindingAlgo {
     private static final double INF_DIST = Double.MAX_VALUE;
 
     private Graph graph;
@@ -20,7 +20,7 @@ public class ALT implements PathfindingAlgo {
     // For visual
     private List<Edge> edgesConsidered;
 
-    public ALT(Graph graph, LandmarkSelector landmarkSelector) {
+    public ALTStaticLandmark(Graph graph, LandmarkSelector landmarkSelector) {
         this.graph = graph;
 
         // List<Vertex> landmarks = new ArrayList<>();
@@ -30,11 +30,12 @@ public class ALT implements PathfindingAlgo {
         this.landmarkSelector = landmarkSelector;
 
 
+        landmarkSelector.setAllLandmarks();
+
     }
 
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
-        landmarkSelector.updateLandmarks(start, goal, 2);
 
 
         Map<Vertex, Double> dist = new HashMap<>();
@@ -126,7 +127,7 @@ public class ALT implements PathfindingAlgo {
 
         LandmarkSelector landmarkSelector = new LandmarkSelector(graph, 16, 1);
 
-        ALT d = new ALT(graph, landmarkSelector);
+        PathfindingAlgo d = new ALTStaticLandmark(graph, landmarkSelector);
         Solution solution = d.shortestPath(a, b);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);

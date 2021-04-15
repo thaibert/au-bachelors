@@ -7,7 +7,7 @@ import utility.*;
 
 import java.util.*;
 
-public class BidirectionalALT implements PathfindingAlgo{
+public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
 
     private static final double INF_DIST = Double.MAX_VALUE;
 
@@ -39,7 +39,7 @@ public class BidirectionalALT implements PathfindingAlgo{
     private List<Map<Vertex, Map<Vertex, Double>>> landmarks;
 
 
-    public BidirectionalALT(Graph graph, LandmarkSelector landmarkSelector) {
+    public BidirectionalALTStaticLandmark(Graph graph, LandmarkSelector landmarkSelector) {
         this.graph = graph;
         this.landmarkSelector = landmarkSelector;
 
@@ -50,13 +50,13 @@ public class BidirectionalALT implements PathfindingAlgo{
         // List<Vertex> landmarks = new ArrayList<>();
         // landmarks.add(GraphUtils.findNearestVertex(graph, 56.21684389259911, 9.517964491806737));
         // landmarks.add(new Vertex(56.0929669, 10.0084564));
+        landmarkSelector.setAllLandmarks();
+
     }
 
 
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
-        landmarkSelector.updateLandmarks(start, goal, 2);
-
 
         // TODO visuellisering
         this.start = start;
@@ -246,27 +246,26 @@ public class BidirectionalALT implements PathfindingAlgo{
 
     
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("aarhus-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
     
         Vertex a = new Vertex(56.1702261,10.1700643); 
         Vertex b = new Vertex(56.1728893,10.1981565); 
 
-        for (int i = 0; i < 1000; i++) {
 
         LandmarkSelector ls = new LandmarkSelector(graph, 16, 1); 
 
-        BidirectionalALT d = new BidirectionalALT(graph, ls);
+        PathfindingAlgo d = new BidirectionalALTStaticLandmark(graph, ls);
         Solution solution = d.shortestPath(a, b);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Aarhus);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
         vis.drawPoint(ls.getAllLandmarks(), ls.getActiveLandmarks());
         vis.drawVisited(solution.getVisited());
         vis.drawMeetingNode(solution.getMeetingNode());
 
-        // vis.visualize("Bidirec ALT");
-        }
+        vis.visualize("Bidirec ALT Static");
+        
 
     }
     
