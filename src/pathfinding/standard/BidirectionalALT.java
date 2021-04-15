@@ -38,6 +38,13 @@ public class BidirectionalALT implements PathfindingAlgo{
 
     private List<Map<Vertex, Map<Vertex, Double>>> landmarks;
 
+    private double originalPi;
+    private int landmarkCheckpoint = 0; // ranges from 0-10
+    private int iterationsSinceLastLandmarkUpdate = 0;
+    private boolean landmarksUpdated = false;
+    private Vertex landmarkUpdateVertex = null;
+
+
 
     public BidirectionalALT(Graph graph, LandmarkSelector landmarkSelector) {
         this.graph = graph;
@@ -56,7 +63,7 @@ public class BidirectionalALT implements PathfindingAlgo{
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
         landmarkSelector.updateLandmarks(start, goal, 2);
-
+        originalPi = hf(start, goal);
 
         // TODO visuellisering
         this.start = start;
@@ -86,17 +93,64 @@ public class BidirectionalALT implements PathfindingAlgo{
         pq_f.add(new Pair(start, 0));
         pq_b.add(new Pair(goal, 0));
 
+        int iterations = 0;
         // ALGO
         while (pq_f.size() > 0 && pq_b.size() > 0) {
-            //try{
-            //    Thread.sleep(4);
-            //} catch(Exception e){
-            //    e.printStackTrace();
-            //}
+            
+            iterations++;
+            iterationsSinceLastLandmarkUpdate++;
+
             if(pq_f.size() < pq_b.size()){
                 expandForwad();
             }else{
                 expandBackward();
+            }
+
+            if (landmarksUpdated) {
+                landmarksUpdated = false;
+                System.out.printf("Updated landmarks #%d @ iteration %d", landmarkCheckpoint, iterations);
+
+                boolean addedLandmark = landmarkSelector.updateLandmarks(landmarkUpdateVertex, goal, 1);
+
+                if (addedLandmark) {
+                    // Updates both priority ques
+                    System.out.println(" :)");
+                    PriorityQueue<Pair> newPQ_f = new PriorityQueue<>(comp);
+                
+                    Iterator<Pair> it_f = pq_f.iterator();
+                    Set<Vertex> alreadyAdded_f = new HashSet<>();
+                    while (it_f.hasNext()) {
+                        Pair next = it_f.next();
+                        if (alreadyAdded_f.contains(next.v)) {
+                            continue;
+                        }
+                        Vertex v = next.v;
+                        double d = dist_f.get(v) + landmarkSelector.pi(v, goal);
+
+                        newPQ_f.add(new Pair(v, d));
+                    }
+                    pq_f = newPQ_f;
+
+                    PriorityQueue<Pair> newPQ_b = new PriorityQueue<>(comp);
+                
+                    Iterator<Pair> it_b = pq_b.iterator();
+                    Set<Vertex> alreadyAdded_b = new HashSet<>();
+                    while (it_b.hasNext()) {
+                        Pair next = it_b.next();
+                        if (alreadyAdded_b.contains(next.v)) {
+                            continue;
+                        }
+                        Vertex v = next.v;
+                        double d = dist_b.get(v) + landmarkSelector.pi(v, goal);
+
+                        newPQ_b.add(new Pair(v, d));
+                    }
+                    pq_b = newPQ_b;
+                } else {
+                    System.out.println(" :("); // TODO better logging
+                }
+
+                
             }
         } 
 
@@ -144,6 +198,16 @@ public class BidirectionalALT implements PathfindingAlgo{
     public void expandForwad(){
         Pair currentPair = pq_f.poll();
 
+        if (originalPi == 0 && iterationsSinceLastLandmarkUpdate >= 100) {
+            // If the first pi was 0, no landmarks could reach start.
+           // So try again after at least 100 opened edges. Maybe we can see the landmarks now!
+           iterationsSinceLastLandmarkUpdate = 0;
+          
+           Vertex curr = currentPair.v;
+           landmarkSelector.updateLandmarks(curr, goal, 2);
+           originalPi = landmarkSelector.pi(curr, goal);
+       }
+
         if (closed.contains(currentPair.v)){
             return;
         }
@@ -168,7 +232,22 @@ public class BidirectionalALT implements PathfindingAlgo{
                 if (dist_f.getOrDefault(n.v, INF_DIST) > tentDist) {
                     dist_f.put(n.v, tentDist);
                     pred_f.put(n.v, currentPair.v);
-                    pq_f.add(new Pair(n.v, tentDist + hf(n.v, goal)));
+
+                    double pi = hf(n.v, goal);
+
+
+                    // b(10−i)/10,    b is original lower bound from s->t, i is checkpoint
+                    boolean tenPercentMore = pi < originalPi * (10 - landmarkCheckpoint) / 10;
+                    boolean enoughIterations = iterationsSinceLastLandmarkUpdate > 100;
+
+                    if (tenPercentMore && enoughIterations) {
+                        landmarksUpdated = true;
+                        landmarkCheckpoint++;
+                        iterationsSinceLastLandmarkUpdate = 0;
+                        landmarkUpdateVertex = currentPair.v; // TODO should this be n.v?
+                    }
+
+                    pq_f.add(new Pair(n.v, tentDist + pi));
 
                 // Checking if we found new best
                 if (dist_b.containsKey(n.v)) {
@@ -194,6 +273,16 @@ public class BidirectionalALT implements PathfindingAlgo{
     public void expandBackward(){
         Pair currentPair = pq_b.poll();
 
+        if (originalPi == 0 && iterationsSinceLastLandmarkUpdate >= 100) {
+            // If the first pi was 0, no landmarks could reach start.
+           // So try again after at least 100 opened edges. Maybe we can see the landmarks now!
+           iterationsSinceLastLandmarkUpdate = 0;
+          
+           Vertex curr = currentPair.v;
+           landmarkSelector.updateLandmarks(curr, goal, 2);
+           originalPi = landmarkSelector.pi(curr, goal);
+       }
+
         if (closed.contains(currentPair.v)){
             return;
         }
@@ -217,7 +306,22 @@ public class BidirectionalALT implements PathfindingAlgo{
                 if (dist_b.getOrDefault(n.v, INF_DIST) > tentDist){
                     dist_b.put(n.v, tentDist);
                     pred_b.put(n.v, currentPair.v);
-                    pq_b.add(new Pair(n.v, tentDist + hf(start, n.v)));
+
+                    double pi = hf(start, n.v);
+                    
+                    // b(10−i)/10,    b is original lower bound from s->t, i is checkpoint
+                    boolean tenPercentMore = pi < originalPi * (10 - landmarkCheckpoint) / 10;
+                    boolean enoughIterations = iterationsSinceLastLandmarkUpdate > 100;
+
+                    if (tenPercentMore && enoughIterations) {
+                        landmarksUpdated = true;
+                        landmarkCheckpoint++;
+                        iterationsSinceLastLandmarkUpdate = 0;
+                        landmarkUpdateVertex = currentPair.v; // TODO should this be n.v?
+                    }
+
+
+                    pq_b.add(new Pair(n.v, tentDist + pi));
 
                     //Checking if we found new best
                     if (dist_f.containsKey(n.v)){
@@ -236,17 +340,19 @@ public class BidirectionalALT implements PathfindingAlgo{
         }
     }
 
+
+
     public double hf(Vertex v, Vertex to){
         double temp = landmarkSelector.pi(v, to);
         if (temp < 0) {
-            //System.out.println("Front:" +temp); 
+            System.out.println("Front:" +temp); 
         }
         return temp;
     }
 
     
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("aarhus-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
     
         Vertex a = new Vertex(56.2095925,10.0379637); 
@@ -255,9 +361,9 @@ public class BidirectionalALT implements PathfindingAlgo{
         LandmarkSelector ls = new LandmarkSelector(graph, 16, 1); 
 
         BidirectionalALT d = new BidirectionalALT(graph, ls);
-        Solution solution = d.shortestPath(GraphUtils.pickRandomVertex(graph), GraphUtils.pickRandomVertex(graph));
+        Solution solution = d.shortestPath(Location.Silkeborg, Location.Randersvej);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Aarhus);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());
         vis.drawPoint(ls.getAllLandmarks(), ls.getActiveLandmarks());
         vis.drawVisited(solution.getVisited());
