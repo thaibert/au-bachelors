@@ -70,6 +70,7 @@ public class Dijkstra implements PathfindingAlgo {
             g.getNeighboursOf(head).forEach(n -> {
                 boolean relaxed = relax(head, n);
                 if (relaxed) {
+                    pq.remove(n.v); // To ensure we don't fuck some invariant up in the tree
                     pq.add(n.v);
                 }
             });
