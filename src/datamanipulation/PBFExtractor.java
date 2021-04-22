@@ -26,10 +26,9 @@ public class PBFExtractor {
 
     public static void main(String[] args) {
         System.out.println("Starting 1st pass");
-        //FirstPassSink firstPass = firstPass(FILE_PREFIX);
-        //int chunks = firstPass.getChunksCreated();
+        FirstPassSink firstPass = firstPass(FILE_PREFIX);
+        int chunks = firstPass.getChunksCreated();
 
-        int chunks = 1;
         System.out.println("Starting 2nd pass");
         secondPass(FILE_PREFIX, chunks);
 

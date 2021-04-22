@@ -145,7 +145,7 @@ public class TestAll {
 
 
     public static void main(String[] args) throws FileNotFoundException {
-        Graph g = GraphPopulator.populateGraph("aarhus-intersections.csv");
+        Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
         LandmarkSelector ls = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
@@ -163,7 +163,7 @@ public class TestAll {
         pw = new PrintWriter(csv);
         pw.write("algo,time,edges_expanded,no_nodes\n");
 
-        int runs = (int) 1e2;
+        int runs = (int) 1e1;
 
         System.out.println();
         for (int i = 0; i < runs; i++) {
