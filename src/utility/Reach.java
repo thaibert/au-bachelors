@@ -54,6 +54,7 @@ public class Reach {
             
 
             for (Vertex sPrime : verticesPrime) {
+                System.out.println("s' = "+ sPrime);
                 double g = 0;
                 double d = 0;
                 for (Neighbor x : graphInv.getNeighboursOf(sPrime)) {
@@ -67,7 +68,6 @@ public class Reach {
 
                 // Traverse T
                 Map<Vertex, Neighbor> tree = dijkstra(graph, sPrime, bs[i]);
-                System.out.println("Tree has " + tree.keySet().size() + " entries");
                 for (Vertex v : tree.keySet()) {
 
                     // compute r(v, T) TODO needed here?
@@ -90,8 +90,9 @@ public class Reach {
                         }
                     }
 
-                    if (calcReach(v, tree) > r.get(v)) {
-                        r.put(v, calcReach(v, tree));
+                    double reachV = calcReach(v, tree);
+                    if (reachV > r.get(v)) {
+                        r.put(v, reachV);
                     }
 
                 }
@@ -182,7 +183,9 @@ public class Reach {
 
 
     public static double calcReach(Vertex v, Map<Vertex, Neighbor> tree) {
-        // System.out.println("Tree: " + tree);
+        // First find the distance s -> v.
+        // Then, for all leaves in the tree that look like s -> v -> t,
+        //   calculate reach for v as max_{all t}( min(s->v, v->t) )
         Collection<Vertex> leavesThroughV = findLeaves(v, tree);
 
         double sToV = 0;
@@ -207,7 +210,7 @@ public class Reach {
                 }
             }
             
-            System.out.println("vtoleaf:   " + v + "->" + leaf + ": " + vToLeaf);
+            System.out.println("  vtoleaf:   " + v + "->" + leaf + ": " + vToLeaf);
             maxReach = Math.max(maxReach, 
                 Math.min(sToV, vToLeaf));
         }
@@ -304,15 +307,15 @@ public class Reach {
     public static void main(String[] args){
         Graph graph = new SimpleGraph();
  
-        Vertex a = new Vertex(2,5); // a
-        Vertex b = new Vertex(2,4); // b
-        Vertex c = new Vertex(4,4); // c
-        Vertex d = new Vertex(1,3); // d
-        Vertex e = new Vertex(3,3); // e
-        Vertex f = new Vertex(2,4); // f
-        Vertex g = new Vertex(2,2); // g
-        Vertex s = new Vertex(2,6); // s
-        Vertex t = new Vertex(2,1); // t
+        Vertex a = new NamedVertex("a");
+        Vertex b = new NamedVertex("b");
+        Vertex c = new NamedVertex("c");
+        Vertex d = new NamedVertex("d");
+        Vertex e = new NamedVertex("e");
+        Vertex f = new NamedVertex("f");
+        Vertex g = new NamedVertex("g");
+        Vertex s = new NamedVertex("s");
+        Vertex t = new NamedVertex("t");
 
         graph.addVertex(a);
         graph.addVertex(b);
@@ -357,4 +360,18 @@ public class Reach {
 
     }
 
+
 }   
+
+class NamedVertex extends Vertex {
+    private String name;
+    public NamedVertex(String name) {
+        super(name.hashCode(), name.hashCode());
+        this.name = name;
+    }
+    @Override
+    public String toString() {
+        return name;
+    }
+}
+
