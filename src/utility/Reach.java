@@ -12,6 +12,8 @@ public class Reach {
 
     // bs is a 
     public static Map<Vertex, Double> reach(Graph graph, double[] bs) {
+        System.out.println("Calculating reach");
+        System.out.println("  (" + graph.getAllVertices().size() + " nodes)");
         Graph graphPrime = graph;
         Graph graphInv = GraphUtils.invertGraph(graph);
         Map<Vertex, Double> bounds = new HashMap<>();
@@ -24,7 +26,7 @@ public class Reach {
 
         for (int i = 0; i < bs.length; i++) {
             // Iterate!
-            System.out.println("Iterating, epsilon = " + bs[i]);
+            // System.out.println("Iterating, epsilon = " + bs[i]);
 
 
             Graph graphPrimeInv = GraphUtils.invertGraph(graphPrime);
@@ -32,7 +34,7 @@ public class Reach {
 
             Collection<Vertex> vertices = graph.getAllVertices();
             Collection<Vertex> verticesPrime = graphPrime.getAllVertices();
-            System.out.println("V': " + verticesPrime);
+            // System.out.println("V': " + verticesPrime);
 
             Collection<Vertex> vMinusVPrime = new HashSet<>(vertices);
             vMinusVPrime.removeAll(verticesPrime);
@@ -54,7 +56,7 @@ public class Reach {
             
 
             for (Vertex sPrime : verticesPrime) {
-                System.out.println("s' = "+ sPrime);
+                // System.out.println("s' = "+ sPrime);
                 double g = 0;
                 double d = 0;
                 for (Neighbor x : graphInv.getNeighboursOf(sPrime)) {
@@ -113,13 +115,11 @@ public class Reach {
                     newGPrime.addVertex(v);
                 }
             }
-            // System.out.println("new V': " + newGPrime.getAllVertices());
             Collection<Vertex> verticesStillIncluded = new HashSet<>(newGPrime.getAllVertices());
             // get new edges
             for (Vertex v : newGPrime.getAllVertices()) {
                 for (Neighbor n : graph.getNeighboursOf(v)) {
                     if (verticesStillIncluded.contains(n.v)) {
-                        // System.out.println("want to add  " + v + "->" + n.v + "   @  " + n.distance);
                         newGPrime.addEdge(v, n.v, n.distance);
                     }
                 }
@@ -149,7 +149,6 @@ public class Reach {
 
     private static Collection<Vertex> findLeaves(Vertex current, Map<Vertex, Neighbor> tree) {
         // TODO probably slow 
-        // System.out.println("finding leaves");
         Collection<Vertex> out = new ArrayList<>();
         Collection<Vertex> notLeaf = new HashSet<>();
 
@@ -175,7 +174,6 @@ public class Reach {
             }
 
         }
-        // System.out.println("found leaves");
         return leafsThroughCurrent;
 
     }
@@ -191,13 +189,12 @@ public class Reach {
         double sToV = 0;
         Neighbor parent = tree.get(v);
         while (parent != null) {
-            // System.out.println("1st calcreach loop parent: " + parent);
             sToV += parent.distance;
             parent = tree.get(parent.v);
         }
 
         double maxReach = 0;
-        System.out.println(" leaves @ " + v + ": " + leavesThroughV.size());
+        // System.out.println(" leaves @ " + v + ": " + leavesThroughV.size());
         for (Vertex leaf : leavesThroughV) {
             // First, calculate distance from v -> leaf
             parent = tree.get(leaf);
@@ -208,11 +205,11 @@ public class Reach {
             }
             vToLeaf += parent.distance;
             
-            System.out.println("  vtoleaf:   " + v + "->" + leaf + ": " + vToLeaf);
+            // System.out.println("  vtoleaf:   " + v + "->" + leaf + ": " + vToLeaf);
             maxReach = Math.max(maxReach, 
                 Math.min(sToV, vToLeaf));
         }
-        System.out.println("    reach @ " + v + ":  " + maxReach + "   (stov=" + sToV + ")");
+        // System.out.println("    reach @ " + v + ":  " + maxReach + "   (stov=" + sToV + ")");
         return maxReach;
     }
 
@@ -300,11 +297,8 @@ public class Reach {
         return pred;
     }
 
-
-
-    public static void main(String[] args){
+    private static Graph makeExampleGraph() {
         Graph graph = new SimpleGraph();
- 
         Vertex a = new NamedVertex("a");
         Vertex b = new NamedVertex("b");
         Vertex c = new NamedVertex("c");
@@ -349,16 +343,24 @@ public class Reach {
         graph.addEdge(s, c, 7);
         graph.addEdge(t, d, 13);
         graph.addEdge(t, f, 9);
-        graph.addEdge(t, g, 3);
+        graph.addEdge(t, g, 3); 
 
-        double[] bs = new double[]{1000};
-        Map<Vertex, Double> r = reach(graph, bs);
-        
-        System.out.println(r);
-
+        return graph;
     }
 
+    public static void main(String[] args){
+        // Graph graph = makeExampleGraph();
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
+        long timeBefore = System.currentTimeMillis();
+        double[] bs = new double[]{5, 10, 25, 50, 100};
+        Map<Vertex, Double> r = reach(graph, bs);
+        long timeAfter = System.currentTimeMillis();
+        
+        System.out.println(r.keySet().size() + " reaches returned");
+        System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
+
+    }
 }   
 
 class NamedVertex extends Vertex {
