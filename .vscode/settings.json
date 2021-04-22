@@ -4,11 +4,7 @@
         "lib/**/*.jar"
     ],
     "java.project.sourcePaths": [
-        "src/utility",
-        "src/testing",
-        "src/pathfinding/standard",
-        "src/pathfinding",
-        "src/graph",
+        "lib",
         "src"
     ]
 }

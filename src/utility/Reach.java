@@ -149,7 +149,7 @@ public class Reach {
             
         }
         Collection<Vertex> leafs = tree.keySet();
-        leafs.removeAll(notleaf);
+        leafs.removeAll(notLeaf);
         
         Collection<Vertex> leafsThroughCurrent = new HashSet<>();
 
@@ -168,7 +168,14 @@ public class Reach {
 
     }
 
-    public static Map<Vertex, Double> dijkstra(Graph g, Vertex start, Double epsilon){
+
+
+    public static double calcReach(Vertex v, Map<Vertex, Neighbor> tree) {
+        // TODO
+        return 0;
+    }
+
+    public static Map<Vertex, Neighbor> dijkstra(Graph g, Vertex start, Double epsilon){
 
         //  Pseudocode from CLRS
         //  Initialize-Single-Source(G, s) (s = source)
@@ -292,7 +299,7 @@ public class Reach {
         graph.addEdge(t, f, 9);
         graph.addEdge(t, g, 3);
 
-        double[] bs = new int[]{5,100};
+        double[] bs = new double[]{5,100};
         Map<Vertex, Double> r = reach(graph, bs);
         
         System.out.println(r);
