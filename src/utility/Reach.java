@@ -197,6 +197,7 @@ public class Reach {
         }
 
         double maxReach = 0;
+        System.out.println(" leaves @ " + v + ": " + leavesThroughV.size());
         for (Vertex leaf : leavesThroughV) {
             // First, calculate distance from v -> leaf
             parent = tree.get(leaf);
@@ -214,7 +215,7 @@ public class Reach {
             maxReach = Math.max(maxReach, 
                 Math.min(sToV, vToLeaf));
         }
-        System.out.println("    reach @ " + v + ":  " + maxReach);
+        System.out.println("    reach @ " + v + ":  " + maxReach + "   (stov=" + sToV + ")");
         return maxReach;
     }
 
@@ -366,7 +367,7 @@ public class Reach {
 class NamedVertex extends Vertex {
     private String name;
     public NamedVertex(String name) {
-        super(name.hashCode(), name.hashCode());
+        super(name.hashCode(), name.hashCode()); // ugly hack: they have to be different to add more than one.
         this.name = name;
     }
     @Override
