@@ -24,6 +24,7 @@ public class Reach {
 
         for (int i = 0; i < bs.length; i++) {
             // Iterate!
+            System.out.println("Iterating, epsilon = " + bs[i]);
 
 
             Graph graphPrimeInv = GraphUtils.invertGraph(graphPrime);
@@ -31,8 +32,9 @@ public class Reach {
 
             Collection<Vertex> vertices = graph.getAllVertices();
             Collection<Vertex> verticesPrime = graphPrime.getAllVertices();
+            System.out.println("V': " + verticesPrime);
 
-            Collection<Vertex> vMinusVPrime = vertices;
+            Collection<Vertex> vMinusVPrime = new HashSet<>(vertices);
             vMinusVPrime.removeAll(verticesPrime);
 
             if (! vertices.equals(verticesPrime) ) {  // todo: gutman makes no sense!
@@ -50,8 +52,6 @@ public class Reach {
                 r.put(v, 0.0);
             }
             
-            //Form the graph H
-
 
             for (Vertex sPrime : verticesPrime) {
                 double g = 0;
@@ -67,7 +67,9 @@ public class Reach {
 
                 // Traverse T
                 Map<Vertex, Neighbor> tree = dijkstra(graph, sPrime, bs[i]);
+                System.out.println("Tree has " + tree.keySet().size() + " entries");
                 for (Vertex v : tree.keySet()) {
+
                     // compute r(v, T) TODO needed here?
 
                     Collection<Vertex> leaves = findLeaves(v, tree);
@@ -105,17 +107,24 @@ public class Reach {
             // Change G'!!
             Graph newGPrime = new SimpleGraph();
             // get new vertices
-            for (Vertex v : verticesPrime) {
+            for (Vertex v : vertices) {
                 if (bounds.get(v) == INF_DIST) {
                     newGPrime.addVertex(v);
                 }
             }
+            // System.out.println("new V': " + newGPrime.getAllVertices());
+            Collection<Vertex> verticesStillIncluded = new HashSet<>(newGPrime.getAllVertices());
             // get new edges
             for (Vertex v : newGPrime.getAllVertices()) {
                 for (Neighbor n : graph.getNeighboursOf(v)) {
-                    newGPrime.addEdge(v, n.v, n.distance);
+                    if (verticesStillIncluded.contains(n.v)) {
+                        // System.out.println("want to add  " + v + "->" + n.v + "   @  " + n.distance);
+                        newGPrime.addEdge(v, n.v, n.distance);
+                    }
                 }
             }
+
+            graphPrime = newGPrime;
 
         }
 
@@ -139,6 +148,7 @@ public class Reach {
 
     private static Collection<Vertex> findLeaves(Vertex current, Map<Vertex, Neighbor> tree) {
         // TODO probably slow 
+        // System.out.println("finding leaves");
         Collection<Vertex> out = new ArrayList<>();
         Collection<Vertex> notLeaf = new HashSet<>();
 
@@ -148,7 +158,7 @@ public class Reach {
             notLeaf.add(parent.v);
             
         }
-        Collection<Vertex> leafs = tree.keySet();
+        Collection<Vertex> leafs = new HashSet<>(tree.keySet());
         leafs.removeAll(notLeaf);
         
         Collection<Vertex> leafsThroughCurrent = new HashSet<>();
@@ -164,6 +174,7 @@ public class Reach {
             }
 
         }
+        // System.out.println("found leaves");
         return leafsThroughCurrent;
 
     }
@@ -171,8 +182,37 @@ public class Reach {
 
 
     public static double calcReach(Vertex v, Map<Vertex, Neighbor> tree) {
-        // TODO
-        return 0;
+        // System.out.println("Tree: " + tree);
+        Collection<Vertex> leavesThroughV = findLeaves(v, tree);
+
+        double sToV = 0;
+        Neighbor parent = tree.get(v);
+        while (parent != null) {
+            // System.out.println("1st calcreach loop parent: " + parent);
+            sToV += parent.distance;
+            parent = tree.get(parent.v);
+        }
+
+        double maxReach = 0;
+        for (Vertex leaf : leavesThroughV) {
+            // First, calculate distance from v -> leaf
+            parent = tree.get(leaf);
+            double vToLeaf = 0;
+            if (v.equals(parent.v)) {
+                vToLeaf = parent.distance;
+            } else {
+                while (! v.equals(parent.v)) {
+                    vToLeaf += parent.distance;
+                    parent = tree.get(parent.v);
+                }
+            }
+            
+            System.out.println("vtoleaf:   " + v + "->" + leaf + ": " + vToLeaf);
+            maxReach = Math.max(maxReach, 
+                Math.min(sToV, vToLeaf));
+        }
+        System.out.println("    reach @ " + v + ":  " + maxReach);
+        return maxReach;
     }
 
     public static Map<Vertex, Neighbor> dijkstra(Graph g, Vertex start, Double epsilon){
@@ -199,13 +239,14 @@ public class Reach {
         PriorityQueue<Pair> pq = new PriorityQueue<>(comp);
 
         pq.add(new Pair(start, 0));
+        bestDist.put(start, 0.0);
         xprimeDist.put(start, 0.0);
         
         Map<Vertex, Double> shortest = new HashMap<>();
 
         while (pq.size() > 0) {
 
-            boolean trueForAllLeaf = true;
+            boolean trueForAllLeaf = leafTprime.size() > 0; // if there are any, assume it's tru and disprove in for loop
             for (Vertex v: leafTprime) {
                 if (!(leafT.contains(v) || xprimeDist.get(v) >= 2 * epsilon)){
                     trueForAllLeaf = false;
@@ -216,10 +257,20 @@ public class Reach {
                 break;
             }
 
+
             Pair head = pq.poll();
 
+            if (xprimeDist.get(head.v) >= 2 * epsilon) {
+                break;
+            }
+
             leafTprime.add(head.v);
-            leafTprime.remove(pred.get(head.v));
+            
+            // remove parent - it's no longer a leaf!
+            Neighbor parent = pred.get(head.v);
+            if (parent != null) {
+                leafTprime.remove(parent.v);
+            }
 
             g.getNeighboursOf(head.v)
                 .forEach(n -> {
@@ -299,7 +350,7 @@ public class Reach {
         graph.addEdge(t, f, 9);
         graph.addEdge(t, g, 3);
 
-        double[] bs = new double[]{5,100};
+        double[] bs = new double[]{1000};
         Map<Vertex, Double> r = reach(graph, bs);
         
         System.out.println(r);

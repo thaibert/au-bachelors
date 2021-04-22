@@ -9,6 +9,9 @@ public class GraphUtils {
 
     public static Graph invertGraph(Graph g) {
         Collection<Vertex> vertices = g.getAllVertices();
+        if (vertices.size() == 0) {
+            return g;
+        }
 
         Graph inverted = new SimpleGraph(); // TODO if we get more graph types?
         for (Vertex v : vertices) {
