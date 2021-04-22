@@ -11,7 +11,7 @@ public class Reach {
     public static final double INF_DIST = Double.MAX_VALUE;
 
     // bs is a 
-    public static Map<Vertex, Double> reach(Graph graph, int[] bs) {
+    public static Map<Vertex, Double> reach(Graph graph, double[] bs) {
         Graph graphPrime = graph;
         Graph graphInv = GraphUtils.invertGraph(graph);
         Map<Vertex, Double> bounds = new HashMap<>();
@@ -192,7 +192,7 @@ public class Reach {
         PriorityQueue<Pair> pq = new PriorityQueue<>(comp);
 
         pq.add(new Pair(start, 0));
-        xprimeDist.put(start, 0);
+        xprimeDist.put(start, 0.0);
         
         Map<Vertex, Double> shortest = new HashMap<>();
 
@@ -226,9 +226,9 @@ public class Reach {
                         leafT.remove(head.v);
 
                         if (!head.v.equals(start)) {
-                            xprimeDist.put(xprimeDist.get(head.v) + n.distance);
+                            xprimeDist.put(n.v, xprimeDist.get(head.v) + n.distance);
                         } else {
-                            xprimeDist.put(xprimeDist.get(head.v) + 0);
+                            xprimeDist.put(n.v, xprimeDist.get(head.v) + 0.0);
                         }
                         bestDist.put(n.v, maybeNewBestDistance);
                         pred.put(n.v, new Neighbor(head.v, n.distance));
@@ -292,7 +292,7 @@ public class Reach {
         graph.addEdge(t, f, 9);
         graph.addEdge(t, g, 3);
 
-        int[] bs = new int[]{5,100};
+        double[] bs = new int[]{5,100};
         Map<Vertex, Double> r = reach(graph, bs);
         
         System.out.println(r);
