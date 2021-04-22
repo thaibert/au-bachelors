@@ -202,14 +202,11 @@ public class Reach {
             // First, calculate distance from v -> leaf
             parent = tree.get(leaf);
             double vToLeaf = 0;
-            if (v.equals(parent.v)) {
-                vToLeaf = parent.distance;
-            } else {
-                while (! v.equals(parent.v)) {
-                    vToLeaf += parent.distance;
-                    parent = tree.get(parent.v);
-                }
+            while (! v.equals(parent.v)) {
+                vToLeaf += parent.distance;
+                parent = tree.get(parent.v);
             }
+            vToLeaf += parent.distance;
             
             System.out.println("  vtoleaf:   " + v + "->" + leaf + ": " + vToLeaf);
             maxReach = Math.max(maxReach, 
