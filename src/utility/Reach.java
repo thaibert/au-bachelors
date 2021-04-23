@@ -1,5 +1,8 @@
 package utility;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.util.*;
 
 import javax.swing.plaf.basic.BasicListUI.ListDataHandler;
@@ -26,7 +29,8 @@ public class Reach {
 
         for (int i = 0; i < bs.length; i++) {
             // Iterate!
-            // System.out.println("Iterating, epsilon = " + bs[i]);
+            System.out.println("Iterating, epsilon = " + bs[i]);
+            System.out.println("Gprime size at this iteration = " + graphPrime.getAllVertices().size());
 
 
             Graph graphPrimeInv = GraphUtils.invertGraph(graphPrime);
@@ -127,6 +131,12 @@ public class Reach {
 
             graphPrime = newGPrime;
 
+        }
+        // All the nodes still in Gprime, their reaches have not been "settled" yet, so set them = inf
+        for (Vertex v : graph.getAllVertices()) {
+            if (bounds.get(v) == INF_DIST) {
+                r.put(v, INF_DIST);            
+            }
         }
 
         return r;
@@ -349,19 +359,39 @@ public class Reach {
     }
 
     public static void main(String[] args){
-        // Graph graph = makeExampleGraph();
+        //Graph graph = makeExampleGraph();
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
         long timeBefore = System.currentTimeMillis();
         double[] bs = new double[]{5, 10, 25, 50, 100};
+        //double[] bs = new double[]{1,10, 20};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
         
         System.out.println(r.keySet().size() + " reaches returned");
+        //System.out.println(r);
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
+        saveReachArrayToFile("aarhus-silkeborg-reach", r);
+
+    }
+
+    public static void saveReachArrayToFile(String filename, Map<Vertex, Double> r ){
+        try {
+            File fileOne = new File(filename);
+            FileOutputStream fos = new FileOutputStream(fileOne);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+    
+            oos.writeObject(r);
+            oos.flush();
+            oos.close();
+            fos.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 }   
+
 
 class NamedVertex extends Vertex {
     private String name;

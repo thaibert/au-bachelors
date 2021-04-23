@@ -1,7 +1,8 @@
 package graph;
 
+import java.io.Serializable;
 
-public class Vertex {
+public class Vertex implements Serializable {
 
     private double longitude;
     private double latitude;
