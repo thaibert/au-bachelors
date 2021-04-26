@@ -58,7 +58,7 @@ public class GraphUtils {
 
     public static double haversineDist(Vertex a, Vertex b) {
         double radius = 6371000; // ~6371 km
-        double DEGREES_TO_RADIANS = Math.PI / 360;
+        double DEGREES_TO_RADIANS = Math.PI / 180;
 
         double phi_1 = a.getLatitude() * DEGREES_TO_RADIANS;
         double phi_2 = b.getLatitude() * DEGREES_TO_RADIANS;
