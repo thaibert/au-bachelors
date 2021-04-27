@@ -75,11 +75,10 @@ public class Reach {
                 // Traverse T
                 Map<Vertex, Neighbor> tree = dijkstra(graph, sPrime, bs[i]);
                 for (Vertex v : tree.keySet()) {
-
                     // compute r(v, T) TODO needed here?
 
                     Collection<Vertex> leaves = findLeaves(v, tree);
-
+                    
                     // Loop over all paths in T that yadda yadda yadda
                     for (Vertex tPrime : leaves) {
                         double rt = 0;
@@ -88,9 +87,15 @@ public class Reach {
                             rt = bounds.get(tPrime);
                         }
                         
+                        /*if (sPrime.equals(v) || v.equals(tPrime)){
+                            // There is no suffix or prefix. So it will always return 0. And it should not ?
+                            // TODO remove maybe?
+                            continue;
+                        }*/
                         double rb = Math.min(g + measure(sPrime, v, tree), // todo give tree?
                                              rt + measure(v, tPrime, tree));  // todo give tree?
                         
+   
                         if (rb > bounds.get(v)) {
                             bounds.put(v, rb);
                         }
@@ -106,8 +111,19 @@ public class Reach {
             }
 
             for (Vertex v : verticesPrime) {
+                Vertex u = new Vertex(56.1302396,9.7414558);
+                if (u.equals(v)){
+                    System.out.println(u);
+                    System.out.println("Reach:  " + r.get(v));
+                    System.out.println("Bounds: " + bounds.get(u));
+                }
                 if (r.get(v) >= bs[i]) {
                     bounds.put(v, INF_DIST);
+                }
+                if (u.equals(v)){
+                    System.out.println(u);
+                    System.out.println("Reach:  " + r.get(v));
+                    System.out.println("Bounds: " + bounds.get(u));
                 }
             }
 
@@ -165,7 +181,9 @@ public class Reach {
         for (Vertex v: tree.keySet()) {
             
             Neighbor parent = tree.get(v);
-            notLeaf.add(parent.v);
+            if (parent != null){
+                notLeaf.add(parent.v);
+            }
             
         }
         Collection<Vertex> leafs = new HashSet<>(tree.keySet());
@@ -194,6 +212,7 @@ public class Reach {
         // First find the distance s -> v.
         // Then, for all leaves in the tree that look like s -> v -> t,
         //   calculate reach for v as max_{all t}( min(s->v, v->t) )
+
         Collection<Vertex> leavesThroughV = findLeaves(v, tree);
 
         double sToV = 0;
@@ -205,6 +224,7 @@ public class Reach {
 
         double maxReach = 0;
         // System.out.println(" leaves @ " + v + ": " + leavesThroughV.size());
+
         for (Vertex leaf : leavesThroughV) {
             // First, calculate distance from v -> leaf
             parent = tree.get(leaf);
@@ -216,6 +236,7 @@ public class Reach {
             vToLeaf += parent.distance;
             
             // System.out.println("  vtoleaf:   " + v + "->" + leaf + ": " + vToLeaf);
+
             maxReach = Math.max(maxReach, 
                 Math.min(sToV, vToLeaf));
         }
@@ -239,6 +260,7 @@ public class Reach {
         Map<Vertex, Double> xprimeDist = new HashMap<>();
 
         Map<Vertex, Neighbor> pred = new HashMap<>();
+        Map<Vertex, Neighbor> predTrue = new HashMap<>();
 
         Set<Vertex> leafTprime = new HashSet<>(); 
         Set<Vertex> leafT = new HashSet<>();
@@ -276,6 +298,7 @@ public class Reach {
             
             // remove parent - it's no longer a leaf!
             Neighbor parent = pred.get(head.v);
+            predTrue.put(head.v, pred.get(head.v));
             if (parent != null) {
                 leafTprime.remove(parent.v);
             }
@@ -304,7 +327,7 @@ public class Reach {
                     }
                 });
         }
-        return pred;
+        return predTrue;
     }
 
     private static Graph makeExampleGraph() {
@@ -363,13 +386,13 @@ public class Reach {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{5, 10, 25, 50, 100};
+        double[] bs = new double[]{5,10,25,50,100,250,500};
         //double[] bs = new double[]{1,10, 20};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
         
         System.out.println(r.keySet().size() + " reaches returned");
-        //System.out.println(r);
+       // System.out.println(r);
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
         saveReachArrayToFile("aarhus-silkeborg-reach", r);
