@@ -74,11 +74,12 @@ public class TestAll {
                 totalExpanded[i] += solutions[i].getVisited().size();
 
                 // WRITE TO CSV
-                //  algo, time(ns), edges expanded, #nodes,
+                //  algo, time(ns), edges expanded, #nodes, driven_len
                 pw.write(names[i] + "," 
                     + (stop-start) + "," 
                     + solutions[i].getVisited().size() + ","
-                    + solutions[i].getShortestPath().size() + "\n");
+                    + solutions[i].getShortestPath().size() + ","
+                    + GraphUtils.realLength(g, solutions[i].getShortestPath()) + "\n");
             }
 
         } catch(Exception e) {
@@ -145,12 +146,16 @@ public class TestAll {
 
 
     public static void main(String[] args) throws FileNotFoundException {
-        Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        String fileIn = "aarhus-silkeborg-intersections.csv";
+        int runs = (int) 1e3;
+
+
+        Graph g = GraphPopulator.populateGraph(fileIn);
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
         LandmarkSelector ls = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
 
-        algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g);
+        algos[DIJKSTRA_TRADITIONAL] = new Dijkstra(g);
         algos[DIJKSTRA_OURS] = new Dijkstra(g);
         algos[ASTAR] = new Astar(g);
         algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
@@ -158,12 +163,11 @@ public class TestAll {
         algos[ASTAR_BIDIRECTIONAL] = new NBA(g);
         algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, ls);
 
+        
         // Prepare data logging file
-        csv = new File("data-log.csv");
+        csv = new File("log-"+ runs + "-" + fileIn);
         pw = new PrintWriter(csv);
-        pw.write("algo,time,edges_expanded,no_nodes\n");
-
-        int runs = (int) 1e1;
+        pw.write("algo,time,edges_expanded,no_nodes,driven_len\n");
 
         System.out.println();
         for (int i = 0; i < runs; i++) {

@@ -230,6 +230,27 @@ public class GraphUtils {
 
         return newGraph;
     }
+
+
+    public static double realLength(Graph g, List<Vertex> path) {
+        if (path.size() < 2) {
+            return 0;
+        }
+
+        double dist = 0;
+        Vertex curr = path.get(0);
+        for (int i = 1; i < path.size(); i++) {
+            Vertex next = path.get(i);
+            for (Neighbor n : g.getNeighboursOf(curr)) {
+                if (! next.equals(n.v)) {
+                    continue;
+                }
+                dist += n.distance;
+            }
+            curr = next;
+        }
+        return dist;
+    }
     
 
 

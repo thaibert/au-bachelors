@@ -10,18 +10,28 @@ import hashlib
 from matplotlib import patches as mpatches
 from matplotlib import colors as mcolors
 
+DRIVEN_LEN_SCATTER = "Driven length (meters)"
+NODES_IN_PATH = "Path length (#nodes)"
+DRIVEN_LEN_AVG_LINE = "Average driven length (meters)"
 
+##################################################################
+
+plot_type = DRIVEN_LEN_AVG_LINE
+file_in = "log-1000-aarhus-silkeborg-intersections.csv"
+sections = 20
+
+##################################################################
 
 fig = plt.figure(figsize=(10, 7))
 axes = fig.add_subplot(1,1,1)#, aspect='equal')
 axes.set_ylabel("Expanded edges")
-axes.set_xlabel("Path length (#nodes)")
+axes.set_xlabel(plot_type)
 
 #axes.set_xlim([MIN_LON, MAX_LON])
 #axes.set_ylim([MIN_LAT, MAX_LAT])
 
 
-data = pd.read_csv("data-log.csv")
+data = pd.read_csv(file_in)
 
 
 # def hashAndColorfy(id):
@@ -87,9 +97,51 @@ legend = axes.legend(handles=patches,loc='upper left')
 # plot the whole data frame
 #  csv:  algo, time, edges_expanded, no_nodes
 
-axes.scatter(data["no_nodes"], data["edges_expanded"], s=10, 
-    alpha=0.7,
-    c=data["algo"].apply(lambda x: colors[x]),
-    marker=".")
+# for count, algo in enumerate(data["algo"]):
+#     print(str(count) + ": " + colors[algo])
+
+if (plot_type == NODES_IN_PATH):
+    axes.scatter(data["no_nodes"], data["edges_expanded"], s=10, 
+        alpha=0.7,
+        c=data["algo"].apply(lambda x: colors[x]),
+        marker=".")
+elif (plot_type == DRIVEN_LEN_SCATTER):
+    pass
+
+elif (plot_type == DRIVEN_LEN_AVG_LINE):
+    max_len = max(data["driven_len"])
+    lengths =       [None] * (len(colors) * sections)
+    average_edges = [None] * (len(colors) * sections)
+    for algo in range(len(colors)):
+        for section in range(sections):
+            lower = max_len/sections * section
+            upper = max_len/sections * (section+1)
+
+            index = len(colors) * section + algo
+            lengths[index] = upper
+            num_data_points = 0
+            sum_data_points = 0
+            for i in range(algo, len(data), len(colors)):
+                x = data["driven_len"][i]
+                if (lower < x and x < upper):
+                    num_data_points += 1
+                    sum_data_points += data["edges_expanded"][i]
+
+            average_edges[index] = sum_data_points / num_data_points
+
+    for algo in range(len(colors)):
+        xs = []
+        ys = []
+        for section in range(sections):
+            index = len(colors) * section + algo
+            xs.append(lengths[index])
+            ys.append(average_edges[index])
+
+        axes.plot(xs, ys,
+            alpha=0.7,
+            c=list(colors.values())[algo],
+            marker=".")
+
+
 plt.show()
 
