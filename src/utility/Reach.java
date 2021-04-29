@@ -8,6 +8,8 @@ import java.util.*;
 import javax.swing.plaf.basic.BasicListUI.ListDataHandler;
 import javax.swing.plaf.metal.MetalIconFactory.TreeControlIcon;
 
+import org.checkerframework.checker.units.qual.C;
+
 import graph.*;
 
 public class Reach {
@@ -35,6 +37,7 @@ public class Reach {
             // Iterate!
             System.out.println("Iterating, epsilon = " + bs[i]);
             System.out.println("Gprime size at this iteration = " + graphPrime.getAllVertices().size());
+            //System.out.println("Reaches: " + r);
 
 
             Graph graphPrimeInv = GraphUtils.invertGraph(graphPrime);
@@ -42,7 +45,7 @@ public class Reach {
 
             Collection<Vertex> vertices = graph.getAllVertices();
             Collection<Vertex> verticesPrime = graphPrime.getAllVertices();
-            // System.out.println("V': " + verticesPrime);
+            //System.out.println("V': " + verticesPrime);
 
             Collection<Vertex> vMinusVPrime = new HashSet<>(vertices);
             vMinusVPrime.removeAll(verticesPrime);
@@ -62,9 +65,14 @@ public class Reach {
                 r.put(v, 0.0);
             }
             
-
+            int interations = 0;
             for (Vertex sPrime : verticesPrime) {
-                // System.out.println("s' = "+ sPrime);
+                if (interations % 1000 == 0) {
+                    System.out.println("1000 passed");
+                }
+                interations++;
+
+                //System.out.println("s' = "+ sPrime);
                 double g = 0;
                 double d = 0;
                 for (Neighbor x : graphInv.getNeighboursOf(sPrime)) {
@@ -186,6 +194,7 @@ public class Reach {
 
     private static Collection<Vertex> findLeaves(Vertex current, Map<Vertex, Neighbor> tree) {
         // TODO probably slow 
+        //System.out.println("Findleaves start");
         Collection<Vertex> out = new ArrayList<>();
         Collection<Vertex> notLeaf = new HashSet<>();
 
@@ -199,7 +208,8 @@ public class Reach {
         }
         Collection<Vertex> leafs = new HashSet<>(tree.keySet());
         leafs.removeAll(notLeaf);
-        
+        //System.out.println("Findleaves middle");
+
         Collection<Vertex> leafsThroughCurrent = new HashSet<>();
 
         for (Vertex v: leafs){
@@ -213,8 +223,9 @@ public class Reach {
             }
 
         }
-        return leafsThroughCurrent;
+        //System.out.println("Findleaves end");
 
+        return leafsThroughCurrent;
     }
 
 
@@ -256,7 +267,7 @@ public class Reach {
     }
 
     public static Map<Vertex, Neighbor> dijkstra(Graph g, Vertex start, Double epsilon){
-
+        System.out.println("Start djikstra with: " + start);
         //  Pseudocode from CLRS
         //  Initialize-Single-Source(G, s) (s = source)
         //  S = Ø
@@ -279,6 +290,10 @@ public class Reach {
         DistComparator comp = new DistComparator();
         PriorityQueue<Pair> pq = new PriorityQueue<>(comp);
 
+        Map<Vertex, Double> noOfChildren = new HashMap<>();
+
+        Set<Vertex> closed = new HashSet<>();
+
         pq.add(new Pair(start, 0));
         bestDist.put(start, 0.0);
         xprimeDist.put(start, 0.0);
@@ -288,6 +303,16 @@ public class Reach {
         while (pq.size() > 0) {
 
             boolean trueForAllLeaf = leafTprime.size() > 0; // if there are any, assume it's tru and disprove in for loop
+            
+            System.out.println(bestDist);
+            System.out.println(xprimeDist);
+            System.out.println(leafT);
+            System.out.println(leafTprime + "\n");
+            try{
+                //Thread.sleep(1000);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
             for (Vertex v: leafTprime) {
                 if (!(leafT.contains(v) || xprimeDist.get(v) >= 2 * epsilon)){
                     trueForAllLeaf = false;
@@ -304,6 +329,12 @@ public class Reach {
 
 
             Pair head = pq.poll();
+            if (closed.contains(head.v)){
+                continue;
+            }
+            closed.add(head.v);
+        
+            //System.out.println(head.v);
 
             /*if (xprimeDist.get(head.v) >= 2 * epsilon) {
                 System.out.println(head.v);
@@ -315,14 +346,18 @@ public class Reach {
             
             // remove parent - it's no longer a leaf!
             Neighbor parent = pred.get(head.v);
-            predTrue.put(head.v, pred.get(head.v));
+            predTrue.put(head.v, parent);
             if (parent != null) {
                 leafTprime.remove(parent.v);
             }
+            
 
             g.getNeighboursOf(head.v)
                 .forEach(n -> {
                     // RELAX
+                    if (closed.contains(n.v)){
+                        return;
+                    }
 
                     double maybeNewBestDistance = head.dist + n.distance;
                     double previousBestDistance = bestDist.getOrDefault(n.v, INF_DIST);
@@ -330,20 +365,29 @@ public class Reach {
                     if (maybeNewBestDistance < previousBestDistance) {
                         leafT.add(n.v);
                         leafT.remove(head.v);
-
                         if (!head.v.equals(start)) {
                             xprimeDist.put(n.v, xprimeDist.get(head.v) + n.distance);
                         } else {
                             xprimeDist.put(n.v, xprimeDist.get(head.v) + 0.0);
                         }
                         bestDist.put(n.v, maybeNewBestDistance);
+                        Neighbor oldParent = pred.get(n.v);
+                        if (oldParent != null){
+                            noOfChildren.put(oldParent.v, noOfChildren.get(oldParent.v) -1); // Should never give 0
+                            if (noOfChildren.get(oldParent.v) == 0){
+                                leafT.add(oldParent.v);
+                            }
+                        } 
+
                         pred.put(n.v, new Neighbor(head.v, n.distance));
+                        noOfChildren.put(head.v, noOfChildren.getOrDefault(head.v, 0.0) + 1);
 
                         // put back in PQ with new dist, but leave the old, "wrong" dist in there too.
                         pq.add(new Pair(n.v, maybeNewBestDistance)); 
                     }
                 });
         }
+        System.out.println("Dijkstra done");
         return predTrue;
     }
 
@@ -398,13 +442,47 @@ public class Reach {
         return graph;
     }
 
+    private static Graph makeSquareGraph() {
+        Graph graph = new SimpleGraph();
+        Vertex a = new NamedVertex("a");
+        Vertex b = new NamedVertex("b");
+        Vertex c = new NamedVertex("c");
+        Vertex d = new NamedVertex("d");
+        graph.addVertex(a);
+        graph.addVertex(b);
+        graph.addVertex(c);
+        graph.addVertex(d);
+
+
+        graph.addEdge(a, b, 19.23);
+        graph.addEdge(b, a, 19.23);
+        
+        graph.addEdge(a, c, 14.49);
+        graph.addEdge(c, a, 14.49);
+        
+        graph.addEdge(c, d, 19.25);
+        graph.addEdge(d, c, 19.25);
+        
+        graph.addEdge(b, d, 13.80);
+        graph.addEdge(d, b, 13.80);
+
+        return graph;
+    }
+
     public static void main(String[] args){
-        Graph graph = makeExampleGraph();
-        //Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        //Graph graph = makeExampleGraph(); 56.0791471,10.0493711
+        //Graph graph = GraphPopulator.populateGraph("boegebakken-intersections.csv");
+        Graph graph = makeSquareGraph(); 
+
+        for (Vertex v: graph.getAllVertices()){
+            for (Neighbor n: graph.getNeighboursOf(v)){
+                System.out.println(n);
+            }
+        }
 
         long timeBefore = System.currentTimeMillis();
-        //double[] bs = new double[]{5,10,25,50,100,250,500};
-        double[] bs = new double[]{1, 10, 20};
+        double[] bs = new double[]{5,10,25,50,100,250,500};
+        //double[] bs = new double[]{20};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
         
