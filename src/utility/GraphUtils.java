@@ -263,7 +263,7 @@ public class GraphUtils {
 
     
     public static Landmarks farthestLandmarks(Graph g, int noOfLandmarks){
-        // TODO THIS DOESN'T WORK AS INTENDED !!!!
+        // TODO this does something weird on small data sets, but on Denmarks does exactly what would be expected !!!!
 
         Graph ginv = invertGraph(g);
 
@@ -304,9 +304,12 @@ public class GraphUtils {
             if (i == 0) {
                 landmarks.remove(random);
                 distances.clear();
+                System.out.println(landmarks.size());
+                System.out.println(distances.size());
+
             }
             landmarks.add(maxLandmark);
-            distances.add(dijkstra(g, landmarks.get(i)));
+            distances.add(dijkstra(g, maxLandmark));
         }
         //System.out.println("\nSize of landmarks: " + landmarks.size());
         //System.out.println(landmarks);
@@ -329,7 +332,7 @@ public class GraphUtils {
 
 
     public static List<Map<Vertex, Map<Vertex, Double>>> avoidLandmarks(Graph g, int noOfLandmarks){
-
+        
         return null;
     }
 
@@ -359,14 +362,9 @@ public class GraphUtils {
 
         pq.add(new Pair(start, 0));
         
-        Map<Vertex, Double> shortest = new HashMap<>();
-
         while (pq.size() > 0) {
 
             Pair head = pq.poll();
-            if (head.dist < shortest.getOrDefault(head.v, INF_DIST)) {
-                shortest.put(head.v, head.dist);
-            }
 
 
             g.getNeighboursOf(head.v)
@@ -384,7 +382,7 @@ public class GraphUtils {
                     }
                 });
         }
-        return shortest;
+        return bestDist;
     }
 }
 

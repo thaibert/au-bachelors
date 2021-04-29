@@ -13,6 +13,10 @@ import graph.*;
 public class Reach {
     public static final double INF_DIST = Double.MAX_VALUE;
 
+
+    //TODO testing something
+    static Set<Vertex> testedForReach = new HashSet<>();
+
     // bs is a 
     public static Map<Vertex, Double> reach(Graph graph, double[] bs) {
         System.out.println("Calculating reach");
@@ -74,6 +78,8 @@ public class Reach {
 
                 // Traverse T
                 Map<Vertex, Neighbor> tree = dijkstra(graph, sPrime, bs[i]);
+                //System.out.println(sPrime.toString() + tree.keySet());
+
                 for (Vertex v : tree.keySet()) {
                     // compute r(v, T) TODO needed here?
 
@@ -87,11 +93,11 @@ public class Reach {
                             rt = bounds.get(tPrime);
                         }
                         
-                        /*if (sPrime.equals(v) || v.equals(tPrime)){
+                        if (sPrime.equals(v) || v.equals(tPrime)){
                             // There is no suffix or prefix. So it will always return 0. And it should not ?
                             // TODO remove maybe?
                             continue;
-                        }*/
+                        }
                         double rb = Math.min(g + measure(sPrime, v, tree), // todo give tree?
                                              rt + measure(v, tPrime, tree));  // todo give tree?
                         
@@ -101,6 +107,7 @@ public class Reach {
                         }
                     }
 
+                    testedForReach.add(v);
                     double reachV = calcReach(v, tree);
                     if (reachV > r.get(v)) {
                         r.put(v, reachV);
@@ -110,7 +117,11 @@ public class Reach {
 
             }
 
+
             for (Vertex v : verticesPrime) {
+                if (!testedForReach.contains(v)){
+                    r.put(v, INF_DIST);
+                }
                 Vertex u = new Vertex(56.1302396,9.7414558);
                 if (u.equals(v)){
                     System.out.println(u);
@@ -283,16 +294,22 @@ public class Reach {
                     break;
                 }
             }
-            if (trueForAllLeaf){
+            if (trueForAllLeaf){                
+                System.out.println("Break 1");
+                System.out.println("Start: " + start);
+                System.out.println(leafT);
+                System.out.println(leafTprime + "\n");
                 break;
             }
 
 
             Pair head = pq.poll();
 
-            if (xprimeDist.get(head.v) >= 2 * epsilon) {
+            /*if (xprimeDist.get(head.v) >= 2 * epsilon) {
+                System.out.println(head.v);
+                System.out.println("Break 2");
                 break;
-            }
+            }*/
 
             leafTprime.add(head.v);
             
@@ -382,17 +399,17 @@ public class Reach {
     }
 
     public static void main(String[] args){
-        //Graph graph = makeExampleGraph();
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = makeExampleGraph();
+        //Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{5,10,25,50,100,250,500};
-        //double[] bs = new double[]{1,10, 20};
+        //double[] bs = new double[]{5,10,25,50,100,250,500};
+        double[] bs = new double[]{1, 10, 20};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
         
         System.out.println(r.keySet().size() + " reaches returned");
-       // System.out.println(r);
+        System.out.println(r);
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
         saveReachArrayToFile("aarhus-silkeborg-reach", r);
