@@ -68,7 +68,7 @@ public class Reach {
             int interations = 0;
             for (Vertex sPrime : verticesPrime) {
                 if (interations % 1000 == 0) {
-                    System.out.println("1000 passed");
+                    //System.out.println("1000 passed");
                 }
                 interations++;
 
@@ -127,10 +127,7 @@ public class Reach {
 
 
             for (Vertex v : verticesPrime) {
-                if (!testedForReach.contains(v)){
-                    r.put(v, INF_DIST);
-                }
-                Vertex u = new Vertex(56.1302396,9.7414558);
+                Vertex u = new Vertex(56.1870903,10.02968);
                 if (u.equals(v)){
                     System.out.println(u);
                     System.out.println("Reach:  " + r.get(v));
@@ -485,14 +482,14 @@ public class Reach {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{25,50,100};
+        double[] bs = new double[]{25,100};
         //double[] bs = new double[]{200};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
 
         
         System.out.println(r.keySet().size() + " reaches returned");
-        System.out.println(r);
+        //System.out.println(r);
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
         saveReachArrayToFile("aarhus-silkeborg-reach", r);
