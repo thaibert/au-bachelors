@@ -267,7 +267,7 @@ public class Reach {
     }
 
     public static Map<Vertex, Neighbor> dijkstra(Graph g, Vertex start, Double epsilon){
-        System.out.println("Start djikstra with: " + start);
+        //System.out.println("Start djikstra with: " + start);
         //  Pseudocode from CLRS
         //  Initialize-Single-Source(G, s) (s = source)
         //  S = Ø
@@ -298,16 +298,18 @@ public class Reach {
         bestDist.put(start, 0.0);
         xprimeDist.put(start, 0.0);
         
+        double bestxPrimeDist = 0.0;
+        
         Map<Vertex, Double> shortest = new HashMap<>();
 
         while (pq.size() > 0) {
 
-            boolean trueForAllLeaf = leafTprime.size() > 0; // if there are any, assume it's tru and disprove in for loop
+            boolean trueForAllLeaf = leafTprime.size() > 0 && bestxPrimeDist > 2 * epsilon ; // if there are any, assume it's tru and disprove in for loop
             
-            System.out.println(bestDist);
+            /*System.out.println(bestDist);
             System.out.println(xprimeDist);
             System.out.println(leafT);
-            System.out.println(leafTprime + "\n");
+            System.out.println(leafTprime + "\n");*/
             try{
                 //Thread.sleep(1000);
             } catch(Exception e) {
@@ -320,10 +322,10 @@ public class Reach {
                 }
             }
             if (trueForAllLeaf){                
-                System.out.println("Break 1");
-                System.out.println("Start: " + start);
+                //System.out.println("Break 1");
+                /*System.out.println("Start: " + start);
                 System.out.println(leafT);
-                System.out.println(leafTprime + "\n");
+                System.out.println(leafTprime + "\n");*/
                 break;
             }
 
@@ -334,6 +336,8 @@ public class Reach {
             }
             closed.add(head.v);
         
+            bestxPrimeDist = xprimeDist.get(head.v);
+
             //System.out.println(head.v);
 
             /*if (xprimeDist.get(head.v) >= 2 * epsilon) {
@@ -387,7 +391,7 @@ public class Reach {
                     }
                 });
         }
-        System.out.println("Dijkstra done");
+        //System.out.println("Dijkstra done");
         return predTrue;
     }
 
@@ -470,21 +474,22 @@ public class Reach {
     }
 
     public static void main(String[] args){
-        //Graph graph = makeExampleGraph(); 56.0791471,10.0493711
-        //Graph graph = GraphPopulator.populateGraph("boegebakken-intersections.csv");
-        Graph graph = makeSquareGraph(); 
+        //Graph graph = makeExampleGraph();
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        //Graph graph = makeSquareGraph(); 
 
-        for (Vertex v: graph.getAllVertices()){
-            for (Neighbor n: graph.getNeighboursOf(v)){
+        /*for (Vertex v: graph.getAllVertices()){
+            for (Neighbor n: graph.getNeighboursOf(v)){boegebakken-intersections
                 System.out.println(n);
             }
-        }
+        }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{5,10,25,50,100,250,500};
-        //double[] bs = new double[]{20};
+        double[] bs = new double[]{25,50,100};
+        //double[] bs = new double[]{200};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
+
         
         System.out.println(r.keySet().size() + " reaches returned");
         System.out.println(r);
