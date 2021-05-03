@@ -84,6 +84,9 @@ public class ALT implements PathfindingAlgo {
             boolean landmarksUpdated = false;
 
             for (Neighbor n : graph.getNeighboursOf(head.v)) {
+                if (settled.contains(n.v)){
+                    continue;
+                }
                 // RELAX
                 double maybeNewBestDistance = dist.get(head.v) + n.distance; // dist(s,v) + len(v,u)
                 double previousBestDistance = dist.getOrDefault(n.v, INF_DIST); // dist(s,u)
@@ -94,21 +97,20 @@ public class ALT implements PathfindingAlgo {
                     dist.put(n.v, maybeNewBestDistance);
                     parent.put(n.v, head.v);
 
-                    if (! settled.contains(n.v)) {
-                        double pi = landmarkSelector.pi(n.v, goal);
+                    double pi = landmarkSelector.pi(n.v, goal);
 
-                        // b(10−i)/10,    b is original lower bound from s->t, i is checkpoint
-                        boolean tenPercentMore = pi < originalPi * (10 - landmarkCheckpoint) / 10;
-                        boolean enoughIterations = iterationsSinceLastLandmarkUpdate > 100;
+                    // b(10−i)/10,    b is original lower bound from s->t, i is checkpoint
+                    boolean tenPercentMore = pi < originalPi * (10 - landmarkCheckpoint) / 10;
+                    boolean enoughIterations = iterationsSinceLastLandmarkUpdate > 100;
 
-                        if (tenPercentMore && enoughIterations) {
-                            landmarksUpdated = true;
-                            landmarkCheckpoint++;
-                            iterationsSinceLastLandmarkUpdate = 0;
-                        }
-
-                        pq.add(new Pair(n.v, maybeNewBestDistance + pi)); 
+                    if (tenPercentMore && enoughIterations) {
+                        landmarksUpdated = true;
+                        landmarkCheckpoint++;
+                        iterationsSinceLastLandmarkUpdate = 0;
                     }
+
+                    pq.add(new Pair(n.v, maybeNewBestDistance + pi)); 
+
                 }
             }
 
