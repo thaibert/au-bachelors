@@ -33,6 +33,10 @@ public class LandmarkSelector {
     public void setAllLandmarks(){
         activeLandmarks = distanceFromLandmark.keySet();
     }
+    
+    public void resetLandmarks(){
+        activeLandmarks = new HashSet<>();
+    }
 
     public boolean updateLandmarks(Vertex curr, Vertex goal, int numberToAdd){
         ArrayList<Pair> pairs = new ArrayList<>();

@@ -192,6 +192,9 @@ public class BidirectionalALT implements PathfindingAlgo{
 
         Solution solution = new Solution(out2, edgesConsidered, touchNode);
 
+        // Reset landmarks, so they don't carry over if multiple queries are run in series.
+        landmarkSelector.resetLandmarks();
+
         return solution;
     }
 

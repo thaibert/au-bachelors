@@ -166,6 +166,9 @@ public class ALT implements PathfindingAlgo {
 
         Solution solution = new Solution(out, edgesConsidered, null);
 
+        // Reset landmarks, so they don't carry over if multiple queries are run in series.
+        landmarkSelector.resetLandmarks();
+
         return solution;
     }
 
