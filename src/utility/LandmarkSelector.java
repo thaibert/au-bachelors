@@ -84,6 +84,7 @@ public class LandmarkSelector {
     public double pi(Vertex curr, Vertex goal) {
 
         double max = 0.0; // TODO maybe -inf
+        // http://www-or.amp.i.kyoto-u.ac.jp/members/ohshima/Paper/MThesis/MThesis.pdf
         for (Vertex l : activeLandmarks) {
             Map<Vertex, Double> distTo = distanceToLandmark.get(l);
             Map<Vertex, Double> distFrom = distanceFromLandmark.get(l);

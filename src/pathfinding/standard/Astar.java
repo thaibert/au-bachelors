@@ -13,6 +13,8 @@ public class Astar implements PathfindingAlgo {
     private Map<Vertex, Double> dist;
     private Map<Vertex, Vertex> pred; // S in the algo is pred.keySet()
 
+    private Set<Vertex> settled;
+
     // For visual
     private List<Edge> edgesConsidered;
 
@@ -21,6 +23,7 @@ public class Astar implements PathfindingAlgo {
     }
 
     public Solution shortestPath(Vertex start, Vertex goal){
+        settled = new HashSet<>();
 
         dist = new HashMap<>();
         pred = new HashMap<>();
@@ -38,6 +41,7 @@ public class Astar implements PathfindingAlgo {
 
         while (pq.size() > 0) {
             Pair min = pq.poll(); // Should retrieve the lowest Fscore
+            settled.add(min.v);
 
             if (min.v.equals(goal)) {
                 System.out.println("  --> Finished early");
@@ -45,6 +49,9 @@ public class Astar implements PathfindingAlgo {
             }
 
             g.getNeighboursOf(min.v).forEach(n -> {
+                if (settled.contains(n.v)){
+                    return;
+                }
                 double tent_gScore = dist.getOrDefault(min.v, INF_DIST) + n.distance;
                 double potentialNewFscore = tent_gScore + heuristic(n.v, goal);
 
@@ -89,14 +96,14 @@ public class Astar implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-all-roads.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
 
 
         Vertex a = new Vertex(56.0440049,9.9025227);
         Vertex b = new Vertex(56.1814955,10.2042923);
 
         Astar d = new Astar(graph);
-        Solution solution = d.shortestPath(Location.Esbjerg, Location.CPH);
+        Solution solution = d.shortestPath(Location.CPH, Location.Esbjerg);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());

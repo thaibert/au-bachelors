@@ -191,7 +191,10 @@ public class DijkstraReach implements PathfindingAlgo {
             }
         }
 
-
+        GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        vis2.drawPath(solution2.getShortestPath());
+        vis2.drawVisited(solution2.getVisited());
+        vis2.visualize("Dijkstra");
 
 
     }
