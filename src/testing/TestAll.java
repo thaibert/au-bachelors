@@ -155,7 +155,7 @@ public class TestAll {
 
         LandmarkSelector ls = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
 
-        algos[DIJKSTRA_TRADITIONAL] = new Dijkstra(g);
+        algos[DIJKSTRA_TRADITIONAL] = new Dijkstra(g); //TODO change to DijkstraTraditional, its just slow to run
         algos[DIJKSTRA_OURS] = new Dijkstra(g);
         algos[ASTAR] = new Astar(g);
         algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
