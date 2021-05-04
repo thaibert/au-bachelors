@@ -34,6 +34,8 @@ public class Reach {
         }
 
         for (int i = 0; i < bs.length; i++) {
+            long timeBefore = System.currentTimeMillis();
+
             // Iterate!
             System.out.println("Iterating, epsilon = " + bs[i]);
             System.out.println("Gprime size at this iteration = " + graphPrime.getAllVertices().size());
@@ -85,7 +87,7 @@ public class Reach {
                 }
 
                 // Traverse T
-                Map<Vertex, Neighbor> tree = dijkstra(graph, sPrime, bs[i]);
+                Map<Vertex, Neighbor> tree = dijkstra(graphPrime, sPrime, bs[i]);
                 //System.out.println(sPrime.toString() + tree.keySet());
 
                 for (Vertex v : tree.keySet()) {
@@ -134,7 +136,7 @@ public class Reach {
                     System.out.println("Bounds: " + bounds.get(u));
                 }
                 if (r.get(v) >= bs[i]) {
-                    bounds.put(v, INF_DIST);
+                    bounds.put(v, INF_DIST); // Reach not validated  
                 }
                 if (u.equals(v)){
                     System.out.println(u);
@@ -163,11 +165,15 @@ public class Reach {
 
             graphPrime = newGPrime;
 
+            long timeAfter = System.currentTimeMillis();
+            System.out.println("Calculating reach iteration " + i + " took " + ((timeAfter-timeBefore)/1000) + " seconds");
+
+
         }
         // All the nodes still in Gprime, their reaches have not been "settled" yet, so set them = inf
         for (Vertex v : graph.getAllVertices()) {
             if (bounds.get(v) == INF_DIST) {
-                r.put(v, INF_DIST);            
+                r.put(v, INF_DIST);       
             }
         }
 
@@ -389,7 +395,8 @@ public class Reach {
                 });
         }
         //System.out.println("Dijkstra done");
-        return predTrue;
+        // TODO is it T or T' that should be returned here. It seems that i get ther ight results if i return T.
+        return pred;
     }
 
     private static Graph makeExampleGraph() {
@@ -471,8 +478,8 @@ public class Reach {
     }
 
     public static void main(String[] args){
-        //Graph graph = makeExampleGraph();
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = makeExampleGraph();
+        //Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //Graph graph = makeSquareGraph(); 
 
         /*for (Vertex v: graph.getAllVertices()){
@@ -482,17 +489,17 @@ public class Reach {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{25,100};
-        //double[] bs = new double[]{200};
+        //double[] bs = new double[]{25,100, 250, 500, 1000, 2000, 5000, 10000};
+        double[] bs = new double[]{200};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
 
         
         System.out.println(r.keySet().size() + " reaches returned");
-        //System.out.println(r);
+        System.out.println(r);
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
-        saveReachArrayToFile("aarhus-silkeborg-reach", r);
+        //saveReachArrayToFile("aarhus-silkeborg-reach3", r);
 
     }
 
