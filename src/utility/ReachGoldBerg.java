@@ -41,12 +41,26 @@ public class ReachGoldBerg {
                 }
             }
             // Prune
-            
+            Graph newGPrime = new SimpleGraph();
+            for (Vertex v: graphPrime.getAllVertices()){
+                for (Neighbor n: graphPrime.getNeighboursOf(v)){
+                    Edge vn = new Edge(v,n.v, 0.0);
+                    if (r.get(vn) > bs[i]){
+                        if (!newGPrime.getAllVertices().contains(v)){
+                            newGPrime.addVertex(v);
+                        }
+                        if(!newGPrime.getAllVertices().contains(n.v)){
+                            newGPrime.addVertex(n.v);
+                        }
+                        newGPrime.addEdge(v, n.v, n.distance);
+                    } 
+                }
+            }
 
             // Penalties
             for (Vertex v: graphPrime.getAllVertices()){
                 //TODO in penalties
-
+                
 
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
                     outPenalties.put(v, Math.max(outPenalties.getOrDefault(v, 0.0), r.get(new Edge(v, n.v, 0.0))));
