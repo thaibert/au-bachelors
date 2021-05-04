@@ -30,9 +30,25 @@ public class ReachGoldBerg {
                 Tree tree = partialTree(graphPrime, v, bs[i]);
                 // We do not include v according to Goldberg
                 tree.inner.remove(v);
+
+                // Modify tree according to the out-penalties
+                int x = 0;
+                int y = 0;
+                for (Vertex w: tree.closed){ // TODO this is ugly
+                    tree.leafs.remove(w);
+                    Vertex wPrime = new Vertex(x,y); // This is the pseudo nodes
+                    x++; 
+                    y++;
+                    tree.dist.put(wPrime, tree.dist.get(w) + outPenalties.get(w));
+                    tree.leafs.add(wPrime);
+                    Set<Vertex> path = new HashSet<>(tree.paths.get(w));
+                    path.add(w);
+                    tree.paths.put(wPrime, path);
+                }
+
                 for (Vertex u: tree.inner){
                     for (Neighbor n: graphPrime.getNeighboursOf(u)){
-                        Double tempR = calcReach(u,n.v, tree);
+                        Double tempR = calcReach(u,n.v, tree, inPenalties.get(v));
                         Edge un = new Edge(v, u, 0.0);
                         if (r.get(un) < tempR){
                             r.put(un, tempR);
@@ -59,11 +75,11 @@ public class ReachGoldBerg {
 
             // Penalties
             for (Vertex v: graphPrime.getAllVertices()){
-                //TODO in penalties
-                
-
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
-                    outPenalties.put(v, Math.max(outPenalties.getOrDefault(v, 0.0), r.get(new Edge(v, n.v, 0.0))));
+                    Edge edge = new Edge(v, n.v, 0.0);
+                    outPenalties.put(v, Math.max(outPenalties.getOrDefault(v, 0.0), r.get(edge)));
+
+                    inPenalties.put(n.v, Math.max(inPenalties.getOrDefault(n.v, 0.0), r.get(edge)));
                 }
             }
             
@@ -73,19 +89,36 @@ public class ReachGoldBerg {
 
         } 
 
+        // TODO Refinement phase?
+        // This just gives better upperbound by doing some recalculation.
 
+        // TODO translate from arc reach into vertex reach
+        // TODO Can maybe be done better
+        Map<Vertex, Double> maxIncomming = new HashMap<>();
+        Map<Vertex, Double> maxOutgoing = new HashMap<>();
+
+        for (Vertex v: graph.getAllVertices()){
+            for (Neighbor n: graph.getNeighboursOf(v)){
+                Edge edge = new Edge(v, n.v, 0.0);
+                maxIncomming.put(n.v, Math.max(r.get(edge), maxIncomming.getOrDefault(n.v, 0.0)));
+                maxOutgoing.put(v, Math.max(r.get(edge), maxOutgoing.getOrDefault(v, 0.0)));
+            }
+        }
+        for (Vertex v: graph.getAllVertices()){
+            rVertex.put(v, Math.min(maxIncomming.get(v), maxOutgoing.get(v)));
+        }
 
         return rVertex;
     }
 
-    public static Double calcReach(Vertex v, Vertex u, Tree tree){
+    public static Double calcReach(Vertex v, Vertex u, Tree tree, double penalty){
 
-        return Math.min(depth(v,u, tree), height(v,u,tree));
+        return Math.min(depth(v,u, tree, penalty), height(v,u,tree));
 
     }
 
-    public static double depth(Vertex v, Vertex u, Tree tree){
-        return tree.dist.get(u); // TODO i think it's to the end of the edge, but unsure
+    public static double depth(Vertex v, Vertex u, Tree tree, double penalty){
+        return tree.dist.get(u) + penalty ; // TODO i think it's to the end of the edge, but unsure
     }
 
     public static double height(Vertex v, Vertex u, Tree tree){
@@ -227,8 +260,8 @@ public class ReachGoldBerg {
 
 
     public static void main(String[] args){
-        //Graph graph = makeExampleGraph();
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = makeExampleGraph();
+        //Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //Graph graph = makeSquareGraph(); 
 
         /*for (Vertex v: graph.getAllVertices()){
@@ -238,17 +271,17 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{25,100, 250, 500};
-        //double[] bs = new double[]{200};
+        //double[] bs = new double[]{25,100, 250, 500};
+        double[] bs = new double[]{10};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
 
         
         System.out.println(r.keySet().size() + " reaches returned");
-        //System.out.println(r);
+        System.out.println(r);
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
-        saveReachArrayToFile("aarhus-silkeborg-reach", r);
+        //saveReachArrayToFile("aarhus-silkeborg-reach", r);
 
     }
 
