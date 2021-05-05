@@ -23,6 +23,13 @@ public class ReachGoldBerg {
         Map<Vertex, Double> rVertex = new HashMap<>();
 
         for (int i = 0; i < bs.length; i++){
+            for (Vertex v: graphPrime.getAllVertices()){
+                for (Neighbor n: graphPrime.getNeighboursOf(v)){
+                    Edge edge = new Edge(v, n.v, 0.0);
+                    r.put(edge, 0.0);
+                }
+            }
+
             //Iterative step
             System.out.println("Iteration " + i);
             System.out.println("Works with gPrime size: " + graphPrime.getAllVertices().size());
@@ -288,8 +295,8 @@ public class ReachGoldBerg {
 
 
     public static void main(String[] args){
-        //Graph graph = makeExampleGraph();
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = makeExampleGraph();
+        //Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //Graph graph = makeSquareGraph(); 
 
         /*for (Vertex v: graph.getAllVertices()){
@@ -299,14 +306,14 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{25,100, 250, 500, 1000, 2000, 5000, 10000, 50000};
-        //double[] bs = new double[]{1,5, 10, 25};
+        //double[] bs = new double[]{25,100, 250, 500, 1000, 2000, 5000, 10000, 50000};
+        double[] bs = new double[]{1,5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
 
         
         System.out.println(r.keySet().size() + " reaches returned");
-        //System.out.println(r);
+        System.out.println(r);
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
         /*for (Vertex v: r.keySet()){
