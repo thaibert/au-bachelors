@@ -167,7 +167,7 @@ public class DijkstraReach implements PathfindingAlgo {
         //Map<Vertex, Double> r = Reach.reach(graph, bs);
         // if run rn, this 56.1302396,9.7414558 is pruned away when it shouldn't because its reach is low.fileOne
 
-        Map<Vertex, Double> r = readReaches("aarhus-silkeborg-reach3");
+        Map<Vertex, Double> r = readReaches("aarhus-silkeborg-GoldbergReach");
 
         Vertex a = new Vertex(56.1336391,9.7235112);
         Vertex b = new Vertex(56.1906785,10.0880127);
