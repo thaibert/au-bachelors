@@ -211,16 +211,10 @@ public class ReachGoldBerg {
         paths.put(x, new HashSet<Vertex>());
         
         double bestxPrimeDist = 0.0;
-
-
-        Set<Vertex> xChildren = new HashSet<>();
-        for (Neighbor n : g.getNeighboursOf(x)){
-            xChildren.add(n.v);
-        }
         
         while (pq.size() > 0) {
-            // The last part of this is very improvised 
-            boolean trueForAllLeaf = leafTprime.size() > 0 && bestxPrimeDist > 2 * epsilon && closed.contains(xChildren); // if there are any, assume it's tru and disprove in for loop
+
+            boolean trueForAllLeaf = leafTprime.size() > 0 && bestxPrimeDist > 2 * epsilon ; // if there are any, assume it's tru and disprove in for loop
             
             /*System.out.println(bestDist);
             System.out.println(xprimeDist);
@@ -335,7 +329,7 @@ public class ReachGoldBerg {
 
         long timeBefore = System.currentTimeMillis();
         //double[] bs = new double[]{25,100, 250, 500, 1000, 2000, 5000, 10000, 50000};
-        double[] bs = new double[]{1,5, 10, 25};
+        double[] bs = new double[]{25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
 
