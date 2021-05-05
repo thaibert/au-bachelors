@@ -66,6 +66,10 @@ public class ReachGoldBerg {
                 }
             }
             // Prune
+            Set<Edge> lostArcs = new HashSet<>();
+
+            System.out.println("Reaches at the time of pruning, with bs[i] = " + bs[i]);
+            System.out.println(r);
             Graph newGPrime = new SimpleGraph();
             for (Vertex v: graphPrime.getAllVertices()){
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
@@ -80,8 +84,16 @@ public class ReachGoldBerg {
                         newGPrime.addEdge(v, n.v, n.distance);
                     } else {
                         //System.out.println("Edge pruned :" + v + n.v);
+                        lostArcs.add(vn);
                     }
                 }
+            }
+            graphPrime = newGPrime; //TODO IS THIS THE RIGHT PLACE
+
+            System.out.println("New gprime: " + graphPrime.getAllVertices());
+            System.out.println("New edges in grpime");
+            for (Vertex v: graphPrime.getAllVertices()){
+                System.out.println("Vertex v " + v + graphPrime.getNeighboursOf(v));
             }
 
             // Penalties
@@ -89,6 +101,8 @@ public class ReachGoldBerg {
                 for (Neighbor n: graph.getNeighboursOf(v)){
                     if (graphPrime.getAllVertices().contains(v) && graphPrime.getNeighboursOf(v).contains(n)) {
                         continue;
+                    } else {
+                        //System.out.println("Arc is no longer in graphprime: " +  v.toString() + n.v);
                     }
                     // TODO check that penalty should only be added if they're not in the graph anymore
                     Edge edge = new Edge(v, n.v, 0.0);
@@ -97,7 +111,14 @@ public class ReachGoldBerg {
                     inPenalties.put(n.v, Math.max(inPenalties.getOrDefault(n.v, 0.0), r.getOrDefault(edge, 0.0)));
                 }
             }
-            graphPrime = newGPrime; //TODO IS THIS THE RIGHT PLACE
+            // Lost arcs in iteration i
+            System.out.println("Lost arcs in iteration " + i);
+            System.out.println(lostArcs);
+
+            System.out.println("Penalties after iteration " + i + " values = ");
+            System.out.println("out: " + outPenalties);
+            System.out.println("in : " + inPenalties);
+
 
             // Shortcuts
             shortcut(graphPrime, bs[i]); //TODO what graph should this be given
