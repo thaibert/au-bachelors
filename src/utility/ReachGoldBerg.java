@@ -72,7 +72,7 @@ public class ReachGoldBerg {
                         }
                         newGPrime.addEdge(v, n.v, n.distance);
                     } else {
-                        System.out.println("Edge pruned :" + v + n.v);
+                        //System.out.println("Edge pruned :" + v + n.v);
                     }
                 }
             }
@@ -113,7 +113,16 @@ public class ReachGoldBerg {
             }
         }
         for (Vertex v: graph.getAllVertices()){
-            rVertex.put(v, Math.min(maxIncomming.get(v), maxOutgoing.get(v)));
+            /*if (maxIncomming.get(v) == null || maxOutgoing.get(v) == null){
+                System.out.println(v);
+            }*/
+            rVertex.put(v, Math.min(maxIncomming.getOrDefault(v, INF_DIST), maxOutgoing.getOrDefault(v, INF_DIST)));
+        }
+
+        for (Vertex v: graph.getAllVertices()) {
+            if (rVertex.get(v) > bs[bs.length-1]){
+                rVertex.put(v, INF_DIST);
+            }
         }
 
         return rVertex;
@@ -213,6 +222,17 @@ public class ReachGoldBerg {
                 outerCircle.add(head.v);
             }
 
+
+            leafTprime.add(head.v);
+
+            bestxPrimeDist = xprimeDist.get(head.v);
+
+            // remove parent - it's no longer a leaf!
+            Vertex parent = pred.get(head.v);
+            if (parent != null) {
+                leafTprime.remove(parent);
+            }
+
             g.getNeighboursOf(head.v)
                 .forEach(n -> {
                     // RELAX
@@ -279,8 +299,8 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{25,100, 250, 500};
-        //double[] bs = new double[]{5, 10, 25};
+        double[] bs = new double[]{25,100, 250, 500, 1000, 2000, 5000, 10000, 50000};
+        //double[] bs = new double[]{1,5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
 
@@ -289,7 +309,13 @@ public class ReachGoldBerg {
         //System.out.println(r);
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
-        //saveReachArrayToFile("aarhus-silkeborg-reach5", r);
+        /*for (Vertex v: r.keySet()){
+            if (r.get(v) < INF_DIST){
+                System.out.println(v + " with reach " + r.get(v));
+            }
+        }*/
+
+        saveReachArrayToFile("aarhus-silkeborg-GoldbergReach", r);
 
     }
 
