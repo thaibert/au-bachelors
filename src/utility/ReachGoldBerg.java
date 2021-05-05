@@ -43,11 +43,11 @@ public class ReachGoldBerg {
                 Tree tree = partialTree(graphPrime, v, bs[i]);
                 // We do not include v according to Goldberg
                 tree.inner.remove(v);
-                System.out.println("Vertex " + v + " have tree inner = " + tree.inner + " and outer " + tree.outer);
 
                 // Modify tree according to the out-penalties
                 int x = 0;
                 int y = 0;
+                Set<Vertex> newClosed = new HashSet<>(tree.closed);
                 for (Vertex w: tree.closed){ // TODO this is ugly
                     tree.leafs.remove(w);
                     Vertex wPrime = new Vertex(x,y); // This is the pseudo leafs
@@ -58,7 +58,9 @@ public class ReachGoldBerg {
                     Set<Vertex> path = new HashSet<>(tree.paths.get(w));
                     path.add(w);
                     tree.paths.put(wPrime, path);
+                    newClosed.add(wPrime);
                 }
+                tree.closed = newClosed;
 
                 for (Vertex u: tree.inner){
                     for (Neighbor n: graphPrime.getNeighboursOf(u)){
@@ -66,7 +68,7 @@ public class ReachGoldBerg {
                             continue;
                         }
                         Double tempR = calcReach(u,n.v, tree, inPenalties.getOrDefault(v, 0.0));
-                        Edge un = new Edge(v, u, 0.0);
+                        Edge un = new Edge(u, n.v, 0.0);
                         if (r.getOrDefault(un, 0.0) < tempR){
                             r.put(un, tempR);
                         }
@@ -87,7 +89,7 @@ public class ReachGoldBerg {
                         }
                         newGPrime.addEdge(v, n.v, n.distance);
                     } else {
-                        System.out.println("Edge " + vn + " is pruned with reach " + r.getOrDefault(vn, INF_DIST));
+                        //System.out.println("Edge " + vn + " is pruned with reach " + r.getOrDefault(vn, INF_DIST));
                     }
                 }
             }
@@ -166,15 +168,15 @@ public class ReachGoldBerg {
     public static double height(Vertex v, Vertex u, Tree tree){
         Double h = 0.0;
         for (Vertex w: tree.leafs){
-            if (tree.paths.get(w).contains(v) && tree.closed.contains(w)) {
-                h = Math.max(h, tree.dist.get(w) - tree.dist.get(v)); // If we take the distance to the beginning node, we don't have to keep track of the length of the edge
-            } else if (tree.paths.get(w).contains(v) && !tree.closed.contains(w)){
+            if (tree.paths.get(w).contains(u) && tree.closed.contains(w)) {
+                // If we take the distance to the beginning node, we don't have to keep track of the length of the edge
+                h = Math.max(h, tree.dist.get(w) - tree.dist.get(v)); 
+            } else if (tree.paths.get(w).contains(u) && !tree.closed.contains(w)){
                 h = INF_DIST;
             } else {
                 // This happens when the leaf does not have v in its path
             }
         }
-
         return h;
     }
 
@@ -328,8 +330,8 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        //double[] bs = new double[]{25,100, 250, 500, 1000, 2000, 5000, 10000, 50000};
-        double[] bs = new double[]{25};
+        double[] bs = new double[]{5, 25, 100, 250, 500, 1000, 2000, 5000, 10000, 50000};
+        //double[] bs = new double[]{25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
 
@@ -338,11 +340,13 @@ public class ReachGoldBerg {
         System.out.println(r);
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
-        for (Vertex v: r.keySet()){
-            if (r.get(v) > 10000){
-                System.out.println(v + " with reach " + r.get(v));
+        int counter = 0;
+        for (Vertex v : r.keySet()){
+            if (r.get(v) == 0){
+                counter++;
             }
         }
+        System.out.println("number of vertices with reach 0: " + counter);
 
         saveReachArrayToFile("aarhus-silkeborg-GoldbergReach", r);
 
