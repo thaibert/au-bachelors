@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.*;
 
+import org.checkerframework.checker.units.qual.h;
 
 import graph.*;
 import pathfinding.framework.Edge;
@@ -23,16 +24,19 @@ public class ReachGoldBerg {
         Map<Vertex, Double> rVertex = new HashMap<>();
 
         for (int i = 0; i < bs.length; i++){
+
+            Set<Edge> edgesConsidered = new HashSet<>();
+
             GraphVisualiser vis2 = new GraphVisualiser(graphPrime, BoundingBox.AarhusSilkeborg);
             //vis2.visualize("Iteration " + i);
 
 
-            for (Vertex v: graphPrime.getAllVertices()){
+            /*for (Vertex v: graphPrime.getAllVertices()){
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
                     Edge edge = new Edge(v, n.v, 0.0);
                     r.put(edge, 0.0);
                 }
-            }
+            }*/
 
             //Iterative step
             System.out.println("Iteration " + i + " with bs[i] = " + bs[i]);
@@ -69,17 +73,37 @@ public class ReachGoldBerg {
                         }
                         Double tempR = calcReach(u,n.v, tree, inPenalties.getOrDefault(v, 0.0));
                         Edge un = new Edge(u, n.v, 0.0);
+                        edgesConsidered.add(un);
                         if (r.getOrDefault(un, 0.0) < tempR){
                             r.put(un, tempR);
                         }
                     }
                 }
             }
+            System.out.println(edgesConsidered.size());
+            //System.out.println(r);
             // Prune
             Graph newGPrime = new SimpleGraph();
-            for (Vertex v: graphPrime.getAllVertices()){
+            for (Edge e: r.keySet()){
+                //System.out.println(r.getOrDefault(e, 0.0));
+                    if (r.getOrDefault(e, 0.0) > bs[i]){
+                        if (!newGPrime.getAllVertices().contains(e.getStart())){
+                            newGPrime.addVertex(e.getStart());
+                        }
+                        if(!newGPrime.getAllVertices().contains(e.getEnd())){
+                            newGPrime.addVertex(e.getEnd());
+                        }
+                        newGPrime.addEdge(e.getStart(), e.getEnd(), e.getDist());
+                    } else {
+                        //System.out.println("Edge " + vn + " is pruned with reach " + r.getOrDefault(vn, INF_DIST));
+                    }
+            }
+        
+
+            /*for (Vertex v: graphPrime.getAllVertices()){
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
-                    Edge vn = new Edge(v,n.v, 0.0);
+                    Edge vn = new Edge(v, n.v, 0.0);
+                    System.out.println(r.getOrDefault(vn, 0.0));
                     if (r.getOrDefault(vn, 0.0) > bs[i]){
                         if (!newGPrime.getAllVertices().contains(v)){
                             newGPrime.addVertex(v);
@@ -92,7 +116,7 @@ public class ReachGoldBerg {
                         //System.out.println("Edge " + vn + " is pruned with reach " + r.getOrDefault(vn, INF_DIST));
                     }
                 }
-            }
+            }*/
             graphPrime = newGPrime; //TODO IS THIS THE RIGHT PLACE
 
 
@@ -129,12 +153,17 @@ public class ReachGoldBerg {
 
         // A better translation is describe on page 13
         // https://www.microsoft.com/en-us/research/wp-content/uploads/2006/01/tr-2005-132.pdf
-        for (Vertex v: graph.getAllVertices()){
+        /*for (Vertex v: graph.getAllVertices()){
             for (Neighbor n: graph.getNeighboursOf(v)){
                 Edge edge = new Edge(v, n.v, 0.0);
                 maxIncomming.put(n.v, Math.max(r.getOrDefault(edge, INF_DIST), maxIncomming.getOrDefault(n.v, 0.0)));
                 maxOutgoing.put(v, Math.max(r.getOrDefault(edge, INF_DIST), maxOutgoing.getOrDefault(v, 0.0)));
             }
+        }*/
+
+        for (Edge e: r.keySet()){
+            maxIncomming.put(e.getEnd(), Math.max(r.getOrDefault(e, INF_DIST), maxIncomming.getOrDefault(e.getEnd(), 0.0)));
+            maxOutgoing.put(e.getStart(), Math.max(r.getOrDefault(e, INF_DIST), maxOutgoing.getOrDefault(e.getStart(), 0.0)));
         }
 
         for (Vertex v: graph.getAllVertices()){
@@ -167,6 +196,7 @@ public class ReachGoldBerg {
 
     public static double height(Vertex v, Vertex u, Tree tree){
         Double h = 0.0;
+        //System.out.println(u);
         for (Vertex w: tree.leafs){
             if (tree.paths.get(w).contains(u) && tree.closed.contains(w)) {
                 // If we take the distance to the beginning node, we don't have to keep track of the length of the edge
@@ -319,8 +349,8 @@ public class ReachGoldBerg {
     public static void main(String[] args){
         // 56.1349785,9.7198848: with reach 240.59535364050208 wrong reach
 
-        Graph graph = makeExampleGraph();
-        //Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        //Graph graph = makeExampleGraph();
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //Graph graph = makeSquareGraph(); 
 
         /*for (Vertex v: graph.getAllVertices()){
@@ -330,23 +360,23 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{5, 25, 100, 250, 500, 1000, 2000, 5000, 10000, 50000};
-        //double[] bs = new double[]{25};
+    double[] bs = new double[]{/*100, 250, 500,*/ 1000/*, 2000*/};
+        //double[] bs = new double[]{5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
 
         
         System.out.println(r.keySet().size() + " reaches returned");
-        System.out.println(r);
+        //System.out.println(r);
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
         int counter = 0;
         for (Vertex v : r.keySet()){
-            if (r.get(v) == 0){
+            if (r.get(v) > 10000){
                 counter++;
             }
         }
-        System.out.println("number of vertices with reach 0: " + counter);
+        System.out.println("number of vertices with very high reach : " + counter);
 
         saveReachArrayToFile("aarhus-silkeborg-GoldbergReach", r);
 

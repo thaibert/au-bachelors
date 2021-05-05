@@ -38,7 +38,7 @@ public class Edge {
             return false;
         }
         final Edge other = (Edge) obj;
-        if ((start != other.start) || (end != other.end) || (dist != other.dist)) {
+        if ((start != other.start) || (end != other.end)) {
             return false;
         }
         return true;
