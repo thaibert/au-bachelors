@@ -24,7 +24,7 @@ public class ReachGoldBerg {
 
         for (int i = 0; i < bs.length; i++){
             GraphVisualiser vis2 = new GraphVisualiser(graphPrime, BoundingBox.AarhusSilkeborg);
-            vis2.visualize("Iteration " + i);
+            //vis2.visualize("Iteration " + i);
 
 
             for (Vertex v: graphPrime.getAllVertices()){
@@ -43,13 +43,14 @@ public class ReachGoldBerg {
                 Tree tree = partialTree(graphPrime, v, bs[i]);
                 // We do not include v according to Goldberg
                 tree.inner.remove(v);
+                System.out.println("Vertex " + v + " have tree inner = " + tree.inner + " and outer " + tree.outer);
 
                 // Modify tree according to the out-penalties
                 int x = 0;
                 int y = 0;
                 for (Vertex w: tree.closed){ // TODO this is ugly
                     tree.leafs.remove(w);
-                    Vertex wPrime = new Vertex(x,y); // This is the pseudo nodes
+                    Vertex wPrime = new Vertex(x,y); // This is the pseudo leafs
                     x++; 
                     y++;
                     tree.dist.put(wPrime, tree.dist.get(w) + outPenalties.getOrDefault(w, 0.0));
@@ -61,6 +62,9 @@ public class ReachGoldBerg {
 
                 for (Vertex u: tree.inner){
                     for (Neighbor n: graphPrime.getNeighboursOf(u)){
+                        if (!tree.paths.get(n.v).contains(u)){
+                            continue;
+                        }
                         Double tempR = calcReach(u,n.v, tree, inPenalties.getOrDefault(v, 0.0));
                         Edge un = new Edge(v, u, 0.0);
                         if (r.getOrDefault(un, 0.0) < tempR){
@@ -82,7 +86,9 @@ public class ReachGoldBerg {
                             newGPrime.addVertex(n.v);
                         }
                         newGPrime.addEdge(v, n.v, n.distance);
-                    } 
+                    } else {
+                        System.out.println("Edge " + vn + " is pruned with reach " + r.getOrDefault(vn, INF_DIST));
+                    }
                 }
             }
             graphPrime = newGPrime; //TODO IS THIS THE RIGHT PLACE
@@ -118,23 +124,29 @@ public class ReachGoldBerg {
         Map<Vertex, Double> maxIncomming = new HashMap<>();
         Map<Vertex, Double> maxOutgoing = new HashMap<>();
 
+
+        // A better translation is describe on page 13
+        // https://www.microsoft.com/en-us/research/wp-content/uploads/2006/01/tr-2005-132.pdf
         for (Vertex v: graph.getAllVertices()){
             for (Neighbor n: graph.getNeighboursOf(v)){
                 Edge edge = new Edge(v, n.v, 0.0);
-                maxIncomming.put(n.v, Math.max(r.getOrDefault(edge, INF_DIST), maxIncomming.getOrDefault(n.v, INF_DIST)));
-                maxOutgoing.put(v, Math.max(r.getOrDefault(edge, INF_DIST), maxOutgoing.getOrDefault(v, INF_DIST)));
+                maxIncomming.put(n.v, Math.max(r.getOrDefault(edge, INF_DIST), maxIncomming.getOrDefault(n.v, 0.0)));
+                maxOutgoing.put(v, Math.max(r.getOrDefault(edge, INF_DIST), maxOutgoing.getOrDefault(v, 0.0)));
             }
         }
+
         for (Vertex v: graph.getAllVertices()){
             /*if (maxIncomming.get(v) == null || maxOutgoing.get(v) == null){
                 System.out.println(v);
             }*/
             rVertex.put(v, Math.min(maxIncomming.getOrDefault(v, INF_DIST), maxOutgoing.getOrDefault(v, INF_DIST)));
         }
-
+        //System.out.println(rVertex);
         for (Vertex v: graph.getAllVertices()) {
             if (rVertex.get(v) > bs[bs.length-1]){
                 rVertex.put(v, INF_DIST);
+            } else {
+                //System.out.println( v + " not set to inf");
             }
         }
 
@@ -158,6 +170,8 @@ public class ReachGoldBerg {
                 h = Math.max(h, tree.dist.get(w) - tree.dist.get(v)); // If we take the distance to the beginning node, we don't have to keep track of the length of the edge
             } else if (tree.paths.get(w).contains(v) && !tree.closed.contains(w)){
                 h = INF_DIST;
+            } else {
+                // This happens when the leaf does not have v in its path
             }
         }
 
@@ -197,10 +211,16 @@ public class ReachGoldBerg {
         paths.put(x, new HashSet<Vertex>());
         
         double bestxPrimeDist = 0.0;
+
+
+        Set<Vertex> xChildren = new HashSet<>();
+        for (Neighbor n : g.getNeighboursOf(x)){
+            xChildren.add(n.v);
+        }
         
         while (pq.size() > 0) {
-
-            boolean trueForAllLeaf = leafTprime.size() > 0 && bestxPrimeDist > 2 * epsilon ; // if there are any, assume it's tru and disprove in for loop
+            // The last part of this is very improvised 
+            boolean trueForAllLeaf = leafTprime.size() > 0 && bestxPrimeDist > 2 * epsilon && closed.contains(xChildren); // if there are any, assume it's tru and disprove in for loop
             
             /*System.out.println(bestDist);
             System.out.println(xprimeDist);
@@ -301,8 +321,10 @@ public class ReachGoldBerg {
 
 
     public static void main(String[] args){
-        //Graph graph = makeExampleGraph();
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        // 56.1349785,9.7198848: with reach 240.59535364050208 wrong reach
+
+        Graph graph = makeExampleGraph();
+        //Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //Graph graph = makeSquareGraph(); 
 
         /*for (Vertex v: graph.getAllVertices()){
@@ -312,21 +334,21 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{25,100, 250, 500, 1000, 2000, 5000, 10000, 50000};
-        //double[] bs = new double[]{1,5, 10, 25};
+        //double[] bs = new double[]{25,100, 250, 500, 1000, 2000, 5000, 10000, 50000};
+        double[] bs = new double[]{1,5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
 
         
         System.out.println(r.keySet().size() + " reaches returned");
-        //System.out.println(r);
+        System.out.println(r);
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
-        /*for (Vertex v: r.keySet()){
-            if (r.get(v) < INF_DIST){
+        for (Vertex v: r.keySet()){
+            if (r.get(v) > 10000){
                 System.out.println(v + " with reach " + r.get(v));
             }
-        }*/
+        }
 
         saveReachArrayToFile("aarhus-silkeborg-GoldbergReach", r);
 
