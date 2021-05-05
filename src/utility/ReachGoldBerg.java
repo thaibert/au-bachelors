@@ -23,6 +23,10 @@ public class ReachGoldBerg {
         Map<Vertex, Double> rVertex = new HashMap<>();
 
         for (int i = 0; i < bs.length; i++){
+            GraphVisualiser vis2 = new GraphVisualiser(graphPrime, BoundingBox.AarhusSilkeborg);
+            vis2.visualize("Iteration " + i);
+
+
             for (Vertex v: graphPrime.getAllVertices()){
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
                     Edge edge = new Edge(v, n.v, 0.0);
@@ -31,7 +35,7 @@ public class ReachGoldBerg {
             }
 
             //Iterative step
-            System.out.println("Iteration " + i);
+            System.out.println("Iteration " + i + " with bs[i] = " + bs[i]);
             System.out.println("Works with gPrime size: " + graphPrime.getAllVertices().size());
 
             // Grow trees 
@@ -66,10 +70,6 @@ public class ReachGoldBerg {
                 }
             }
             // Prune
-            Set<Edge> lostArcs = new HashSet<>();
-
-            System.out.println("Reaches at the time of pruning, with bs[i] = " + bs[i]);
-            System.out.println(r);
             Graph newGPrime = new SimpleGraph();
             for (Vertex v: graphPrime.getAllVertices()){
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
@@ -82,19 +82,11 @@ public class ReachGoldBerg {
                             newGPrime.addVertex(n.v);
                         }
                         newGPrime.addEdge(v, n.v, n.distance);
-                    } else {
-                        //System.out.println("Edge pruned :" + v + n.v);
-                        lostArcs.add(vn);
-                    }
+                    } 
                 }
             }
             graphPrime = newGPrime; //TODO IS THIS THE RIGHT PLACE
 
-            System.out.println("New gprime: " + graphPrime.getAllVertices());
-            System.out.println("New edges in grpime");
-            for (Vertex v: graphPrime.getAllVertices()){
-                System.out.println("Vertex v " + v + graphPrime.getNeighboursOf(v));
-            }
 
             // Penalties
             for (Vertex v: graph.getAllVertices()){
@@ -111,13 +103,6 @@ public class ReachGoldBerg {
                     inPenalties.put(n.v, Math.max(inPenalties.getOrDefault(n.v, 0.0), r.getOrDefault(edge, 0.0)));
                 }
             }
-            // Lost arcs in iteration i
-            System.out.println("Lost arcs in iteration " + i);
-            System.out.println(lostArcs);
-
-            System.out.println("Penalties after iteration " + i + " values = ");
-            System.out.println("out: " + outPenalties);
-            System.out.println("in : " + inPenalties);
 
 
             // Shortcuts
@@ -136,8 +121,8 @@ public class ReachGoldBerg {
         for (Vertex v: graph.getAllVertices()){
             for (Neighbor n: graph.getNeighboursOf(v)){
                 Edge edge = new Edge(v, n.v, 0.0);
-                maxIncomming.put(n.v, Math.max(r.getOrDefault(edge, 0.0), maxIncomming.getOrDefault(n.v, 0.0)));
-                maxOutgoing.put(v, Math.max(r.getOrDefault(edge, 0.0), maxOutgoing.getOrDefault(v, 0.0)));
+                maxIncomming.put(n.v, Math.max(r.getOrDefault(edge, INF_DIST), maxIncomming.getOrDefault(n.v, INF_DIST)));
+                maxOutgoing.put(v, Math.max(r.getOrDefault(edge, INF_DIST), maxOutgoing.getOrDefault(v, INF_DIST)));
             }
         }
         for (Vertex v: graph.getAllVertices()){
@@ -316,8 +301,8 @@ public class ReachGoldBerg {
 
 
     public static void main(String[] args){
-        Graph graph = makeExampleGraph();
-        //Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        //Graph graph = makeExampleGraph();
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //Graph graph = makeSquareGraph(); 
 
         /*for (Vertex v: graph.getAllVertices()){
@@ -327,14 +312,14 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        //double[] bs = new double[]{25,100, 250, 500, 1000, 2000, 5000, 10000, 50000};
-        double[] bs = new double[]{1,5, 10, 25};
+        double[] bs = new double[]{25,100, 250, 500, 1000, 2000, 5000, 10000, 50000};
+        //double[] bs = new double[]{1,5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
 
         
         System.out.println(r.keySet().size() + " reaches returned");
-        System.out.println(r);
+        //System.out.println(r);
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
         /*for (Vertex v: r.keySet()){
