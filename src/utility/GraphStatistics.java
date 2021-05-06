@@ -1,0 +1,119 @@
+package utility;
+
+import java.io.*;
+import java.util.*;
+
+
+import graph.*;
+
+
+public class GraphStatistics {
+
+    private static void doStatistics(String filename) {
+        int edges = 0;
+        int onewayEdges = 0;
+        Map<Vertex, IntTuple> nodeDegrees = new HashMap<>(); // in-degree, out-degree
+
+        try (BufferedReader reader = new BufferedReader(
+            new InputStreamReader(
+                new FileInputStream(
+                    new File(filename))))) {
+            System.out.println("Performing statistics on " + filename);
+            String currentLine = reader.readLine(); // Read first line to skip CSV header line
+
+            Vertex prevVertex = null;
+            Vertex currVertex = null;
+            String prevWayID = "";
+            String currWayID = "";
+
+            while (null != (currentLine = reader.readLine())) {
+                // Setup "prev" values at the start rather than the end. Then we don't forget :)
+                prevWayID = currWayID;
+                prevVertex = currVertex;
+
+                String[] args = currentLine.split(",");
+                double lat = Double.valueOf(args[0]);
+                double lon = Double.valueOf(args[1]);
+                currWayID = args[2];
+                boolean oneway = "1".equals(args[3]); // args[3] is the "oneway" column. Either 1 or 0.
+
+                currVertex = new Vertex(lat, lon);
+
+                if (! prevWayID.equals(currWayID)) {
+                    // Hit a new ID; skip to next node in same way so we can construct an edge
+                    continue;
+                }
+                
+                // ========= the meat ===========
+                // If we reach here, we know for sure there's an edge from prev->curr. Maybe also the other way.
+
+                if (oneway) {
+                    onewayEdges++;
+                }
+
+                edges++;
+
+                // Increase prev's out-degree
+                IntTuple oldPrev = nodeDegrees.getOrDefault(prevVertex, new IntTuple(0, 0));
+                IntTuple newPrev = new IntTuple(oldPrev.in, oldPrev.out + 1);
+                nodeDegrees.put(prevVertex, newPrev);
+
+                // Increase curr's in-degree
+                IntTuple oldCurr = nodeDegrees.getOrDefault(currVertex, new IntTuple(0, 0));
+                IntTuple newCurr = new IntTuple(oldCurr.in + 1, oldCurr.out);
+                nodeDegrees.put(currVertex, newCurr);
+
+
+                if (! oneway) {
+                    edges++;
+
+                    // Increase prev's in-degree
+                    oldPrev = nodeDegrees.getOrDefault(prevVertex, new IntTuple(0, 0));
+                    newPrev = new IntTuple(oldPrev.in + 1, oldPrev.out);
+                    nodeDegrees.put(prevVertex, newPrev);
+
+                    // Increase curr's out-degree
+                    oldCurr = nodeDegrees.getOrDefault(currVertex, new IntTuple(0, 0));
+                    newCurr = new IntTuple(oldCurr.in, oldCurr.out + 1);
+                    nodeDegrees.put(currVertex, newCurr);
+                }
+
+                
+
+
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        } 
+
+        System.out.printf("Total nodes:  %10d\n", nodeDegrees.keySet().size() );
+        System.out.printf("Total edges:  %10d\n", edges);
+        System.out.printf("Oneway edges: %10d\n", onewayEdges);
+
+
+
+        // TODO in/out degree !
+    }
+
+
+
+    public static void main(String[] args) {
+        String filename = "denmark-latest-roads.csv";
+
+        doStatistics(filename);
+        
+    }
+
+    
+    
+}
+
+class IntTuple {
+    public final int in;
+    public final int out;
+
+    public IntTuple(int in, int out) {
+        this.in = in;
+        this.out = out;
+    }
+}
