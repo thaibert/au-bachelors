@@ -10,7 +10,7 @@ import graph.*;
 public class GraphStatistics {
 
     private static void doStatistics(String filename) {
-        int edges = 0;
+        int twowayEdges = 0;
         int onewayEdges = 0;
         Map<Vertex, IntTuple> nodeDegrees = new HashMap<>(); // in-degree, out-degree
 
@@ -49,9 +49,11 @@ public class GraphStatistics {
 
                 if (oneway) {
                     onewayEdges++;
+                } else {
+                    twowayEdges++;
                 }
 
-                edges++;
+                
 
                 // Increase prev's out-degree
                 IntTuple oldPrev = nodeDegrees.getOrDefault(prevVertex, new IntTuple(0, 0));
@@ -65,8 +67,6 @@ public class GraphStatistics {
 
 
                 if (! oneway) {
-                    edges++;
-
                     // Increase prev's in-degree
                     oldPrev = nodeDegrees.getOrDefault(prevVertex, new IntTuple(0, 0));
                     newPrev = new IntTuple(oldPrev.in + 1, oldPrev.out);
@@ -88,7 +88,7 @@ public class GraphStatistics {
 
         // Simple info
         System.out.printf("Total nodes:  %10d\n", nodeDegrees.keySet().size() );
-        System.out.printf("Total edges:  %10d\n", edges);
+        System.out.printf("Total edges:  %10d\n", twowayEdges);
         System.out.printf("Oneway edges: %10d\n", onewayEdges);
 
 
