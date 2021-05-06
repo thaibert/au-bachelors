@@ -94,14 +94,17 @@ public class GraphStatistics {
 
 
         // In / out degree
-        int[][] inOut = new int[20][20];
+        int[][] inOut = new int[20][20]; // no node should have more than 20? hahah
 
         for (Vertex key : nodeDegrees.keySet()) {
             IntTuple value = nodeDegrees.get(key);
             inOut[value.in][value.out]++;
+            if (value.in > 4 && value.out > 4) {
+                System.out.println("in " + value.in + ", out " + value.out + ": " + key);
+            }
         }
 
-        System.out.printf("in \\ out: %8d  %8d  %8d  %8d  %8d  %8d  %8d \n",
+        System.out.printf("in \\ out: %8d, %8d, %8d, %8d, %8d, %8d, %8d \n",
             1,2,3,4,5,6,7);
         for (int i = 1; i <= 7; i++) {
             System.out.printf("=== %d ==: %8d  %8d  %8d  %8d  %8d  %8d  %8d \n",
@@ -113,7 +116,7 @@ public class GraphStatistics {
 
 
     public static void main(String[] args) {
-        String filename = "denmark-latest-roads.csv";
+        String filename = "aarhus-silkeborg-intersections.csv";
 
         doStatistics(filename);
         
