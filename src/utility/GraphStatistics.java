@@ -99,9 +99,6 @@ public class GraphStatistics {
         for (Vertex key : nodeDegrees.keySet()) {
             IntTuple value = nodeDegrees.get(key);
             inOut[value.in][value.out]++;
-            if (value.in > 4 && value.out > 4) {
-                System.out.println("in " + value.in + ", out " + value.out + ": " + key);
-            }
         }
 
         System.out.printf("in \\ out: %8d, %8d, %8d, %8d, %8d, %8d, %8d \n",
@@ -116,9 +113,19 @@ public class GraphStatistics {
 
 
     public static void main(String[] args) {
-        String filename = "aarhus-silkeborg-intersections.csv";
+        String filename = "denmark-latest-roads.csv";
 
         doStatistics(filename);
+
+
+        Graph g = GraphPopulator.populateGraph(filename);
+
+        int edges = 0;
+        for (Vertex v : g.getAllVertices()) {
+            edges += g.getNeighboursOf(v).size();
+        }
+
+        System.out.println("Actual edges in graph: " + edges);
         
     }
 
