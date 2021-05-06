@@ -86,13 +86,28 @@ public class GraphStatistics {
             e.printStackTrace();
         } 
 
+        // Simple info
         System.out.printf("Total nodes:  %10d\n", nodeDegrees.keySet().size() );
         System.out.printf("Total edges:  %10d\n", edges);
         System.out.printf("Oneway edges: %10d\n", onewayEdges);
 
 
 
-        // TODO in/out degree !
+        // In / out degree
+        int[][] inOut = new int[20][20];
+
+        for (Vertex key : nodeDegrees.keySet()) {
+            IntTuple value = nodeDegrees.get(key);
+            inOut[value.in][value.out]++;
+        }
+
+        System.out.printf("in \\ out: %8d  %8d  %8d  %8d  %8d  %8d  %8d \n",
+            1,2,3,4,5,6,7);
+        for (int i = 1; i <= 7; i++) {
+            System.out.printf("=== %d ==: %8d  %8d  %8d  %8d  %8d  %8d  %8d \n",
+                i, inOut[i][1],  inOut[i][2],  inOut[i][3],  inOut[i][4],  inOut[i][5],  inOut[i][6],  inOut[i][7]  );
+        }
+
     }
 
 
