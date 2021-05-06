@@ -10,7 +10,7 @@ import graph.*;
 public class GraphStatistics {
 
     private static void doStatistics(String filename) {
-        int edges = 0;
+        int twowayEdges = 0;
         int onewayEdges = 0;
         Map<Vertex, IntTuple> nodeDegrees = new HashMap<>(); // in-degree, out-degree
 
@@ -49,9 +49,11 @@ public class GraphStatistics {
 
                 if (oneway) {
                     onewayEdges++;
+                } else {
+                    twowayEdges++;
                 }
 
-                edges++;
+                
 
                 // Increase prev's out-degree
                 IntTuple oldPrev = nodeDegrees.getOrDefault(prevVertex, new IntTuple(0, 0));
@@ -65,8 +67,6 @@ public class GraphStatistics {
 
 
                 if (! oneway) {
-                    edges++;
-
                     // Increase prev's in-degree
                     oldPrev = nodeDegrees.getOrDefault(prevVertex, new IntTuple(0, 0));
                     newPrev = new IntTuple(oldPrev.in + 1, oldPrev.out);
@@ -86,13 +86,28 @@ public class GraphStatistics {
             e.printStackTrace();
         } 
 
+        // Simple info
         System.out.printf("Total nodes:  %10d\n", nodeDegrees.keySet().size() );
-        System.out.printf("Total edges:  %10d\n", edges);
+        System.out.printf("Total edges:  %10d\n", twowayEdges);
         System.out.printf("Oneway edges: %10d\n", onewayEdges);
 
 
 
-        // TODO in/out degree !
+        // In / out degree
+        int[][] inOut = new int[20][20]; // no node should have more than 20? hahah
+
+        for (Vertex key : nodeDegrees.keySet()) {
+            IntTuple value = nodeDegrees.get(key);
+            inOut[value.in][value.out]++;
+        }
+
+        System.out.printf("in \\ out: %8d, %8d, %8d, %8d, %8d, %8d, %8d \n",
+            1,2,3,4,5,6,7);
+        for (int i = 1; i <= 7; i++) {
+            System.out.printf("=== %d ==: %8d  %8d  %8d  %8d  %8d  %8d  %8d \n",
+                i, inOut[i][1],  inOut[i][2],  inOut[i][3],  inOut[i][4],  inOut[i][5],  inOut[i][6],  inOut[i][7]  );
+        }
+
     }
 
 
@@ -101,6 +116,16 @@ public class GraphStatistics {
         String filename = "denmark-latest-roads.csv";
 
         doStatistics(filename);
+
+
+        Graph g = GraphPopulator.populateGraph(filename);
+
+        int edges = 0;
+        for (Vertex v : g.getAllVertices()) {
+            edges += g.getNeighboursOf(v).size();
+        }
+
+        System.out.println("Actual edges in graph: " + edges);
         
     }
 
