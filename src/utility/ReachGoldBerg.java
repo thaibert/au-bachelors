@@ -28,7 +28,7 @@ public class ReachGoldBerg {
             Set<Edge> edgesConsidered = new HashSet<>();
 
             GraphVisualiser vis2 = new GraphVisualiser(graphPrime, BoundingBox.AarhusSilkeborg);
-            //vis2.visualize("Iteration " + i);
+            vis2.visualize("Iteration " + i);
 
 
             /*for (Vertex v: graphPrime.getAllVertices()){
@@ -43,7 +43,21 @@ public class ReachGoldBerg {
             System.out.println("Works with gPrime size: " + graphPrime.getAllVertices().size());
 
             // Grow trees 
+            int max = graphPrime.getAllVertices().size();
+            int tenProcent = max/10;
+            int counter2 = 0;
+            int counter = 0;
+            long timeBefore = System.currentTimeMillis();
+
             for (Vertex v: graphPrime.getAllVertices()){
+                counter++;
+                if (counter % tenProcent == 0) {
+                    counter2++;
+                    System.out.println("Completed the first " + counter2*10 + "%");
+                    long timeAfter = System.currentTimeMillis();
+                    System.out.println("Total calculating time so far " + ((timeAfter-timeBefore)/1000) + " seconds");
+
+                }
                 Tree tree = partialTree(graphPrime, v, bs[i]);
                 // We do not include v according to Goldberg
                 tree.inner.remove(v);
@@ -59,7 +73,13 @@ public class ReachGoldBerg {
                     y++;
                     tree.dist.put(wPrime, tree.dist.get(w) + outPenalties.getOrDefault(w, 0.0));
                     tree.leafs.add(wPrime);
+                    if (i > 0){
+                        //System.out.println(tree.paths.get(w).size());
+                    }
                     Set<Vertex> path = new HashSet<>(tree.paths.get(w));
+                    if (i > 0){
+                        //System.out.println(path.size());
+                    }
                     path.add(w);
                     tree.paths.put(wPrime, path);
                     newClosed.add(wPrime);
@@ -72,9 +92,10 @@ public class ReachGoldBerg {
                             continue;
                         }
                         Double tempR = calcReach(u,n.v, tree, inPenalties.getOrDefault(v, 0.0));
-                        Edge un = new Edge(u, n.v, 0.0);
+                        Edge un = new Edge(u, n.v, n.distance);
                         edgesConsidered.add(un);
                         if (r.getOrDefault(un, 0.0) < tempR){
+                            //System.out.println(r.getOrDefault(un, 0.0));
                             r.put(un, tempR);
                         }
                     }
@@ -103,7 +124,7 @@ public class ReachGoldBerg {
             /*for (Vertex v: graphPrime.getAllVertices()){
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
                     Edge vn = new Edge(v, n.v, 0.0);
-                    System.out.println(r.getOrDefault(vn, 0.0));
+                    //System.out.println(r.getOrDefault(vn, 0.0));
                     if (r.getOrDefault(vn, 0.0) > bs[i]){
                         if (!newGPrime.getAllVertices().contains(v)){
                             newGPrime.addVertex(v);
@@ -211,6 +232,9 @@ public class ReachGoldBerg {
     }
 
     public static Tree partialTree(Graph g, Vertex x, double epsilon){
+        if (epsilon == 101){
+            //System.out.println("Partial tree begin");
+        }
         // This may be super inefficient to maintain all this, but we find it easier than trying to squeze it all 
         // into one data structure.
 
@@ -335,6 +359,12 @@ public class ReachGoldBerg {
         }
         //System.out.println("Dijkstra done");
         Tree tree = new Tree(bestDist, innerCircle, outerCircle, pred, leafT, paths, closed);
+
+       
+        if (epsilon == 101){
+            //System.out.println("Partial tree end");
+        }
+
         return tree;
 
     }
@@ -360,7 +390,7 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-    double[] bs = new double[]{/*100, 250, 500,*/ 1000/*, 2000*/};
+        double[] bs = new double[]{100, 250, 500, 1000, 2000, 5000, 10000, 20000};
         //double[] bs = new double[]{5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
@@ -368,6 +398,7 @@ public class ReachGoldBerg {
         
         System.out.println(r.keySet().size() + " reaches returned");
         //System.out.println(r);
+
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
         int counter = 0;
@@ -378,7 +409,7 @@ public class ReachGoldBerg {
         }
         System.out.println("number of vertices with very high reach : " + counter);
 
-        saveReachArrayToFile("aarhus-silkeborg-GoldbergReach", r);
+        saveReachArrayToFile("aarhus-silkeborg-GoldbergReachV2", r);
 
     }
 
