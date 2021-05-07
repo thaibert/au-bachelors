@@ -31,12 +31,12 @@ public class ReachGoldBerg {
             vis2.visualize("Iteration " + i);
 
 
-            /*for (Vertex v: graphPrime.getAllVertices()){
+            for (Vertex v: graphPrime.getAllVertices()){
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
-                    Edge edge = new Edge(v, n.v, 0.0);
+                    Edge edge = new Edge(v, n.v, n.distance);
                     r.put(edge, 0.0);
                 }
-            }*/
+            }
 
             //Iterative step
             System.out.println("Iteration " + i + " with bs[i] = " + bs[i]);
@@ -151,9 +151,9 @@ public class ReachGoldBerg {
                     }
                     // TODO check that penalty should only be added if they're not in the graph anymore
                     Edge edge = new Edge(v, n.v, 0.0);
-                    outPenalties.put(v, Math.max(outPenalties.getOrDefault(v, 0.0), r.getOrDefault(edge, 0.0)));
+                    outPenalties.put(v, Math.max(outPenalties.getOrDefault(v, 0.0), r.getOrDefault(edge, INF_DIST)));
 
-                    inPenalties.put(n.v, Math.max(inPenalties.getOrDefault(n.v, 0.0), r.getOrDefault(edge, 0.0)));
+                    inPenalties.put(n.v, Math.max(inPenalties.getOrDefault(n.v, 0.0), r.getOrDefault(edge, INF_DIST)));
                 }
             }
 
@@ -409,7 +409,7 @@ public class ReachGoldBerg {
         }
         System.out.println("number of vertices with very high reach : " + counter);
 
-        saveReachArrayToFile("aarhus-silkeborg-GoldbergReachV2", r);
+        saveReachArrayToFile("aarhus-silkeborg-GoldbergReachV3", r);
 
     }
 
