@@ -1,6 +1,7 @@
 package pathfinding.standard;
 
 import pathfinding.framework.*;
+import utility.GraphUtils;
 import graph.*;
 import java.util.*;
 
@@ -94,6 +95,7 @@ public class Dijkstra implements PathfindingAlgo {
         System.out.println("      " + out.size() + " nodes");
         System.out.println("      " + edgesConsidered.size() + " edges considered");
         System.out.println("      " + comp.getComparisons() + " comparisons");
+        System.out.println("      " + dist.get(goal) + " distance");
 
         Solution solution = new Solution(out, edgesConsidered, null);
 
@@ -118,16 +120,23 @@ public class Dijkstra implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-all-roads.csv");
+        Graph graph = GraphPopulator.populateGraph("map-intersections.csv");
 
 
-        Vertex a = new Vertex(56.0443399,9.9034907);
-        Vertex b = new Vertex(56.1799122,9.5522613);
+        Vertex a = new Vertex(56.1738677,10.151051);
+        Vertex b = new Vertex(56.1950259,10.2199056);
+
+        //Vertex a = GraphUtils.pickRandomVertex(graph);
+        //Vertex b = GraphUtils.pickRandomVertex(graph);
+
+        System.out.println("Node a: " + a );
+        System.out.println("Node b: " + b );
+
 
         PathfindingAlgo d = new Dijkstra(graph);
-        Solution solution = d.shortestPath(Location.Skagen, Location.CPH);
+        Solution solution = d.shortestPath(a, b);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.GreaterAarhus);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("Dijkstra ours");

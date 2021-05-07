@@ -232,6 +232,6 @@ public class XMLFilter {
     }
 
     public static void main(String[] args) {
-        filter("/media/andreas/3E3D-9507/europe-210303.osm.bz2", "europe");
+        filter("/home/andreas/Desktop/Bachelor-Project/au-bachelors/map.bz2", "map");
     }
 }

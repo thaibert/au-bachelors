@@ -100,12 +100,26 @@ public class ReachGoldBerg {
                         }
                     }
                 }
+                for (Vertex u: tree.outer){
+                    for (Neighbor n: graphPrime.getNeighboursOf(u)){
+                        if (!tree.paths.get(n.v).contains(u)){
+                            continue;
+                        }
+                        Double tempR = calcReach(u,n.v, tree, inPenalties.getOrDefault(v, 0.0));
+                        Edge un = new Edge(u, n.v, n.distance);
+                        edgesConsidered.add(un);
+                        if (r.getOrDefault(un, 0.0) < tempR){
+                            //System.out.println(r.getOrDefault(un, 0.0));
+                            r.put(un, tempR);
+                        }
+                    }
+                }
             }
             System.out.println(edgesConsidered.size());
             //System.out.println(r);
             // Prune
             Graph newGPrime = new SimpleGraph();
-            for (Edge e: r.keySet()){
+            /*for (Edge e: r.keySet()){
                 //System.out.println(r.getOrDefault(e, 0.0));
                     if (r.getOrDefault(e, 0.0) > bs[i]){
                         if (!newGPrime.getAllVertices().contains(e.getStart())){
@@ -118,14 +132,14 @@ public class ReachGoldBerg {
                     } else {
                         //System.out.println("Edge " + vn + " is pruned with reach " + r.getOrDefault(vn, INF_DIST));
                     }
-            }
+            }*/
         
 
-            /*for (Vertex v: graphPrime.getAllVertices()){
+            for (Vertex v: graphPrime.getAllVertices()){
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
-                    Edge vn = new Edge(v, n.v, 0.0);
+                    Edge vn = new Edge(v, n.v, n.distance);
                     //System.out.println(r.getOrDefault(vn, 0.0));
-                    if (r.getOrDefault(vn, 0.0) > bs[i]){
+                    if (r.getOrDefault(vn, INF_DIST) > bs[i]){
                         if (!newGPrime.getAllVertices().contains(v)){
                             newGPrime.addVertex(v);
                         }
@@ -137,7 +151,7 @@ public class ReachGoldBerg {
                         //System.out.println("Edge " + vn + " is pruned with reach " + r.getOrDefault(vn, INF_DIST));
                     }
                 }
-            }*/
+            }
             graphPrime = newGPrime; //TODO IS THIS THE RIGHT PLACE
 
 
@@ -150,7 +164,7 @@ public class ReachGoldBerg {
                         //System.out.println("Arc is no longer in graphprime: " +  v.toString() + n.v);
                     }
                     // TODO check that penalty should only be added if they're not in the graph anymore
-                    Edge edge = new Edge(v, n.v, 0.0);
+                    Edge edge = new Edge(v, n.v, n.distance);
                     outPenalties.put(v, Math.max(outPenalties.getOrDefault(v, 0.0), r.getOrDefault(edge, INF_DIST)));
 
                     inPenalties.put(n.v, Math.max(inPenalties.getOrDefault(n.v, 0.0), r.getOrDefault(edge, INF_DIST)));
@@ -299,7 +313,7 @@ public class ReachGoldBerg {
             }
             closed.add(head.v);
             // Maintain inner and outercircles. 
-            if (xprimeDist.get(head.v) < epsilon) {
+            if (xprimeDist.get(head.v) <= epsilon) {
                 innerCircle.add(head.v);
             } else {
                 outerCircle.add(head.v);
@@ -380,7 +394,7 @@ public class ReachGoldBerg {
         // 56.1349785,9.7198848: with reach 240.59535364050208 wrong reach
 
         //Graph graph = makeExampleGraph();
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("map-intersections.csv");
         //Graph graph = makeSquareGraph(); 
 
         /*for (Vertex v: graph.getAllVertices()){
@@ -409,7 +423,7 @@ public class ReachGoldBerg {
         }
         System.out.println("number of vertices with very high reach : " + counter);
 
-        saveReachArrayToFile("aarhus-silkeborg-GoldbergReachV3", r);
+        saveReachArrayToFile("map-GoldbergReach", r);
 
     }
 

@@ -162,15 +162,15 @@ public class DijkstraReach implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("map-intersections.csv");
         //double[] bs = new double[]{5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500};
         //Map<Vertex, Double> r = Reach.reach(graph, bs);
         // if run rn, this 56.1302396,9.7414558 is pruned away when it shouldn't because its reach is low.fileOne
 
-        Map<Vertex, Double> r = readReaches("aarhus-silkeborg-GoldbergReach");
+        Map<Vertex, Double> r = readReaches("map-GoldbergReach");
 
-        Vertex a = new Vertex(56.1336391,9.7235112);
-        Vertex b = new Vertex(56.1906785,10.0880127);
+        Vertex a = new Vertex(56.1738677,10.151051);
+        Vertex b = new Vertex(56.1950259,10.2199056);
 
 
         DijkstraReach d = new DijkstraReach(graph, r);
