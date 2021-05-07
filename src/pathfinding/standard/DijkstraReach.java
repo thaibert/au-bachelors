@@ -10,6 +10,8 @@ import java.util.*;
 
 import utility.*;
 
+import java.io.*;
+
 public class DijkstraReach implements PathfindingAlgo {
     private final double INF_DIST = Double.MAX_VALUE;
 
@@ -169,7 +171,55 @@ public class DijkstraReach implements PathfindingAlgo {
 
         Map<Vertex, Double> r = readReaches("map-GoldbergReach");
 
-        Vertex a = new Vertex(56.1738677,10.151051);
+
+        PrintStream originalStream = System.out;
+
+        PrintStream noopStream = new PrintStream(new OutputStream(){
+            public void write(int b) {
+                // NO-OP
+            }
+        });
+        System.setOut(noopStream);
+
+        for (int i = 0; i < 1000; i++ ){
+            Vertex a = GraphUtils.pickRandomVertex(graph);
+            Vertex b = GraphUtils.pickRandomVertex(graph);
+
+            DijkstraReach d = new DijkstraReach(graph, r);
+            Solution solution = d.shortestPath(a, b);
+    
+
+            PathfindingAlgo da = new DijkstraTraditional(graph);
+            Solution solution2 = da.shortestPath(a, b);
+
+            if (!solution.getShortestPath().equals(solution2.getShortestPath())){
+                
+
+                try {
+                    System.setOut(originalStream);
+
+                    System.out.println("Mistake found on :" + a + " -> " + b);
+
+                    GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+                    vis.drawPath(solution.getShortestPath());
+                    vis.drawVisited(solution.getVisited());
+                    vis.visualize("Dijkstra Reaches");
+
+
+                    GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+                    vis2.drawPath(solution2.getShortestPath());
+                    vis2.drawVisited(solution2.getVisited());
+                    vis2.visualize("Dijkstra");
+
+                    Thread.sleep(100000);
+
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+
+            }
+        }
+        /*Vertex a = new Vertex(56.1738677,10.151051);
         Vertex b = new Vertex(56.1950259,10.2199056);
 
 
@@ -196,7 +246,7 @@ public class DijkstraReach implements PathfindingAlgo {
         vis2.drawVisited(solution2.getVisited());
         vis2.visualize("Dijkstra");
 
-
+        */
     }
 
     public static Map<Vertex, Double> readReaches(String filename) {

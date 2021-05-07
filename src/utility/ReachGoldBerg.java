@@ -185,9 +185,9 @@ public class ReachGoldBerg {
 
             // Shortcuts
             // TODO us bs[i+1], but avoid the last edge case with indexing out of bounds....
-            Graph gPrimeShortcut = shortcut(graphPrime, bs[i]); //TODO what graph should this be given
+            //Graph gPrimeShortcut = shortcut(graphPrime, bs[i]); //TODO what graph should this be given
             
-            graphPrime = gPrimeShortcut;
+            //graphPrime = gPrimeShortcut;
 
             System.out.println("Time spent in iteration " + i + " is " +  (System.currentTimeMillis() - timeBefore)/1000);
             System.out.println("Time spent calculating reaches " + totalReachCalcTime/1000);
@@ -731,7 +731,7 @@ public class ReachGoldBerg {
         //Graph graph = makeSquareGraph(); 
 
         // Graph graph = makeSingleLineGraph();
-        Graph shortCuttedGraph = shortcut(graph, 1000);
+        /*Graph shortCuttedGraph = shortcut(graph, 1000);
         int amountOfEdges = 0;
         int edges = 0;
         for (Vertex v: shortCuttedGraph.getAllVertices()){
@@ -742,7 +742,7 @@ public class ReachGoldBerg {
         }
         
         System.out.println("The graph originally had " + edges);
-        System.out.println("The shortcutted graph have " + amountOfEdges);
+        System.out.println("The shortcutted graph have " + amountOfEdges);*/
 
         /*for (Vertex v: graph.getAllVertices()){
             for (Neighbor n: graph.getNeighboursOf(v)){boegebakken-intersections
@@ -770,7 +770,7 @@ public class ReachGoldBerg {
         }
         System.out.println("number of vertices with very high reach : " + counter);
 
-        saveReachArrayToFile("map-GoldbergReachShortCut", r);
+        saveReachArrayToFile("map-GoldbergReach", r);
 
     }
 
