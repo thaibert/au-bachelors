@@ -52,21 +52,21 @@ public class ReachGoldBerg {
 
             // Grow trees 
             int max = graphPrime.getAllVertices().size();
-            int tenProcent = max/10;
+            int tenProcent = max/10+1;
             int counter2 = 0;
             int counter = 0;
             long timeBefore = System.currentTimeMillis();
             long totalReachCalcTime = 0;
 
             for (Vertex v: graphPrime.getAllVertices()){
-                counter++;
+                /*counter++;
                 if (counter % tenProcent == 0) {
                     counter2++;
                     System.out.println("Completed the first " + counter2*10 + "%");
                     long timeAfter = System.currentTimeMillis();
                     System.out.println("Total calculating time so far " + ((timeAfter-timeBefore)/1000) + " seconds");
 
-                }
+                }*/
                 Tree tree = partialTree(graphPrime, v, bs[i]);
                 // We do not include v according to Goldberg
                 tree.inner.remove(v);
@@ -128,6 +128,8 @@ public class ReachGoldBerg {
             }
             System.out.println(edgesConsidered.size());
             //System.out.println(r);
+            
+            
             // Prune
             Graph newGPrime = new SimpleGraph();
             /*for (Edge e: r.keySet()){
@@ -150,7 +152,13 @@ public class ReachGoldBerg {
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
                     Edge vn = new Edge(v, n.v, n.distance);
                     //System.out.println(r.getOrDefault(vn, 0.0));
-                    if (r.getOrDefault(vn, INF_DIST) > bs[i]){
+                    double reach = 0;
+                    if (edgesConsidered.contains(vn)){
+                        reach = r.get(vn);
+                    } else {
+                        reach = INF_DIST;
+                    }
+                    if (reach > bs[i]){
                         if (!newGPrime.getAllVertices().contains(v)){
                             newGPrime.addVertex(v);
                         }
@@ -204,18 +212,18 @@ public class ReachGoldBerg {
 
         // A better translation is describe on page 13
         // https://www.microsoft.com/en-us/research/wp-content/uploads/2006/01/tr-2005-132.pdf
-        /*for (Vertex v: graph.getAllVertices()){
+        for (Vertex v: graph.getAllVertices()){
             for (Neighbor n: graph.getNeighboursOf(v)){
                 Edge edge = new Edge(v, n.v, 0.0);
                 maxIncomming.put(n.v, Math.max(r.getOrDefault(edge, INF_DIST), maxIncomming.getOrDefault(n.v, 0.0)));
                 maxOutgoing.put(v, Math.max(r.getOrDefault(edge, INF_DIST), maxOutgoing.getOrDefault(v, 0.0)));
             }
-        }*/
-
+        }
+        /*
         for (Edge e: r.keySet()){
             maxIncomming.put(e.getEnd(), Math.max(r.getOrDefault(e, INF_DIST), maxIncomming.getOrDefault(e.getEnd(), 0.0)));
             maxOutgoing.put(e.getStart(), Math.max(r.getOrDefault(e, INF_DIST), maxOutgoing.getOrDefault(e.getStart(), 0.0)));
-        }
+        }*/
 
         for (Vertex v: graph.getAllVertices()){
             /*if (maxIncomming.get(v) == null || maxOutgoing.get(v) == null){
@@ -726,8 +734,8 @@ public class ReachGoldBerg {
     public static void main(String[] args){
         // 56.1349785,9.7198848: with reach 240.59535364050208 wrong reach
 
-        //Graph graph = makeExampleGraph();
-        Graph graph = GraphPopulator.populateGraph("map-intersections.csv");
+        Graph graph = makeExampleGraph();
+        //Graph graph = GraphPopulator.populateGraph("map-intersections.csv");
         //Graph graph = makeSquareGraph(); 
 
         // Graph graph = makeSingleLineGraph();
@@ -751,14 +759,14 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{100, 250, 500, 1000, 2000};
-        //double[] bs = new double[]{5, 10, 25};
+        //double[] bs = new double[]{100, 250, 500/*, 1000, 2000*/};
+        double[] bs = new double[]{5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
 
         
         System.out.println(r.keySet().size() + " reaches returned");
-        //System.out.println(r);
+        System.out.println(r);
 
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
@@ -770,7 +778,7 @@ public class ReachGoldBerg {
         }
         System.out.println("number of vertices with very high reach : " + counter);
 
-        saveReachArrayToFile("map-GoldbergReach", r);
+        //saveReachArrayToFile("map-GoldbergReach250V2", r);
 
     }
 

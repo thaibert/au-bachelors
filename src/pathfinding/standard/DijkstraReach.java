@@ -169,7 +169,7 @@ public class DijkstraReach implements PathfindingAlgo {
         //Map<Vertex, Double> r = Reach.reach(graph, bs);
         // if run rn, this 56.1302396,9.7414558 is pruned away when it shouldn't because its reach is low.fileOne
 
-        Map<Vertex, Double> r = readReaches("map-GoldbergReach");
+        Map<Vertex, Double> r = readReaches("map-GoldbergReach250V2");
 
 
         PrintStream originalStream = System.out;
