@@ -326,7 +326,7 @@ public class ReachGoldBerg {
 
             // Stopping condition as shown in https://www.microsoft.com/en-us/research/wp-content/uploads/2006/01/tr-2005-132.pdf
             for (Vertex v: leafTprime) {
-                if (!(leafT.contains(v) || xprimeDist.get(v) >= 2 * epsilon)){
+                if (!(leafT.contains(v) || xprimeDist.get(v) >= 4 * epsilon)){
                     trueForAllLeaf = false;
                     break;
                 }
@@ -336,7 +336,7 @@ public class ReachGoldBerg {
                 /*System.out.println("Start: " + start);
                 System.out.println(leafT);
                 System.out.println(leafTprime + "\n");*/
-                //break;
+                break;
             }
 
 
@@ -744,7 +744,7 @@ public class ReachGoldBerg {
         // 56.1349785,9.7198848: with reach 240.59535364050208 wrong reach
 
         //Graph graph = makeExampleGraph();
-        Graph graph = GraphPopulator.populateGraph("map-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //Graph graph = makeSquareGraph(); 
 
         // Graph graph = makeSingleLineGraph();
@@ -787,7 +787,7 @@ public class ReachGoldBerg {
         }
         System.out.println("number of vertices with very high reach : " + counter);
 
-        saveReachArrayToFile("lilleAarhus-GoldbergReach500V2", r);
+        saveReachArrayToFile("aarhus-silkeborg-GoldbergReachV4", r);
 
     }
 
