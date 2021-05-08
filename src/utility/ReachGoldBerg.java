@@ -336,7 +336,7 @@ public class ReachGoldBerg {
                 /*System.out.println("Start: " + start);
                 System.out.println(leafT);
                 System.out.println(leafTprime + "\n");*/
-                break;
+                //break;
             }
 
 
@@ -768,8 +768,8 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{/*250, 500, */1000, 2000, 5000};
-        //double[] bs = new double[]{5, 10, 25};
+        double[] bs = new double[]{100, 250, 500, 1000, 2000, 5000};
+        //double[] bs = new double[]{1,2,3,4,5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
 

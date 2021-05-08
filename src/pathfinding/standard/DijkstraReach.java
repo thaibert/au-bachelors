@@ -105,7 +105,7 @@ public class DijkstraReach implements PathfindingAlgo {
 
                     if (maybeNewBestDistance < previousBestDistance) {
                         // Reach pruning:
-                        if (reaches.get(n.v) < maybeNewBestDistance && reaches.get(n.v) < GraphUtils.haversineDist(n.v, goal) ){
+                        if (reaches.get(n.v)*1.00001 < maybeNewBestDistance && reaches.get(n.v)*1.00001 < GraphUtils.haversineDist(n.v, goal) ){
                             //System.out.println("Node pruned with reaching");
                             prunedNodes.add(n.v);
                             nodesPruned++;
@@ -171,7 +171,7 @@ public class DijkstraReach implements PathfindingAlgo {
 
         Map<Vertex, Double> r = readReaches("lilleAarhus-GoldbergReach500V2");
 
-
+        
         PrintStream originalStream = System.out;
 
         PrintStream noopStream = new PrintStream(new OutputStream(){
@@ -218,9 +218,9 @@ public class DijkstraReach implements PathfindingAlgo {
                 }
 
             }
-        }
-        /*Vertex a = new Vertex(56.1715492,10.1809992);
-        Vertex b = new Vertex(56.1726046,10.2029983);
+        }/*
+        Vertex a = new Vertex(56.1626334,10.2143558);
+        Vertex b = new Vertex(56.1646736,10.187033);
 
 
         DijkstraReach d = new DijkstraReach(graph, r);
@@ -247,8 +247,8 @@ public class DijkstraReach implements PathfindingAlgo {
         vis2.drawPath(solution2.getShortestPath());
         vis2.drawVisited(solution2.getVisited());
         vis2.visualize("Dijkstra");
-        */
         
+        */
     }
 
     public static Map<Vertex, Double> readReaches(String filename) {

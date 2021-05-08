@@ -232,6 +232,6 @@ public class XMLFilter {
     }
 
     public static void main(String[] args) {
-        filter("/home/andreas/Desktop/Bachelor-Project/au-bachelors/lilleAarhus.osm.bz2", "map");
+        filter("/home/andreas/Desktop/Bachelor-Project/au-bachelors/failedReach.osm.bz2", "reachFailed");
     }
 }

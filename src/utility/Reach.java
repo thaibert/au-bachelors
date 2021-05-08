@@ -478,9 +478,9 @@ public class Reach {
     }
 
     public static void main(String[] args){
-        //Graph graph = makeExampleGraph();
+        Graph graph = makeExampleGraph();
         //Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
-        Graph graph = makeSquareGraph(); 
+        //Graph graph = makeSquareGraph(); 
 
         /*for (Vertex v: graph.getAllVertices()){
             for (Neighbor n: graph.getNeighboursOf(v)){boegebakken-intersections
