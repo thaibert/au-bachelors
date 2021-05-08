@@ -169,7 +169,7 @@ public class DijkstraReach implements PathfindingAlgo {
         //Map<Vertex, Double> r = Reach.reach(graph, bs);
         // if run rn, this 56.1302396,9.7414558 is pruned away when it shouldn't because its reach is low.fileOne
 
-        Map<Vertex, Double> r = readReaches("map-GoldbergReach250V2");
+        Map<Vertex, Double> r = readReaches("lilleAarhus-GoldbergReach500V2");
 
 
         PrintStream originalStream = System.out;
@@ -219,17 +219,17 @@ public class DijkstraReach implements PathfindingAlgo {
 
             }
         }
-        /*Vertex a = new Vertex(56.1738677,10.151051);
-        Vertex b = new Vertex(56.1950259,10.2199056);
+        /*Vertex a = new Vertex(56.1715492,10.1809992);
+        Vertex b = new Vertex(56.1726046,10.2029983);
 
 
         DijkstraReach d = new DijkstraReach(graph, r);
         Solution solution = d.shortestPath(a, b);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Aarhus);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
-        vis.visualize("Dijkstra Reaches");
+
 
 
         PathfindingAlgo da = new DijkstraTraditional(graph);
@@ -238,15 +238,17 @@ public class DijkstraReach implements PathfindingAlgo {
         for (Vertex v: solution2.getShortestPath()) {
             if (d.prunedNodes.contains(v)){
                 System.out.println(v + ": with reach " + r.get(v));
+                vis.drawMeetingNode(v);
             }
         }
+        vis.visualize("Dijkstra Reaches");
 
-        GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.Aarhus);
         vis2.drawPath(solution2.getShortestPath());
         vis2.drawVisited(solution2.getVisited());
         vis2.visualize("Dijkstra");
-
         */
+        
     }
 
     public static Map<Vertex, Double> readReaches(String filename) {

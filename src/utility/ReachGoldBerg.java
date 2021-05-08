@@ -17,6 +17,8 @@ public class ReachGoldBerg {
 
 
     public static Map<Vertex, Double> reach(Graph graph, double[] bs) {
+        Set<Edge> edgesConsideredThroughout = new HashSet<>();
+
         Map<Vertex, Double> inPenalties = new HashMap<>();
         Map<Vertex, Double> outPenalties = new HashMap<>();
 
@@ -36,7 +38,7 @@ public class ReachGoldBerg {
             System.out.println("Number of edge in graph " + edgeNumber + " at iteration " + i);
 
             GraphVisualiser vis2 = new GraphVisualiser(graphPrime, BoundingBox.AarhusSilkeborg);
-            vis2.visualize("Iteration " + i);
+            //vis2.visualize("Iteration " + i);
 
 
             for (Vertex v: graphPrime.getAllVertices()){
@@ -59,22 +61,22 @@ public class ReachGoldBerg {
             long totalReachCalcTime = 0;
 
             for (Vertex v: graphPrime.getAllVertices()){
-                /*counter++;
+                counter++;
                 if (counter % tenProcent == 0) {
                     counter2++;
                     System.out.println("Completed the first " + counter2*10 + "%");
                     long timeAfter = System.currentTimeMillis();
                     System.out.println("Total calculating time so far " + ((timeAfter-timeBefore)/1000) + " seconds");
 
-                }*/
+                }
                 Tree tree = partialTree(graphPrime, v, bs[i]);
                 // We do not include v according to Goldberg
-                tree.inner.remove(v);
+                //tree.inner.remove(v);
 
                 // Modify tree according to the out-penalties
                 int x = 0;
                 int y = 0;
-                Set<Vertex> newClosed = new HashSet<>(tree.closed);
+                Set<Vertex> newClosed = new HashSet<>(tree.closed); // Can't modify closed while we loop over it 
                 for (Vertex w: tree.closed){ // TODO this is ugly
                     tree.leafs.remove(w);
                     Vertex wPrime = new Vertex(x,y); // This is the pseudo leafs
@@ -82,18 +84,13 @@ public class ReachGoldBerg {
                     y++;
                     tree.dist.put(wPrime, tree.dist.get(w) + outPenalties.getOrDefault(w, 0.0));
                     tree.leafs.add(wPrime);
-                    if (i > 0){
-                        //System.out.println(tree.paths.get(w).size());
-                    }
                     Set<Vertex> path = new HashSet<>(tree.paths.get(w));
-                    if (i > 0){
-                        //System.out.println(path.size());
-                    }
                     path.add(w);
                     tree.paths.put(wPrime, path);
                     newClosed.add(wPrime);
                 }
                 tree.closed = newClosed;
+
                 long timeBeforeReachCalc = System.currentTimeMillis();
                 for (Vertex u: tree.inner){
                     for (Neighbor n: graphPrime.getNeighboursOf(u)){
@@ -109,7 +106,7 @@ public class ReachGoldBerg {
                         }
                     }
                 }
-                for (Vertex u: tree.outer){
+                /*for (Vertex u: tree.outer){
                     for (Neighbor n: graphPrime.getNeighboursOf(u)){
                         if (!tree.paths.get(n.v).contains(u)){
                             continue;
@@ -122,11 +119,12 @@ public class ReachGoldBerg {
                             r.put(un, tempR);
                         }
                     }
-                }
+                }*/
                 long timeAfterReachCalc = System.currentTimeMillis();
                 totalReachCalcTime += (timeAfterReachCalc-timeBeforeReachCalc);
             }
             System.out.println(edgesConsidered.size());
+            //System.out.println(edgesConsidered);
             //System.out.println(r);
             
             
@@ -197,6 +195,8 @@ public class ReachGoldBerg {
             
             //graphPrime = gPrimeShortcut;
 
+            edgesConsideredThroughout.addAll(edgesConsidered);
+
             System.out.println("Time spent in iteration " + i + " is " +  (System.currentTimeMillis() - timeBefore)/1000);
             System.out.println("Time spent calculating reaches " + totalReachCalcTime/1000);
         } 
@@ -210,11 +210,12 @@ public class ReachGoldBerg {
         Map<Vertex, Double> maxOutgoing = new HashMap<>();
 
 
-        // A better translation is describe on page 13
+        // A better translation is described on page 13
         // https://www.microsoft.com/en-us/research/wp-content/uploads/2006/01/tr-2005-132.pdf
         for (Vertex v: graph.getAllVertices()){
             for (Neighbor n: graph.getNeighboursOf(v)){
-                Edge edge = new Edge(v, n.v, 0.0);
+                Edge edge = new Edge(v, n.v, n.distance);
+
                 maxIncomming.put(n.v, Math.max(r.getOrDefault(edge, INF_DIST), maxIncomming.getOrDefault(n.v, 0.0)));
                 maxOutgoing.put(v, Math.max(r.getOrDefault(edge, INF_DIST), maxOutgoing.getOrDefault(v, 0.0)));
             }
@@ -232,6 +233,8 @@ public class ReachGoldBerg {
             rVertex.put(v, Math.min(maxIncomming.getOrDefault(v, INF_DIST), maxOutgoing.getOrDefault(v, INF_DIST)));
         }
         //System.out.println(rVertex);
+
+        // High reaches set to INF to ensure it works
         for (Vertex v: graph.getAllVertices()) {
             if (rVertex.get(v) > bs[bs.length-1]){
                 rVertex.put(v, INF_DIST);
@@ -259,12 +262,18 @@ public class ReachGoldBerg {
         for (Vertex w: tree.leafs){
             if (tree.paths.get(w).contains(u) && tree.closed.contains(w)) {
                 // If we take the distance to the beginning node, we don't have to keep track of the length of the edge
+                if (tree.dist.get(w) + tree.dist.get(v) < 0) {
+                    System.out.println("Impossible case");
+                }
                 h = Math.max(h, tree.dist.get(w) - tree.dist.get(v)); 
             } else if (tree.paths.get(w).contains(u) && !tree.closed.contains(w)){
                 h = INF_DIST;
             } else {
                 // This happens when the leaf does not have v in its path
             }
+        }
+        if (h == 0){
+            //System.out.println(v + " -> " + u + " value h=" + h);
         }
         return h;
     }
@@ -734,8 +743,8 @@ public class ReachGoldBerg {
     public static void main(String[] args){
         // 56.1349785,9.7198848: with reach 240.59535364050208 wrong reach
 
-        Graph graph = makeExampleGraph();
-        //Graph graph = GraphPopulator.populateGraph("map-intersections.csv");
+        //Graph graph = makeExampleGraph();
+        Graph graph = GraphPopulator.populateGraph("map-intersections.csv");
         //Graph graph = makeSquareGraph(); 
 
         // Graph graph = makeSingleLineGraph();
@@ -759,14 +768,14 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        //double[] bs = new double[]{100, 250, 500/*, 1000, 2000*/};
-        double[] bs = new double[]{5, 10, 25};
+        double[] bs = new double[]{/*250, 500, */1000, 2000, 5000};
+        //double[] bs = new double[]{5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
 
         
         System.out.println(r.keySet().size() + " reaches returned");
-        System.out.println(r);
+        //System.out.println(r);
 
         System.out.println("Calculating reach took " + ((timeAfter-timeBefore)/1000) + " seconds");
 
@@ -778,7 +787,7 @@ public class ReachGoldBerg {
         }
         System.out.println("number of vertices with very high reach : " + counter);
 
-        //saveReachArrayToFile("map-GoldbergReach250V2", r);
+        saveReachArrayToFile("lilleAarhus-GoldbergReach500V2", r);
 
     }
 
