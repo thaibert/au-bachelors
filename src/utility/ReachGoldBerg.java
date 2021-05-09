@@ -54,7 +54,7 @@ public class ReachGoldBerg {
 
             // Grow trees 
             int max = graphPrime.getAllVertices().size();
-            int tenProcent = max/10+1;
+            int tenProcent = max/10;
             int counter2 = 0;
             int counter = 0;
             long timeBefore = System.currentTimeMillis();
@@ -92,6 +92,7 @@ public class ReachGoldBerg {
                 tree.closed = newClosed;
 
                 long timeBeforeReachCalc = System.currentTimeMillis();
+
                 for (Vertex u: tree.inner){
                     for (Neighbor n: graphPrime.getNeighboursOf(u)){
                         if (!tree.paths.get(n.v).contains(u)){
@@ -191,9 +192,9 @@ public class ReachGoldBerg {
 
             // Shortcuts
             // TODO us bs[i+1], but avoid the last edge case with indexing out of bounds....
-            //Graph gPrimeShortcut = shortcut(graphPrime, bs[i]); //TODO what graph should this be given
+            Graph gPrimeShortcut = shortcut(graphPrime, graph, bs[i]); //TODO what graph should this be given
             
-            //graphPrime = gPrimeShortcut;
+            graphPrime = gPrimeShortcut;
 
             edgesConsideredThroughout.addAll(edgesConsidered);
 
@@ -243,6 +244,9 @@ public class ReachGoldBerg {
             }
         }
 
+
+        writeGraphToFile("shortCuttedGraph",graph);
+
         return rVertex;
     }
 
@@ -279,9 +283,6 @@ public class ReachGoldBerg {
     }
 
     public static Tree partialTree(Graph g, Vertex x, double epsilon){
-        if (epsilon == 101){
-            //System.out.println("Partial tree begin");
-        }
         // This may be super inefficient to maintain all this, but we find it easier than trying to squeze it all 
         // into one data structure.
 
@@ -326,7 +327,7 @@ public class ReachGoldBerg {
 
             // Stopping condition as shown in https://www.microsoft.com/en-us/research/wp-content/uploads/2006/01/tr-2005-132.pdf
             for (Vertex v: leafTprime) {
-                if (!(leafT.contains(v) || xprimeDist.get(v) >= 4 * epsilon)){
+                if (!(leafT.contains(v) || xprimeDist.get(v) >= 5 * epsilon)){
                     trueForAllLeaf = false;
                     break;
                 }
@@ -436,16 +437,11 @@ public class ReachGoldBerg {
         //System.out.println("Dijkstra done");
         Tree tree = new Tree(bestDist, innerCircle, outerCircle, pred, leafT, paths, closed);
 
-       
-        if (epsilon == 101){
-            //System.out.println("Partial tree end");
-        }
-
         return tree;
 
     }
 
-    public static Graph shortcut(Graph g, double epsilon){
+    public static Graph shortcut(Graph g, Graph origGraph, double epsilon){
         //TODO add shortcuts to the graph
 
         // Copy the graph, so we can modify it!
@@ -464,7 +460,6 @@ public class ReachGoldBerg {
         long timeBefore = System.currentTimeMillis();
 
         while (it.hasNext()){
-            System.out.print(".");
             counter++;
             if (counter % tenProcent == 0) {
                 counter2++;
@@ -552,7 +547,7 @@ public class ReachGoldBerg {
                 shortCutTo = potentialLinkAfter.v;
                 path.add(potentialLinkAfter.v);
 
-                addShortcut(shortCutFrom, shortCutTo, path, epsilon, g, gToModify, 0);
+                addShortcut(shortCutFrom, shortCutTo, path, epsilon, g, gToModify, 0, origGraph);
 
             }
 
@@ -624,7 +619,7 @@ public class ReachGoldBerg {
                 shortCutTo = potentialLinkAfter.v;
                 path.add(potentialLinkAfter.v);
 
-                addShortcut(shortCutFrom, shortCutTo, path, epsilon, g, gToModify, 1);
+                addShortcut(shortCutFrom, shortCutTo, path, epsilon, g, gToModify, 1, origGraph);
 
             }         
 
@@ -635,52 +630,76 @@ public class ReachGoldBerg {
         return gToModify;
     }
 
-    private static Graph addShortcut(Vertex from, Vertex to, Set<Vertex> path, double epsilon, Graph g, Graph gToModify, int direction){
+    private static Graph addShortcut(Vertex from, Vertex to, Set<Vertex> path, double epsilon, Graph g, Graph gToModify, int direction, Graph origGraph){
         //System.out.println("Call to add shortcut");
         if (path.size() == 2) {
             // This case can happen if you try and shortcut something with 4 vertices originally
             return gToModify;
         }
+        if (to.equals(from)){
+            // This is a circle, idk how to shortcut it
+            return gToModify;
+        }
         // Find length of path!
-        Vertex middle = null;
-        double bestDistToMiddle = INF_DIST;
-        Set<Vertex> pathToMiddle = new HashSet<>();
 
         double length = 0;
         double lengthReverse = 0;
         Vertex curr = from;
-        while (!curr.equals(to)){
+        System.out.println("1");
+        boolean calcLength = false;
+        System.out.println(path);
+        System.out.println(to);
+        System.out.println(from);
+        while (!calcLength){
             for (Neighbor n: g.getNeighboursOf(curr)){
                 if (path.contains(n.v)){
                     // We found the neighbor that is in the link!
                     length += n.distance;
                     curr = n.v;
-                    break;
+                    if (curr.equals(to)){
+                        calcLength = true;
+                        break;
+                    }                    
                 }
             }
+            System.out.println("does this loop?");
         }
+        System.out.println("2");
+
 
         if (direction == 1){
             curr = to;
-            while (!curr.equals(from)){
+            calcLength = false;
+
+            while (calcLength){
                 for (Neighbor n: g.getNeighboursOf(curr)){
                     if (path.contains(n.v)){
                         // We found the neighbor that is in the link!
                         lengthReverse += n.distance;
                         curr = n.v;
-                        break;
+                        if (curr.equals(to)){
+                            calcLength = true;
+                            break;
+                        }                    
                     }
                 }
             }
         }
+        System.out.println("3");
+
 
 
         // Make the recursive calls !
         // TODO update the paths, so they only include the ones needed. May give issues in "bidirectional" else
         if (path.size() > 3){
+            Vertex middle = null;
+            double bestDistToMiddle = INF_DIST;
+            Set<Vertex> pathToMiddle = new HashSet<>();
             // Find middle point
             curr = from;
             double distanceToCur = 0;
+            System.out.println("curr: " + curr);
+            System.out.println("to  :" + to);
             while (!curr.equals(to)){
                 for (Neighbor n: g.getNeighboursOf(curr)){
                     if (path.contains(n.v)){
@@ -688,6 +707,7 @@ public class ReachGoldBerg {
                         distanceToCur += n.distance;
                         curr = n.v;
 
+                        System.out.println(distanceToCur-(length/2));
                         if (Math.abs(distanceToCur-(length/2)) < bestDistToMiddle){
                             middle = curr;
                             bestDistToMiddle = Math.abs(distanceToCur-(length/2));
@@ -697,8 +717,8 @@ public class ReachGoldBerg {
                 }
             }
             curr = from;
-            //System.out.println("Moving to middle " + middle);
-            //System.out.println("path:" + path);
+            System.out.println("Moving to middle " + middle);
+            System.out.println("path:" + path);
             boolean foundMid = false;
             while (!foundMid){
                 for (Neighbor n: g.getNeighboursOf(curr)){
@@ -711,28 +731,37 @@ public class ReachGoldBerg {
                         if (curr.equals(middle)){
                             foundMid = true;
                         }
+                        System.out.println(foundMid);
+                        break;
                     }
                 }
             }
+            System.out.println("Found the middle");
 
 
             
             Set<Vertex> pathToEnd = new HashSet<>(path);
             pathToEnd.removeAll(pathToMiddle);
             pathToMiddle.add(middle);
+            pathToEnd.add(middle);
+            pathToEnd.add(to);
 
-
-            addShortcut(from, middle, pathToMiddle, epsilon, g, gToModify, direction);
-            addShortcut(middle, to, pathToEnd, epsilon, g, gToModify, direction);
+            System.out.println("from -> middle");
+            addShortcut(from, middle, pathToMiddle, epsilon, g, gToModify, direction, origGraph);
+            System.out.println("middle -> to");
+            addShortcut(middle, to, pathToEnd, epsilon, g, gToModify, direction, origGraph);
         }
         // Add the "full length" shortcut
         if (length <= epsilon){
             if (direction == 0){
                 gToModify.addEdge(from, to, length);
+                origGraph.addEdge(from, to, length);
             }
             else { // TODO should calculate the correct distance from both ends!
                 gToModify.addEdge(from, to, length);
                 gToModify.addEdge(to, from, lengthReverse);
+                origGraph.addEdge(from, to, length);
+                origGraph.addEdge(to, from, lengthReverse);
             }
         } 
 
@@ -768,7 +797,7 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{100, 250, 500, 1000, 2000, 5000};
+        double[] bs = new double[]{100, 250, 500, 1000, 2000/*, 5000*/};
         //double[] bs = new double[]{1,2,3,4,5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
@@ -787,7 +816,7 @@ public class ReachGoldBerg {
         }
         System.out.println("number of vertices with very high reach : " + counter);
 
-        saveReachArrayToFile("aarhus-silkeborg-GoldbergReachV4", r);
+        saveReachArrayToFile("aarhus-silkeborg-GoldbergReachV4Shortcut", r);
 
     }
 
@@ -804,6 +833,22 @@ public class ReachGoldBerg {
         } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void writeGraphToFile(String filename, Graph g){
+        try {
+            File fileOne = new File(filename);
+            FileOutputStream fos = new FileOutputStream(fileOne);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+    
+            oos.writeObject(g);
+            oos.flush();
+            oos.close();
+            fos.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
 

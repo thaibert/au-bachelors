@@ -1,9 +1,10 @@
 package graph;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.*;
 
-public class SimpleGraph implements Graph {
+public class SimpleGraph implements Graph, Serializable {
     
     private Map<Vertex, Collection<Neighbor>> neighborsMap;
 
