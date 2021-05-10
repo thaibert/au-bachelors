@@ -1,6 +1,8 @@
 package graph;
 
-public class Neighbor {
+import java.io.*;
+
+public class Neighbor implements Serializable {
     public final Vertex v;
     public final double distance;
 

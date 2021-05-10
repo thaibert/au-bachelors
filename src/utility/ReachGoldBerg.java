@@ -650,10 +650,13 @@ public class ReachGoldBerg {
         System.out.println(path);
         System.out.println(to);
         System.out.println(from);
+
+        Set<Vertex> alreadySeen = new HashSet<>();
         while (!calcLength){
             for (Neighbor n: g.getNeighboursOf(curr)){
-                if (path.contains(n.v)){
+                if (path.contains(n.v) && ! alreadySeen.contains(n.v)){
                     // We found the neighbor that is in the link!
+                    alreadySeen.add(n.v);
                     length += n.distance;
                     curr = n.v;
                     if (curr.equals(to)){
@@ -667,14 +670,16 @@ public class ReachGoldBerg {
         System.out.println("2");
 
 
+        alreadySeen = new HashSet<>();
         if (direction == 1){
             curr = to;
             calcLength = false;
 
             while (calcLength){
                 for (Neighbor n: g.getNeighboursOf(curr)){
-                    if (path.contains(n.v)){
+                    if (path.contains(n.v) && ! alreadySeen.contains(n.v)){
                         // We found the neighbor that is in the link!
+                        alreadySeen.add(n.v);
                         lengthReverse += n.distance;
                         curr = n.v;
                         if (curr.equals(to)){
@@ -684,11 +689,14 @@ public class ReachGoldBerg {
                     }
                 }
             }
+            if (length != lengthReverse) {
+                System.out.println("Length: " + length + ",  reverse: " + lengthReverse);
+            }
         }
         System.out.println("3");
 
 
-
+        alreadySeen = new HashSet<>();
         // Make the recursive calls !
         // TODO update the paths, so they only include the ones needed. May give issues in "bidirectional" else
         if (path.size() > 3){
@@ -702,8 +710,9 @@ public class ReachGoldBerg {
             System.out.println("to  :" + to);
             while (!curr.equals(to)){
                 for (Neighbor n: g.getNeighboursOf(curr)){
-                    if (path.contains(n.v)){
+                    if (path.contains(n.v) && ! alreadySeen.contains(n.v)){
                         // We found the neighbor that is in the link!
+                        alreadySeen.add(n.v);
                         distanceToCur += n.distance;
                         curr = n.v;
 
@@ -717,14 +726,16 @@ public class ReachGoldBerg {
                 }
             }
             curr = from;
+            alreadySeen = new HashSet<>();
             System.out.println("Moving to middle " + middle);
             System.out.println("path:" + path);
             boolean foundMid = false;
             while (!foundMid){
                 for (Neighbor n: g.getNeighboursOf(curr)){
                     //System.out.println(n.v);
-                    if (path.contains(n.v)){
+                    if (path.contains(n.v) && ! alreadySeen.contains(n.v)){
                         // We found the neighbor that is in the link!
+                        alreadySeen.add(n.v);
                         pathToMiddle.add(curr);
                         // 56.1540562,10.1826677
                         curr = n.v;
@@ -773,7 +784,7 @@ public class ReachGoldBerg {
         // 56.1349785,9.7198848: with reach 240.59535364050208 wrong reach
 
         //Graph graph = makeExampleGraph();
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("aarhus-intersections.csv");
         //Graph graph = makeSquareGraph(); 
 
         // Graph graph = makeSingleLineGraph();
@@ -996,3 +1007,4 @@ class Tree {
     }
 
 } 
+
