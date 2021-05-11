@@ -24,6 +24,7 @@ public class TestDifferentLandmarks {
     static long[] totalExpanded = new long[numAlgos];
     static double[] averageActiveLandmarks = new double[numAlgos];
     static int[] maxActiveLandmarks = new int[numAlgos]; 
+    static int[][] activeLandmarks = new int[numAlgos][16];
 
     static long start;
     static long stop;
@@ -69,6 +70,7 @@ public class TestDifferentLandmarks {
                 if (lms[i].getActiveLandmarks().size() > maxActiveLandmarks[i]){
                     maxActiveLandmarks[i] = lms[i].getActiveLandmarks().size();
                 }
+                activeLandmarks[i][lms[i].getActiveLandmarks().size()] += 1;
 
             }
 
@@ -188,6 +190,11 @@ public class TestDifferentLandmarks {
             System.out.printf("     Max Active landmarks for %s     %8d landmarks \n", names[i], maxActiveLandmarks[i]);
         }
 
+        for (int i = 0; i < numAlgos; i++){
+            for (int j = 0; j<16; j++){
+                System.out.printf("%d times with %d active landmarks for %s\n", activeLandmarks[i][j], j, names[i]);
+            }
+        }
 
     }
 
