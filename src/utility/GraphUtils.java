@@ -87,6 +87,14 @@ public class GraphUtils {
             .get();
     }
 
+    public static Vertex pickRandomVertexWithSeed(Graph g, Random rnd){
+        Collection<Vertex> vertices = g.getAllVertices();
+        return vertices.stream()
+            .skip((int) (vertices.size() * rnd.nextDouble()))
+            .findFirst()
+            .get();
+    }
+
     public static double pathDistance(List<Vertex> path) {
         if (path.size() < 2) {
             return 0;

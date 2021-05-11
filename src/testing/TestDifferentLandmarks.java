@@ -19,14 +19,18 @@ public class TestDifferentLandmarks {
     static int numAlgos = names.length;
 
     static PathfindingAlgo[] algos = new PathfindingAlgo[numAlgos];
+    static LandmarkSelector[] lms = new LandmarkSelector[numAlgos]; 
     static long[] totalTimes = new long[numAlgos];
     static long[] totalExpanded = new long[numAlgos];
+    static double[] averageActiveLandmarks = new double[numAlgos];
+    static int[] maxActiveLandmarks = new int[numAlgos]; 
+    static int[][] activeLandmarks = new int[numAlgos][16];
 
     static long start;
     static long stop;
 
 
-    static void testDifferentLandmarks(Graph g){
+    static void testDifferentLandmarks(Graph g, int seed){
         // TODO in "actual" runs, we should comment in out in files, as it still takes time?
         // Disable printing while running 
         PrintStream originalStream = System.out;
@@ -38,8 +42,9 @@ public class TestDifferentLandmarks {
         });
         System.setOut(noopStream);
 
-        Vertex a = GraphUtils.pickRandomVertex(g);
-        Vertex b = GraphUtils.pickRandomVertex(g);
+        Random rnd = new Random(seed);
+        Vertex a = GraphUtils.pickRandomVertexWithSeed(g, rnd);
+        Vertex b = GraphUtils.pickRandomVertexWithSeed(g, rnd);
 
         if (a.equals(b)) {
             System.setOut(originalStream);
@@ -61,6 +66,12 @@ public class TestDifferentLandmarks {
                 stop = System.nanoTime();
                 totalTimes[i] += (stop - start);
                 totalExpanded[i] += solutions[i].getVisited().size();
+                averageActiveLandmarks[i] += lms[i].getActiveLandmarks().size();
+                if (lms[i].getActiveLandmarks().size() > maxActiveLandmarks[i]){
+                    maxActiveLandmarks[i] = lms[i].getActiveLandmarks().size();
+                }
+                activeLandmarks[i][lms[i].getActiveLandmarks().size()] += 1;
+
             }
 
         } catch(Exception e) {
@@ -125,12 +136,14 @@ public class TestDifferentLandmarks {
 
 
     public static void main(String[] args) {
-        Graph g = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph g = GraphPopulator.populateGraph("denmark-intersections.csv");
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
         LandmarkSelector ls0 = new LandmarkSelector(g, 16, 0); // TODO how many landmarks
         LandmarkSelector ls1 = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
-
+        lms[ALT_RANDOM] = ls0;
+        lms[ALT_FARTHEST] = ls1;
+    
 
         algos[ALT_RANDOM] = new ALT(g, ls0);
         algos[ALT_FARTHEST] = new ALT(g, ls1);
@@ -143,7 +156,7 @@ public class TestDifferentLandmarks {
             System.out.print(" -> " + i);
             try {
 
-                testDifferentLandmarks(g);
+                testDifferentLandmarks(g, i);
 
             } catch(Exception e) {
                 System.out.println(" failed (exception)");
@@ -171,6 +184,16 @@ public class TestDifferentLandmarks {
 
         for (int i = 0; i < numAlgos; i++) {
             System.out.printf("     Average edges expanded for %s     %8d edges \n", names[i], (long) totalExpanded[i]/runs);
+        }
+        for (int i = 0; i < numAlgos; i++) {
+            System.out.printf("     AverageActiveLandmarks for %s     %8f landmarks \n", names[i], (double) averageActiveLandmarks[i]/runs);
+            System.out.printf("     Max Active landmarks for %s     %8d landmarks \n", names[i], maxActiveLandmarks[i]);
+        }
+
+        for (int i = 0; i < numAlgos; i++){
+            for (int j = 0; j<16; j++){
+                System.out.printf("%d times with %d active landmarks for %s\n", activeLandmarks[i][j], j, names[i]);
+            }
         }
 
     }
