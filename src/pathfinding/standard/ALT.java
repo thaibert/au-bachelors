@@ -34,7 +34,12 @@ public class ALT implements PathfindingAlgo {
 
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
+        // Reset landmarks, so they don't carry over if multiple queries are run in series.
+        landmarkSelector.resetLandmarks();
+
+        // Now find the two best ones
         landmarkSelector.updateLandmarks(start, goal, 2);
+
         double originalPi = landmarkSelector.pi(start, goal);
         int landmarkCheckpoint = 0; // ranges from 0-10
 
@@ -166,13 +171,10 @@ public class ALT implements PathfindingAlgo {
 
         Solution solution = new Solution(out, edgesConsidered, null);
 
-        // Reset landmarks, so they don't carry over if multiple queries are run in series.
-        landmarkSelector.resetLandmarks();
+
 
         return solution;
     }
-
-
 
 
 
