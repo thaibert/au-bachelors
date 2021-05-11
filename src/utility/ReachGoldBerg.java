@@ -192,7 +192,7 @@ public class ReachGoldBerg {
 
             // Shortcuts
             // TODO us bs[i+1], but avoid the last edge case with indexing out of bounds....
-            Graph gPrimeShortcut = shortcut(graphPrime, graph, bs[i]); //TODO what graph should this be given
+            Graph gPrimeShortcut = shortcut(graphPrime, graph, INF_DIST); //TODO what graph should this be given
             
             graphPrime = gPrimeShortcut;
 
@@ -327,7 +327,7 @@ public class ReachGoldBerg {
 
             // Stopping condition as shown in https://www.microsoft.com/en-us/research/wp-content/uploads/2006/01/tr-2005-132.pdf
             for (Vertex v: leafTprime) {
-                if (!(leafT.contains(v) || xprimeDist.get(v) >= 5 * epsilon)){
+                if (!(leafT.contains(v) || xprimeDist.get(v) >= 2 * epsilon)){
                     trueForAllLeaf = false;
                     break;
                 }
@@ -665,7 +665,7 @@ public class ReachGoldBerg {
                     }                    
                 }
             }
-            System.out.println("does this loop?");
+            //System.out.println("does this loop?");
         }
         System.out.println("2");
 
@@ -784,7 +784,7 @@ public class ReachGoldBerg {
         // 56.1349785,9.7198848: with reach 240.59535364050208 wrong reach
 
         //Graph graph = makeExampleGraph();
-        Graph graph = GraphPopulator.populateGraph("aarhus-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //Graph graph = makeSquareGraph(); 
 
         // Graph graph = makeSingleLineGraph();

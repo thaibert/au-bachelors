@@ -188,7 +188,7 @@ public class ALT implements PathfindingAlgo {
         // a = GraphUtils.pickRandomVertex(graph);
         // b = GraphUtils.pickRandomVertex(graph);
 
-        LandmarkSelector landmarkSelector = new LandmarkSelector(graph, 16, 1);
+        LandmarkSelector landmarkSelector = new LandmarkSelector(graph, 16, 2);
 
         ALT d = new ALT(graph, landmarkSelector);
         Solution solution = d.shortestPath(new Vertex(56.0418177, 9.8967658), Location.Viborgvej);

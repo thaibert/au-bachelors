@@ -3,6 +3,8 @@ package utility;
 import graph.*;
 import java.util.*;
 
+import org.checkerframework.checker.units.qual.min;
+
 public class GraphUtils {
     private static final double INF_DIST = Double.MAX_VALUE;
 
@@ -360,15 +362,154 @@ public class GraphUtils {
     }
 
 
-    public static List<Map<Vertex, Map<Vertex, Double>>> avoidLandmarks(Graph g, int noOfLandmarks){
+    public static Landmarks PartionCorner(Graph g, int noOfLandmarks){
+        // noOfLandmarks need to be divisible with 4
+        Set<Vertex> landmarks = new HashSet<>();
+
+        Graph ginv = invertGraph(g);
+
+        Map<Vertex, Map<Vertex, Double>> distanceToLandmark = new HashMap<>();
+        Map<Vertex, Map<Vertex, Double>> distanceFromLandmark = new HashMap<>();
+
+        // Calculate the middle most vertex in g
+        // Do this the "lazy" way with finding the vertex closet to the middle by coordinates
+        double minLatitude = INF_DIST;
+        double minLongitude = INF_DIST;
+        double maxLatitude = -INF_DIST;
+        double maxLongitude = -INF_DIST;
+
+        for (Vertex v: g.getAllVertices()){
+            if (v.getLatitude() > maxLatitude){
+                maxLatitude = v.getLatitude();
+            }
+            if (v.getLatitude() < minLatitude){
+                minLatitude = v.getLatitude();
+            }
+            if (v.getLongitude() < minLongitude){
+                minLongitude = v.getLongitude();
+            }
+            if (v.getLongitude() > maxLongitude){
+                maxLongitude = v.getLongitude();
+            }
+        }
+
+        if (noOfLandmarks == 4){
+            // no partion is needed
+            landmarks.add(findExtremeAbove(g, 0, minLatitude, maxLatitude, minLongitude, maxLongitude));
+            landmarks.add(findExtremeAbove(g, 1, minLatitude, maxLatitude, minLongitude, maxLongitude));
+            landmarks.add(findExtremeBelow(g, 0, minLatitude, maxLatitude, minLongitude, maxLongitude));
+            landmarks.add(findExtremeBelow(g, 1, minLatitude, maxLatitude, minLongitude, maxLongitude));
+        } else if(noOfLandmarks == 8){
+            // find middle point on longitude
+            // TODO should this be partitioned in another way?
+            double middleLat = (minLatitude + maxLatitude)/2; 
+            landmarks.add(findExtremeAbove(g, 0, minLatitude, middleLat, minLongitude, maxLongitude));
+            landmarks.add(findExtremeAbove(g, 1, minLatitude, middleLat, minLongitude, maxLongitude));
+            landmarks.add(findExtremeBelow(g, 0, minLatitude, middleLat, minLongitude, maxLongitude));
+            landmarks.add(findExtremeBelow(g, 1, minLatitude, middleLat, minLongitude, maxLongitude));
+            landmarks.add(findExtremeAbove(g, 0, middleLat, maxLatitude, minLongitude, maxLongitude));
+            landmarks.add(findExtremeAbove(g, 1, middleLat, maxLatitude, minLongitude, maxLongitude));
+            landmarks.add(findExtremeBelow(g, 0, middleLat, maxLatitude, minLongitude, maxLongitude));
+            landmarks.add(findExtremeBelow(g, 1, middleLat, maxLatitude, minLongitude, maxLongitude));
+
+            // Partion into noOfLandmarks/4 squares
+        } else if(noOfLandmarks == 16){
+            double middleLat = (minLatitude + maxLatitude)/2; 
+            double middleLong = (minLongitude + maxLongitude)/2; 
+
+            landmarks.add(findExtremeAbove(g, 0, minLatitude, middleLat, minLongitude, middleLong));
+            landmarks.add(findExtremeAbove(g, 1, minLatitude, middleLat, minLongitude, middleLong));
+            landmarks.add(findExtremeBelow(g, 0, minLatitude, middleLat, minLongitude, middleLong));
+            landmarks.add(findExtremeBelow(g, 1, minLatitude, middleLat, minLongitude, middleLong));
+            landmarks.add(findExtremeAbove(g, 0, middleLat, maxLatitude, minLongitude, middleLong));
+            landmarks.add(findExtremeAbove(g, 1, middleLat, maxLatitude, minLongitude, middleLong));
+            landmarks.add(findExtremeBelow(g, 0, middleLat, maxLatitude, minLongitude, middleLong));
+            landmarks.add(findExtremeBelow(g, 1, middleLat, maxLatitude, minLongitude, middleLong));
+            landmarks.add(findExtremeAbove(g, 0, minLatitude, middleLat, middleLong, maxLongitude));
+            landmarks.add(findExtremeAbove(g, 1, minLatitude, middleLat, middleLong, maxLongitude));
+            landmarks.add(findExtremeBelow(g, 0, minLatitude, middleLat, middleLong, maxLongitude));
+            landmarks.add(findExtremeBelow(g, 1, minLatitude, middleLat, middleLong, maxLongitude));
+            landmarks.add(findExtremeAbove(g, 0, middleLat, maxLatitude, middleLong, maxLongitude));
+            landmarks.add(findExtremeAbove(g, 1, middleLat, maxLatitude, middleLong, maxLongitude));
+            landmarks.add(findExtremeBelow(g, 0, middleLat, maxLatitude, middleLong, maxLongitude));
+            landmarks.add(findExtremeBelow(g, 1, middleLat, maxLatitude, middleLong, maxLongitude));
+            System.out.println(landmarks);
+        } else{
+            throw new RuntimeException("Please provide valid noOfLandmarks divisible with 4");
+
+        }
         
-        return null;
+
+        landmarks.forEach( l -> {
+            System.out.print(".");
+            Map<Vertex, Double> normal = dijkstra(g, l);
+            Map<Vertex, Double> inv = dijkstra(ginv, l);
+
+            distanceFromLandmark.put(l, normal);
+            distanceToLandmark.put(l, inv);
+        });
+
+
+        Landmarks out = new Landmarks(distanceToLandmark, distanceFromLandmark);
+
+
+        
+        return out;
     }
 
-    public static List<Map<Vertex, Map<Vertex, Double>>> planerLandmarks(Graph g, int noOfLandmarks){
-        
-        return null;
+    public static Vertex findExtremeBelow(Graph g, int axis, double minLat, double maxLat, double minLong, double maxLong){
+        Vertex v = null;
+        for (Vertex w: g.getAllVertices()){
+            if (axis == 0){
+                // TODO should pref be <= arg, but that could give the same landmark multiple times
+                if (w.getLatitude() < maxLat && w.getLongitude() < maxLong && w.getLongitude() > minLong ){
+                    if (v == null){
+                        v = w;
+                    } else if(w.getLatitude() > v.getLatitude()){
+                        v = w;  
+                    }
+                }
+            } else if (axis == 1){
+                // TODO should pref be <= arg, but that could give the same landmark multiple times
+                if (w.getLongitude() < maxLong && w.getLatitude() < maxLat && w.getLatitude() > minLat){
+                    if (v == null){
+                        v = w;
+                    } else if(w.getLongitude() > v.getLongitude()){
+                        v = w;  
+                    }
+                }
+            }
+        }
+        return v;
     }
+
+    public static Vertex findExtremeAbove(Graph g, int axis, double minLat, double maxLat, double minLong, double maxLong){
+        Vertex v = null;
+        for (Vertex w: g.getAllVertices()){
+            if (axis == 0){
+                // TODO should pref be >= arg, but that could give the same landmark multiple times
+                if (w.getLatitude() > minLat && w.getLongitude() < maxLong && w.getLongitude() > minLong){
+                    if (v == null){
+                        v = w;
+                    } else if(w.getLatitude() < v.getLatitude()){
+                        v = w;  
+                    }
+                }
+            } else if (axis == 1){
+                // TODO should pref be >= arg, but that could give the same landmark multiple times
+                if (w.getLongitude() > minLong && w.getLatitude() < maxLat && w.getLatitude() > minLat){
+                    if (v == null){
+                        v = w;
+                    } else if(w.getLongitude() < v.getLongitude()){
+                        v = w;  
+                    }
+                }
+            }
+        }
+        return v;
+    }
+
+
 
     public static Map<Vertex, Double> dijkstra(Graph g, Vertex start){
 
