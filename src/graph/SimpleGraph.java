@@ -20,11 +20,39 @@ public class SimpleGraph implements Graph, Serializable {
         neighborsMap.putIfAbsent(v, new ArrayList<>());
     }
 
+    @Override
+    public void removeVertex(Vertex v) {
+        if (! neighborsMap.keySet().contains(v)) {
+            System.out.println("Removing non-existent vertex");
+        }
+        neighborsMap.remove(v);
+    }
+
     //** Add an edge from u -> v */
     @Override
     public void addEdge(Vertex u, Vertex v, double distance) {
         Neighbor n = new Neighbor(v, distance);
-        neighborsMap.get(u).add(n);
+        Collection<Neighbor> neighbors = neighborsMap.getOrDefault(u, new HashSet<>());
+        neighbors.add(n);
+    }
+
+    @Override
+    public void removeEdge(Vertex u, Vertex v) {
+        Collection<Neighbor> neighbors = neighborsMap.get(u);
+        if (neighbors == null) {
+            System.out.println("null neighbors @ " + u + "->" + v);
+            return;
+        }
+        Neighbor correctPair = null;
+        for (Neighbor n : neighbors) {
+            if (! v.equals(n.v)) {
+                continue;
+            }
+            // We found v!
+            correctPair = n;
+        }
+        neighbors.remove(correctPair);
+        neighborsMap.put(u, neighbors);
     }
 
     @Override

@@ -2,6 +2,7 @@ package utility;
 
 import graph.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GraphUtils {
     private static final double INF_DIST = Double.MAX_VALUE;
@@ -229,6 +230,79 @@ public class GraphUtils {
         System.out.println("new graph: " + newGraph.getAllVertices().size());
 
         return newGraph;
+    }
+
+
+    public static Graph pruneUndirectedChains(Graph g) {
+        System.out.println("pruning graph of undirected chains");
+        Graph g_inv = invertGraph(g);
+        Collection<Vertex> vertices = g.getAllVertices();
+        Iterator<Vertex> it = vertices.iterator();
+
+        System.out.println("  inverted graph, starting now");
+
+        int iterations = 0;
+        while (it.hasNext()) {
+            iterations++;
+            if (iterations % 100000 == 0) {
+                System.out.print(".");
+            }
+
+
+            Vertex v = it.next();
+            // System.out.println("looking at " + v);
+            
+            Collection<Neighbor> neighbor_in = g_inv.getNeighboursOf(v);
+            Collection<Neighbor> neighbor_out = g.getNeighboursOf(v);
+            Collection<Vertex> in_v =  neighbor_in.stream().map(n -> n.v).collect(Collectors.toSet());
+            Collection<Vertex> out_v = neighbor_out.stream().map(n -> n.v).collect(Collectors.toSet());
+
+            boolean isMiddleLink = in_v.size() == 2
+                                && out_v.size() == 2
+                                && in_v.equals(out_v);
+            
+            if (! isMiddleLink) {
+                // A normal node. Skip it.
+                continue;
+            } else {
+                // A chain link!
+                Iterator<Neighbor> neigh_it = neighbor_in.iterator();
+                Neighbor a = neigh_it.next();
+                Neighbor b = neigh_it.next();
+
+                if (a.v.equals(b.v)) {
+                    System.out.println("Hold up!! pruning node between the same vertex??");
+                    System.out.println("  a: " + a.v);
+                    System.out.println("  b: " + b.v);
+                    continue;
+                }
+                // System.out.println(a.v + " <--> " + v + " <--> " + b.v);
+
+                g.removeEdge(a.v, v);
+                g.removeEdge(v, a.v);
+
+                g.removeEdge(b.v, v);
+                g.removeEdge(v, b.v);
+
+                g_inv.removeEdge(a.v, v);
+                g_inv.removeEdge(v, a.v);
+
+                g_inv.removeEdge(b.v, v);
+                g_inv.removeEdge(v, b.v);
+
+                it.remove();
+
+                g.addEdge(a.v, b.v, a.distance + b.distance);
+                g.addEdge(b.v, a.v, a.distance + b.distance);
+
+                g_inv.addEdge(a.v, b.v, a.distance + b.distance);
+                g_inv.addEdge(b.v, a.v, a.distance + b.distance);
+
+
+            }
+        }
+
+        return g;
     }
 
 
