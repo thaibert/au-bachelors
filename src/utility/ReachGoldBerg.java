@@ -38,7 +38,7 @@ public class ReachGoldBerg {
             System.out.println("Number of edge in graph " + edgeNumber + " at iteration " + i);
 
             GraphVisualiser vis2 = new GraphVisualiser(graphPrime, BoundingBox.AarhusSilkeborg);
-            //vis2.visualize("Iteration " + i);
+            vis2.visualize("Iteration " + i);
 
 
 
@@ -83,7 +83,7 @@ public class ReachGoldBerg {
                 // Modify tree according to the out-penalties
                 int x = 0;
                 int y = 0;
-                //Set<Vertex> newClosed = new HashSet<>(tree.closed); // Can't modify closed while we loop over it 
+                Set<Vertex> newClosed = new HashSet<>(tree.closed); // Can't modify closed while we loop over it 
                 Set<Vertex> iter = new HashSet<>(tree.dist.keySet());
                 for (Vertex w: iter){ // TODO this is ugly
                     tree.leafs.remove(w);
@@ -95,9 +95,11 @@ public class ReachGoldBerg {
                     Set<Vertex> path = new HashSet<>(tree.paths.get(w));
                     path.add(w);
                     tree.paths.put(wPrime, path);
-                    //newClosed.add(wPrime);
+                    if (tree.closed.contains(w)){
+                        newClosed.add(wPrime);
+                    }
                 }
-                //tree.closed = newClosed;
+                tree.closed = newClosed;
 
                 long timeBeforeReachCalc = System.currentTimeMillis();
 
@@ -149,11 +151,13 @@ public class ReachGoldBerg {
                     Edge vn = new Edge(v, n.v, n.distance);
                     //System.out.println(r.getOrDefault(vn, 0.0));
                     double reach = 0;
-                    if (edgesConsidered.contains(vn)){
+                    /*if (edgesConsidered.contains(vn)){
                         reach = r.get(vn); 
                     } else {
                         reach = INF_DIST;
-                    }
+                    }*/
+                    reach = r.getOrDefault(vn, 0.0); 
+
                     if (reach > bs[i]){
                         if (!newGPrime.getAllVertices().contains(v)){
                             newGPrime.addVertex(v);
@@ -264,7 +268,7 @@ public class ReachGoldBerg {
     public static double height(Vertex v, Vertex u, Tree tree){
         Double h = 0.0;
         //System.out.println(u);
-        for (Vertex w: tree.dist.keySet()){
+        for (Vertex w: tree.leafs){
             if (tree.paths.get(w).contains(u) && tree.closed.contains(w)) {
                 // If we take the distance to the beginning node, we don't have to keep track of the length of the edge
                 if (tree.dist.get(w) - tree.dist.get(v) <= 0) {
@@ -938,7 +942,7 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{100/*100, 250, 500, 1000, 2000, 5000, 10000, 20000, 50000*/};
+        double[] bs = new double[]{100, 500, 1500, 4500/*, 10000, 20000, 50000*/};
         //double[] bs = new double[]{1,2,3,4,5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
