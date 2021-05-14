@@ -63,7 +63,14 @@ public class TestPruningChains {
 
             double lengthOriginal = GraphUtils.realLength(graph, solution.getShortestPath());
             double lengthPruned = GraphUtils.realLength(pruned, solution2.getShortestPath());
-            if (Math.abs(lengthOriginal - lengthPruned) > 1e-5) {
+            // Assume  delta  =  1 * 10^-3  =  0.001m  =  1mm
+            boolean isPlusMinusDelta = Math.abs(lengthOriginal - lengthPruned) <= 1e-3;
+
+            List<Vertex> originalPath = new ArrayList<>(solution.getShortestPath());
+            List<Vertex> prunedPath = new ArrayList<>(solution2.getShortestPath());
+            boolean isSubsetOfLongPath = originalPath.containsAll(prunedPath);
+
+            if (! isPlusMinusDelta || ! isSubsetOfLongPath ) {
                 System.setOut(originalStream);
 
                 System.out.println(i + ":  " + a + "-->" + b);
@@ -89,7 +96,7 @@ public class TestPruningChains {
                 vis2.visualize("A* pruned " + i);
                 // break;
             }
-            
+
             System.out.println();
         }
         System.setOut(originalStream);
