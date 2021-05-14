@@ -145,10 +145,12 @@ public class GraphUtils {
             }
 
             // If reached: we found a chain link!
-            Iterator<Neighbor> neighbors = new HashSet<>(g.getNeighboursOf(v)).iterator();
 
-            Neighbor a = neighbors.next();
-            Neighbor b = neighbors.next();
+            // pull out neighbors for easy access
+            List<Neighbor> neighbors = g.getNeighboursOf(v).stream().collect(Collectors.toList());
+
+            Neighbor a = neighbors.get(0);
+            Neighbor b = neighbors.get(1);
 
             if (a.v.equals(b.v)) {
                 // TODO: still necessary?

@@ -12,18 +12,15 @@ import java.util.*;
 public class TestPruningChains {
     public static void main(String[] args) {
         String csv = "aarhus-silkeborg-all-roads.csv";
-
         // String csv = "denmark-latest-roads.csv";
         BoundingBox bbox = BoundingBox.AarhusSilkeborg;
         int runs = (int) 1e6;
 
-
         Graph graph = GraphPopulator.populateGraph(csv);
 
         Graph pruned = GraphPopulator.populateGraph(csv);
-
-    
         pruned = GraphUtils.pruneUndirectedChains(pruned);
+
         System.out.println(graph.getAllVertices().size() + " nodes in original graph");
         System.out.println(pruned.getAllVertices().size() + " nodes in pruned graph");
         
