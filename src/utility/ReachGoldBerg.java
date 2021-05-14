@@ -41,16 +41,23 @@ public class ReachGoldBerg {
             //vis2.visualize("Iteration " + i);
 
 
+
+
+            //Iterative step
+            System.out.println("Iteration " + i + " with bs[i] = " + bs[i]);
+            System.out.println("Works with gPrime size: " + graphPrime.getAllVertices().size());
+
+            // Do shortcut before!
+            //Graph gPrimeShortcut = shortcut(graphPrime, graph, INF_DIST); //TODO what graph should this be given
+            
+            //graphPrime = gPrimeShortcut;
+
             for (Vertex v: graphPrime.getAllVertices()){
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
                     Edge edge = new Edge(v, n.v, n.distance);
                     r.put(edge, 0.0);
                 }
             }
-
-            //Iterative step
-            System.out.println("Iteration " + i + " with bs[i] = " + bs[i]);
-            System.out.println("Works with gPrime size: " + graphPrime.getAllVertices().size());
 
             // Grow trees 
             int max = graphPrime.getAllVertices().size();
@@ -76,8 +83,9 @@ public class ReachGoldBerg {
                 // Modify tree according to the out-penalties
                 int x = 0;
                 int y = 0;
-                Set<Vertex> newClosed = new HashSet<>(tree.closed); // Can't modify closed while we loop over it 
-                for (Vertex w: tree.closed){ // TODO this is ugly
+                //Set<Vertex> newClosed = new HashSet<>(tree.closed); // Can't modify closed while we loop over it 
+                Set<Vertex> iter = new HashSet<>(tree.dist.keySet());
+                for (Vertex w: iter){ // TODO this is ugly
                     tree.leafs.remove(w);
                     Vertex wPrime = new Vertex(x,y); // This is the pseudo leafs
                     x++; 
@@ -87,40 +95,29 @@ public class ReachGoldBerg {
                     Set<Vertex> path = new HashSet<>(tree.paths.get(w));
                     path.add(w);
                     tree.paths.put(wPrime, path);
-                    newClosed.add(wPrime);
+                    //newClosed.add(wPrime);
                 }
-                tree.closed = newClosed;
+                //tree.closed = newClosed;
 
                 long timeBeforeReachCalc = System.currentTimeMillis();
 
                 for (Vertex u: tree.inner){
                     for (Neighbor n: graphPrime.getNeighboursOf(u)){
-                        if (!tree.paths.get(n.v).contains(u)){
+                        if (!tree.paths.get(n.v).contains(u)){   
                             continue;
                         }
                         Double tempR = calcReach(u,n.v, tree, inPenalties.getOrDefault(v, 0.0));
                         Edge un = new Edge(u, n.v, n.distance);
                         edgesConsidered.add(un);
+
                         if (r.getOrDefault(un, 0.0) < tempR){
                             //System.out.println(r.getOrDefault(un, 0.0));
                             r.put(un, tempR);
                         }
                     }
                 }
-                /*for (Vertex u: tree.outer){
-                    for (Neighbor n: graphPrime.getNeighboursOf(u)){
-                        if (!tree.paths.get(n.v).contains(u)){
-                            continue;
-                        }
-                        Double tempR = calcReach(u,n.v, tree, inPenalties.getOrDefault(v, 0.0));
-                        Edge un = new Edge(u, n.v, n.distance);
-                        edgesConsidered.add(un);
-                        if (r.getOrDefault(un, 0.0) < tempR){
-                            //System.out.println(r.getOrDefault(un, 0.0));
-                            r.put(un, tempR);
-                        }
-                    }
-                }*/
+                
+
                 long timeAfterReachCalc = System.currentTimeMillis();
                 totalReachCalcTime += (timeAfterReachCalc-timeBeforeReachCalc);
             }
@@ -153,7 +150,7 @@ public class ReachGoldBerg {
                     //System.out.println(r.getOrDefault(vn, 0.0));
                     double reach = 0;
                     if (edgesConsidered.contains(vn)){
-                        reach = r.get(vn);
+                        reach = r.get(vn); 
                     } else {
                         reach = INF_DIST;
                     }
@@ -192,9 +189,9 @@ public class ReachGoldBerg {
 
             // Shortcuts
             // TODO us bs[i+1], but avoid the last edge case with indexing out of bounds....
-            Graph gPrimeShortcut = shortcut(graphPrime, graph, INF_DIST); //TODO what graph should this be given
+            //Graph gPrimeShortcut = shortcut(graphPrime, graph, INF_DIST); //TODO what graph should this be given
             
-            graphPrime = gPrimeShortcut;
+            //graphPrime = gPrimeShortcut;
 
             edgesConsideredThroughout.addAll(edgesConsidered);
 
@@ -205,32 +202,29 @@ public class ReachGoldBerg {
         // TODO Refinement phase?
         // This just gives better upperbound by doing some recalculation.
 
-        // TODO translate from arc reach into vertex reach
-        // TODO Can maybe be done better
+        // Arc into vertex
         Map<Vertex, Double> maxIncomming = new HashMap<>();
         Map<Vertex, Double> maxOutgoing = new HashMap<>();
 
 
         // A better translation is described on page 13
         // https://www.microsoft.com/en-us/research/wp-content/uploads/2006/01/tr-2005-132.pdf
-        for (Vertex v: graph.getAllVertices()){
+        /*for (Vertex v: graph.getAllVertices()){
             for (Neighbor n: graph.getNeighboursOf(v)){
                 Edge edge = new Edge(v, n.v, n.distance);
 
                 maxIncomming.put(n.v, Math.max(r.getOrDefault(edge, INF_DIST), maxIncomming.getOrDefault(n.v, 0.0)));
                 maxOutgoing.put(v, Math.max(r.getOrDefault(edge, INF_DIST), maxOutgoing.getOrDefault(v, 0.0)));
             }
-        }
-        /*
+        }*/
+        
         for (Edge e: r.keySet()){
             maxIncomming.put(e.getEnd(), Math.max(r.getOrDefault(e, INF_DIST), maxIncomming.getOrDefault(e.getEnd(), 0.0)));
             maxOutgoing.put(e.getStart(), Math.max(r.getOrDefault(e, INF_DIST), maxOutgoing.getOrDefault(e.getStart(), 0.0)));
-        }*/
+        }
 
         for (Vertex v: graph.getAllVertices()){
-            /*if (maxIncomming.get(v) == null || maxOutgoing.get(v) == null){
-                System.out.println(v);
-            }*/
+
             rVertex.put(v, Math.min(maxIncomming.getOrDefault(v, INF_DIST), maxOutgoing.getOrDefault(v, INF_DIST)));
         }
         //System.out.println(rVertex);
@@ -245,14 +239,21 @@ public class ReachGoldBerg {
         }
 
 
-        writeGraphToFile("shortCuttedGraph",graph);
+        writeGraphToFile("shortCuttedGraph", graph);
 
         return rVertex;
     }
 
     public static Double calcReach(Vertex v, Vertex u, Tree tree, double penalty){
+        double depth = depth(v,u, tree, penalty);
+        double height =  height(v,u,tree);
+        Vertex q = new Vertex(56.1486677,9.9171252);
+        if (q.equals(v) || q.equals(u)){
+            System.out.println(v.toString() + " -> " + u + " depth  = " + depth);
+            System.out.println(v.toString() + " -> " + u + " height = " + height);
+        }
 
-        return Math.min(depth(v,u, tree, penalty), height(v,u,tree));
+        return Math.min(depth, height);
 
     }
 
@@ -263,15 +264,17 @@ public class ReachGoldBerg {
     public static double height(Vertex v, Vertex u, Tree tree){
         Double h = 0.0;
         //System.out.println(u);
-        for (Vertex w: tree.leafs){
+        for (Vertex w: tree.dist.keySet()){
             if (tree.paths.get(w).contains(u) && tree.closed.contains(w)) {
                 // If we take the distance to the beginning node, we don't have to keep track of the length of the edge
-                if (tree.dist.get(w) + tree.dist.get(v) < 0) {
-                    System.out.println("Impossible case");
+                if (tree.dist.get(w) - tree.dist.get(v) <= 0) {
+                    //System.out.println(w.toString() + " -> " + v);
+                    //System.out.println("Impossible case");
                 }
                 h = Math.max(h, tree.dist.get(w) - tree.dist.get(v)); 
             } else if (tree.paths.get(w).contains(u) && !tree.closed.contains(w)){
-                h = INF_DIST;
+                h = Math.max(h, INF_DIST);
+                break;
             } else {
                 // This happens when the leaf does not have v in its path
             }
@@ -283,6 +286,7 @@ public class ReachGoldBerg {
     }
 
     public static Tree partialTree(Graph g, Vertex x, double epsilon){
+        //System.out.print(".");
         // This may be super inefficient to maintain all this, but we find it easier than trying to squeze it all 
         // into one data structure.
 
@@ -306,6 +310,9 @@ public class ReachGoldBerg {
 
         Map<Vertex, Double> noOfChildren = new HashMap<>();
 
+        List<Edge> edgesConsidered = new ArrayList<>();
+
+
         Set<Vertex> closed = new HashSet<>();
 
         pq.add(new Pair(x, 0));
@@ -314,45 +321,118 @@ public class ReachGoldBerg {
 
         paths.put(x, new HashSet<Vertex>());
         
+
+
         double bestxPrimeDist = 0.0;
         
         while (pq.size() > 0) {
 
-            boolean trueForAllLeaf = leafTprime.size() > 0 && bestxPrimeDist > 2 * epsilon ; // if there are any, assume it's tru and disprove in for loop
+            //boolean trueForAllLeaf = leafTprime.size() > 0 && bestxPrimeDist > 2 * epsilon ; // if there are any, assume it's tru and disprove in for loop
             
             /*System.out.println(bestDist);
             System.out.println(xprimeDist);
             System.out.println(leafT);
             System.out.println(leafTprime + "\n");*/
 
+
             // Stopping condition as shown in https://www.microsoft.com/en-us/research/wp-content/uploads/2006/01/tr-2005-132.pdf
-            for (Vertex v: leafTprime) {
+            /*for (Vertex v: leafTprime) {
                 if (!(leafT.contains(v) || xprimeDist.get(v) >= 2 * epsilon)){
                     trueForAllLeaf = false;
                     break;
                 }
-            }
-            if (trueForAllLeaf){                
+            }*/
+
+            //if (trueForAllLeaf){                
                 //System.out.println("Break 1");
                 /*System.out.println("Start: " + start);
                 System.out.println(leafT);
                 System.out.println(leafTprime + "\n");*/
+            //    break;
+            //}
+
+
+            // Another stopping condition 
+            // users.diag.uniroma1.it/challenge9/papers/goldberg.pdf
+            // Assume it's not true for all
+
+
+            boolean foundMistake = leafTprime.size() > 0 && bestxPrimeDist > 2 * epsilon;
+            //boolean foundMistake = true && innerCircle.size() > 0;
+            if (foundMistake){
+                for (Vertex v: innerCircle){
+                    // Property 1) Check for labeled descendents
+                    Pair[] list = pq.toArray(new Pair[0]);
+                    boolean labeledDescendent = false;
+                    for (Pair p: list){
+                        //System.out.println(p.v);
+                        Set<Vertex> path = paths.get(p.v);
+                        //System.out.println(p.v.toString() + path);
+                        labeledDescendent = path.contains(v);
+                    }
+                    if (!labeledDescendent){
+                        // No labeled descendent so early go on
+                        continue;
+                    }
+    
+                    // Property 2 relaxed)   
+                    boolean longDist = true;
+    
+                    for (Vertex s: closed) {
+                        double closestDist = INF_DIST;
+                        for (Vertex w: paths.get(s)){
+                            Vertex ps = new Vertex(56.1483202, 9.9050756);
+                            if (w.equals(ps)){
+                                //System.out.println("p = " + p.v);
+                                //System.out.println("Best dist pv = " + bestDist.get(p.v));
+                                //System.out.println("Best dist w  = " + bestDist.get(w));
+                    
+                            }
+                            // Find closest inner circle
+                            
+                            if (innerCircle.contains(w)){
+                                closestDist = Math.min(closestDist, bestDist.get(s) - bestDist.get(w));
+                            }
+                        }
+                        if (!(closestDist > epsilon)){
+                            longDist = false;
+                        }
+                    }
+    
+                    if (longDist){continue;}
+    
+                    foundMistake = false;
+    
+                } 
+            }
+  
+
+
+            if (foundMistake){
                 break;
             }
 
+
+
+            Vertex q = new Vertex(56.1486677,9.9171252);
 
             Pair head = pq.poll();
             if (closed.contains(head.v)){
                 continue;
             }
             closed.add(head.v);
-            // Maintain inner and outercircles. 
-            if (xprimeDist.get(head.v) <= epsilon) {
+            // Maintain inner and outercircles.
+            if (bestDist.get(head.v) <= epsilon ){
+                innerCircle.add(head.v);
+            } else if (bestDist.get(head.v) > epsilon && xprimeDist.get(head.v) < epsilon) {
+
+                if (q.equals(head.v)){
+                    System.out.println("\nIs in the sweet spot");
+                }
                 innerCircle.add(head.v);
             } else {
                 outerCircle.add(head.v);
             }
-
 
             leafTprime.add(head.v);
 
@@ -364,17 +444,30 @@ public class ReachGoldBerg {
                 leafTprime.remove(parent);
             }
 
+            if (head.v.equals(q)){
+                System.out.println("Origin " + x);
+            }
+            
             g.getNeighboursOf(head.v)
                 .forEach(n -> {
                     // RELAX
+                    double maybeNewBestDistance = head.dist + n.distance;
+                    double previousBestDistance = bestDist.getOrDefault(n.v, INF_DIST);
+
+                    edgesConsidered.add(new Edge(head.v, n.v, maybeNewBestDistance));
+
+                    if (head.v.equals(q)){
+                        System.out.println(n.v + " -> " + previousBestDistance + " prev vs " + maybeNewBestDistance + " new best");
+                    }
                     if (closed.contains(n.v)){
                         return;
                     }
 
-                    double maybeNewBestDistance = head.dist + n.distance;
-                    double previousBestDistance = bestDist.getOrDefault(n.v, INF_DIST);
 
                     if (maybeNewBestDistance < previousBestDistance) {
+                        if (head.v.equals(q)){
+                            System.out.println(q.toString() + " -> " + n.v);
+                        }
                         leafT.add(n.v);
                         leafT.remove(head.v);
                         
@@ -434,6 +527,20 @@ public class ReachGoldBerg {
                     }
                 });
         }
+        Vertex p = new Vertex(56.1483202, 9.9050756);
+        if (x.equals(p)){
+            System.out.println("Inner: " + innerCircle);
+            System.out.println("BestDist + " + bestDist);
+            System.out.println("Paths " + paths);
+            
+            GraphVisualiser vis2 = new GraphVisualiser(g, BoundingBox.ReachTest);
+            vis2.drawVisited(edgesConsidered);
+            vis2.drawMeetingNode(x);
+            vis2.drawPoint(closed, closed);
+            vis2.visualize("Iteration ");
+
+
+        }
         //System.out.println("Dijkstra done");
         Tree tree = new Tree(bestDist, innerCircle, outerCircle, pred, leafT, paths, closed);
 
@@ -463,7 +570,7 @@ public class ReachGoldBerg {
             counter++;
             if (counter % tenProcent == 0) {
                 counter2++;
-                System.out.println("Completed the first " + counter2*10 + "%");
+                System.out.println("Completed the first " + counter2*10 + "% in shortcut");
                 long timeAfter = System.currentTimeMillis();
                 System.out.println("Total calculating time so far " + ((timeAfter-timeBefore)/1000) + " seconds");
     
@@ -645,14 +752,19 @@ public class ReachGoldBerg {
         double length = 0;
         double lengthReverse = 0;
         Vertex curr = from;
-        System.out.println("1");
+        //System.out.println("1");
         boolean calcLength = false;
-        System.out.println(path);
-        System.out.println(to);
-        System.out.println(from);
+        //System.out.println(path);
+        //System.out.println(to);
+        //System.out.println(from);
 
         Set<Vertex> alreadySeen = new HashSet<>();
+        int i = 0;
         while (!calcLength){
+            if (i > path.size()*2){
+                // TODO Shit way to avoid perma looping atm
+                return gToModify;
+            }
             for (Neighbor n: g.getNeighboursOf(curr)){
                 if (path.contains(n.v) && ! alreadySeen.contains(n.v)){
                     // We found the neighbor that is in the link!
@@ -667,7 +779,7 @@ public class ReachGoldBerg {
             }
             //System.out.println("does this loop?");
         }
-        System.out.println("2");
+        //System.out.println("2");
 
 
         alreadySeen = new HashSet<>();
@@ -675,7 +787,7 @@ public class ReachGoldBerg {
             curr = to;
             calcLength = false;
 
-            while (calcLength){
+            while (!calcLength){
                 for (Neighbor n: g.getNeighboursOf(curr)){
                     if (path.contains(n.v) && ! alreadySeen.contains(n.v)){
                         // We found the neighbor that is in the link!
@@ -693,7 +805,7 @@ public class ReachGoldBerg {
                 System.out.println("Length: " + length + ",  reverse: " + lengthReverse);
             }
         }
-        System.out.println("3");
+        //System.out.println("3");
 
 
         alreadySeen = new HashSet<>();
@@ -706,8 +818,8 @@ public class ReachGoldBerg {
             // Find middle point
             curr = from;
             double distanceToCur = 0;
-            System.out.println("curr: " + curr);
-            System.out.println("to  :" + to);
+            //System.out.println("curr: " + curr);
+            //System.out.println("to  :" + to);
             while (!curr.equals(to)){
                 for (Neighbor n: g.getNeighboursOf(curr)){
                     if (path.contains(n.v) && ! alreadySeen.contains(n.v)){
@@ -716,7 +828,7 @@ public class ReachGoldBerg {
                         distanceToCur += n.distance;
                         curr = n.v;
 
-                        System.out.println(distanceToCur-(length/2));
+                        //System.out.println(distanceToCur-(length/2));
                         if (Math.abs(distanceToCur-(length/2)) < bestDistToMiddle){
                             middle = curr;
                             bestDistToMiddle = Math.abs(distanceToCur-(length/2));
@@ -727,8 +839,8 @@ public class ReachGoldBerg {
             }
             curr = from;
             alreadySeen = new HashSet<>();
-            System.out.println("Moving to middle " + middle);
-            System.out.println("path:" + path);
+            //System.out.println("Moving to middle " + middle);
+            //System.out.println("path:" + path);
             boolean foundMid = false;
             while (!foundMid){
                 for (Neighbor n: g.getNeighboursOf(curr)){
@@ -742,12 +854,12 @@ public class ReachGoldBerg {
                         if (curr.equals(middle)){
                             foundMid = true;
                         }
-                        System.out.println(foundMid);
+                        //System.out.println(foundMid);
                         break;
                     }
                 }
             }
-            System.out.println("Found the middle");
+            //System.out.println("Found the middle");
 
 
             
@@ -757,9 +869,9 @@ public class ReachGoldBerg {
             pathToEnd.add(middle);
             pathToEnd.add(to);
 
-            System.out.println("from -> middle");
+            //System.out.println("from -> middle");
             addShortcut(from, middle, pathToMiddle, epsilon, g, gToModify, direction, origGraph);
-            System.out.println("middle -> to");
+            //System.out.println("middle -> to");
             addShortcut(middle, to, pathToEnd, epsilon, g, gToModify, direction, origGraph);
         }
         // Add the "full length" shortcut
@@ -808,7 +920,7 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{100, 250, 500, 1000, 2000/*, 5000*/};
+        double[] bs = new double[]{100/*100, 250, 500, 1000, 2000, 5000, 10000, 20000, 50000*/};
         //double[] bs = new double[]{1,2,3,4,5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
