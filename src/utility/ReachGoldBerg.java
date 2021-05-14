@@ -248,10 +248,10 @@ public class ReachGoldBerg {
         double depth = depth(v,u, tree, penalty);
         double height =  height(v,u,tree);
         Vertex q = new Vertex(56.1486677,9.9171252);
-        if (q.equals(v) || q.equals(u)){
+        /*if (q.equals(v) || q.equals(u)){
             System.out.println(v.toString() + " -> " + u + " depth  = " + depth);
             System.out.println(v.toString() + " -> " + u + " height = " + height);
-        }
+        }*/
 
         return Math.min(depth, height);
 
@@ -355,20 +355,39 @@ public class ReachGoldBerg {
             // Another stopping condition 
             // users.diag.uniroma1.it/challenge9/papers/goldberg.pdf
             // Assume it's not true for all
+            Vertex q = new Vertex(56.1483202, 9.9050756);
+    
+            Vertex z = new Vertex(56.1486794,9.9164926);
+            /*Pair[] list2 = pq.toArray(new Pair[0]);
+            if (q.equals(x)){
+                ArrayList<Vertex> newList = new ArrayList<>();
+                for (int l = 0; l < list2.length; l++){
+                    newList.add(l, list2[l].v);
+                }
+                //System.out.println("List: " + newList.toString());
+            }*/
 
-
-            boolean foundMistake = leafTprime.size() > 0 && bestxPrimeDist > 2 * epsilon;
+            boolean foundMistake = leafTprime.size() > 0 /*&& bestxPrimeDist > 2 * epsilon*/;
             //boolean foundMistake = true && innerCircle.size() > 0;
             if (foundMistake){
                 for (Vertex v: innerCircle){
                     // Property 1) Check for labeled descendents
                     Pair[] list = pq.toArray(new Pair[0]);
+
                     boolean labeledDescendent = false;
                     for (Pair p: list){
                         //System.out.println(p.v);
                         Set<Vertex> path = paths.get(p.v);
+                        /*if (q.equals(x)){
+                            if (p.v.equals(z)){
+                                System.out.println("pair p: " + p.v);
+                                System.out.println(" path " + path);
+                            }
+                        }*/
                         //System.out.println(p.v.toString() + path);
-                        labeledDescendent = path.contains(v);
+                        if (pred.get(p.v).equals(v)){
+                            labeledDescendent = true;
+                        }
                     }
                     if (!labeledDescendent){
                         // No labeled descendent so early go on
@@ -376,11 +395,11 @@ public class ReachGoldBerg {
                     }
     
                     // Property 2 relaxed)   
-                    boolean longDist = true;
+                    /*boolean longDist = true;
     
-                    for (Vertex s: closed) {
+                    for (Pair p: list) {
                         double closestDist = INF_DIST;
-                        for (Vertex w: paths.get(s)){
+                        for (Vertex w: paths.get(p.v)){
                             Vertex ps = new Vertex(56.1483202, 9.9050756);
                             if (w.equals(ps)){
                                 //System.out.println("p = " + p.v);
@@ -391,7 +410,7 @@ public class ReachGoldBerg {
                             // Find closest inner circle
                             
                             if (innerCircle.contains(w)){
-                                closestDist = Math.min(closestDist, bestDist.get(s) - bestDist.get(w));
+                                closestDist = Math.min(closestDist, bestDist.get(p.v) - bestDist.get(w));
                             }
                         }
                         if (!(closestDist > epsilon)){
@@ -399,7 +418,7 @@ public class ReachGoldBerg {
                         }
                     }
     
-                    if (longDist){continue;}
+                    if (longDist){continue;}*/
     
                     foundMistake = false;
     
@@ -414,7 +433,6 @@ public class ReachGoldBerg {
 
 
 
-            Vertex q = new Vertex(56.1486677,9.9171252);
 
             Pair head = pq.poll();
             if (closed.contains(head.v)){
@@ -426,13 +444,15 @@ public class ReachGoldBerg {
                 innerCircle.add(head.v);
             } else if (bestDist.get(head.v) > epsilon && xprimeDist.get(head.v) < epsilon) {
 
-                if (q.equals(head.v)){
+                /*if (q.equals(head.v)){
                     System.out.println("\nIs in the sweet spot");
-                }
+                }*/
                 innerCircle.add(head.v);
             } else {
                 outerCircle.add(head.v);
             }
+            
+
 
             leafTprime.add(head.v);
 
@@ -444,9 +464,9 @@ public class ReachGoldBerg {
                 leafTprime.remove(parent);
             }
 
-            if (head.v.equals(q)){
+            /*if (head.v.equals(q)){
                 System.out.println("Origin " + x);
-            }
+            }*/
             
             g.getNeighboursOf(head.v)
                 .forEach(n -> {
@@ -456,18 +476,18 @@ public class ReachGoldBerg {
 
                     edgesConsidered.add(new Edge(head.v, n.v, maybeNewBestDistance));
 
-                    if (head.v.equals(q)){
+                    /*if (head.v.equals(q)){
                         System.out.println(n.v + " -> " + previousBestDistance + " prev vs " + maybeNewBestDistance + " new best");
-                    }
+                    }*/
                     if (closed.contains(n.v)){
                         return;
                     }
 
 
                     if (maybeNewBestDistance < previousBestDistance) {
-                        if (head.v.equals(q)){
+                        /*if (head.v.equals(q)){
                             System.out.println(q.toString() + " -> " + n.v);
-                        }
+                        }*/
                         leafT.add(n.v);
                         leafT.remove(head.v);
                         
@@ -527,7 +547,7 @@ public class ReachGoldBerg {
                     }
                 });
         }
-        Vertex p = new Vertex(56.1483202, 9.9050756);
+        /*Vertex p = new Vertex(56.1483202, 9.9050756);
         if (x.equals(p)){
             System.out.println("Inner: " + innerCircle);
             System.out.println("BestDist + " + bestDist);
@@ -538,9 +558,7 @@ public class ReachGoldBerg {
             vis2.drawMeetingNode(x);
             vis2.drawPoint(closed, closed);
             vis2.visualize("Iteration ");
-
-
-        }
+        }*/
         //System.out.println("Dijkstra done");
         Tree tree = new Tree(bestDist, innerCircle, outerCircle, pred, leafT, paths, closed);
 
