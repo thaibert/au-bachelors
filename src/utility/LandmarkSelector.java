@@ -19,6 +19,10 @@ public class LandmarkSelector {
             allLandmarks = GraphUtils.randomLandmarks(g, noOfLandmarks);
         } else if (landmarkSelectionType == 1){
             allLandmarks = GraphUtils.farthestLandmarks(g, noOfLandmarks);
+        } else if (landmarkSelectionType == 2){
+            allLandmarks = GraphUtils.PartionCorner(g, noOfLandmarks);
+            System.out.println(allLandmarks.getFrom().keySet().size());
+            System.out.println(allLandmarks.getTo().keySet().size());
         } else {
             throw new RuntimeException("Please provide valid landmark selection strategy");
         }

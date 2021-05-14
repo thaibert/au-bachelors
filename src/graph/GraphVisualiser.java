@@ -106,15 +106,17 @@ public class GraphVisualiser extends Canvas {
         if (this.visited != null) {
             drawVisited(g);
         }
-        if (this.shortestPath != null) {
-            drawPath(g);
-            drawStartGoal(g);
+
+
+        if (this.landmarks.size() > 0 || this.activelandmarks.size() > 0){
+            drawPoint(g);
         }
         if (this.meetingNode != null){
             drawMeetingNode(g);
         }
-        if (this.landmarks.size() > 0 || this.activelandmarks.size() > 0){
-            drawPoint(g);
+        if (this.shortestPath != null) {
+            drawPath(g);
+            drawStartGoal(g);
         }
     }
 

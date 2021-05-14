@@ -13,9 +13,12 @@ public class TestDifferentLandmarks {
 
     static final int ALT_RANDOM = 0;
     static final int ALT_FARTHEST = 1;
+    static final int ALT_CORNER_PART= 2;
 
     static String[] names = new String[]{"ALT RANDOM  ", 
-                                         "ALT FARTHEST"};
+                                         "ALT FARTHEST",
+                                         "ALT CORNER_PART"};
+                                         
     static int numAlgos = names.length;
 
     static PathfindingAlgo[] algos = new PathfindingAlgo[numAlgos];
@@ -141,12 +144,15 @@ public class TestDifferentLandmarks {
 
         LandmarkSelector ls0 = new LandmarkSelector(g, 16, 0); // TODO how many landmarks
         LandmarkSelector ls1 = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
+        LandmarkSelector ls2 = new LandmarkSelector(g, 16, 2);
         lms[ALT_RANDOM] = ls0;
         lms[ALT_FARTHEST] = ls1;
+        lms[ALT_CORNER_PART] = ls2;
     
 
         algos[ALT_RANDOM] = new ALT(g, ls0);
         algos[ALT_FARTHEST] = new ALT(g, ls1);
+        algos[ALT_CORNER_PART] = new ALT(g, ls2);
         
 
         int runs = (int) 1e3;

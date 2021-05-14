@@ -120,13 +120,13 @@ public class Dijkstra implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-latest-roads.csv");
 
 
-        Vertex a = new Vertex(56.1738677,10.151051);
+        //Vertex a = new Vertex(56.1738677,10.151051);
         Vertex b = new Vertex(56.1950259,10.2199056);
 
-        //Vertex a = GraphUtils.pickRandomVertex(graph);
+        Vertex a = GraphUtils.pickRandomVertex(graph);
         //Vertex b = GraphUtils.pickRandomVertex(graph);
 
         System.out.println("Node a: " + a );
@@ -134,9 +134,9 @@ public class Dijkstra implements PathfindingAlgo {
 
 
         PathfindingAlgo d = new Dijkstra(graph);
-        Solution solution = d.shortestPath(a, b);
+        Solution solution = d.shortestPath(a, null);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("Dijkstra ours");

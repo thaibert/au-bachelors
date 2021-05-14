@@ -10,6 +10,8 @@ public class BoundingBox {
     public static BoundingBox intersection = new BoundingBox(56.1484, 56.1486, 9.85, 9.86); //This is the one from the meeting to test something
     public static BoundingBox Europa = new BoundingBox(29.735139, 81.47299000000001, -34.492960000000004, 46.75348);
 
+    public static BoundingBox ReachTest = new BoundingBox(56.1474, 56.1497, 9.8977, 9.9194);
+
     public final double SOUTH;
     public final double NORTH;
     public final double WEST;
