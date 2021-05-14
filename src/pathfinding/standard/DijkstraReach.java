@@ -174,7 +174,7 @@ public class DijkstraReach implements PathfindingAlgo {
         Map<Vertex, Double> r = readReaches("aarhus-silkeborg-GoldbergReachV4Shortcut");
 
         
-        /*PrintStream originalStream = System.out;
+        PrintStream originalStream = System.out;
 
         PrintStream noopStream = new PrintStream(new OutputStream(){
             public void write(int b) {
@@ -205,19 +205,20 @@ public class DijkstraReach implements PathfindingAlgo {
             System.out.println("Reach path has  " + diff + "  fewer nodes");
             if (diff > 25) {
                 System.out.println("  diff " + diff + " @ " + a + "->" + b);
-                GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Aarhus);
+                GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
                 vis.drawPath(solution.getShortestPath());
                 vis.drawVisited(solution.getVisited());
                 vis.visualize("Dijkstra reach");
 
-                GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.Aarhus);
+                GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
                 vis2.drawPath(solution2.getShortestPath());
                 vis2.drawVisited(solution2.getVisited());
                 vis2.visualize("Dijkstra normal");
             }
             System.setOut(noopStream);
 
-            if (! solution2.getShortestPath().equals(solution.getShortestPath())) {                
+            //if (! solution2.getShortestPath().equals(solution.getShortestPath())) {  
+            if (! dijkstraPath.containsAll(shortcutPath)){              
 
                 try {
                     System.setOut(originalStream);
@@ -242,7 +243,7 @@ public class DijkstraReach implements PathfindingAlgo {
                 }
 
             }
-        }*/
+        }/*
         Vertex a = new Vertex(56.1842169,9.7234288);
         Vertex b = new Vertex(56.110709,10.1999165);
 
@@ -272,7 +273,7 @@ public class DijkstraReach implements PathfindingAlgo {
         vis2.drawVisited(solution2.getVisited());
         vis2.visualize("Dijkstra");
         
-        
+        */
     }
 
     public static Map<Vertex, Double> readReaches(String filename) {
