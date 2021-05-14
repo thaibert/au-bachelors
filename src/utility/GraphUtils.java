@@ -96,6 +96,7 @@ public class GraphUtils {
     }
 
     public static double pathDistance(List<Vertex> path) {
+        // TODO: remove and replace references by realLength()
         if (path.size() < 2) {
             return 0;
         }
@@ -320,16 +321,16 @@ public class GraphUtils {
         }
 
         double dist = 0;
-        Vertex curr = path.get(0);
+        Vertex prev = path.get(0);
+        Vertex curr;
         for (int i = 1; i < path.size(); i++) {
-            Vertex next = path.get(i);
-            for (Neighbor n : g.getNeighboursOf(curr)) {
-                if (! next.equals(n.v)) {
-                    continue;
+            curr = path.get(i);
+            for (Neighbor n : g.getNeighboursOf(prev)) {
+                if (curr.equals(n.v)) {
+                    dist += n.distance;
                 }
-                dist += n.distance;
             }
-            curr = next;
+            prev = curr;
         }
         return dist;
     }
