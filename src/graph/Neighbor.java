@@ -16,9 +16,9 @@ public class Neighbor implements Serializable {
     }
 
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true; 
-        }
+        // if (this == obj) {
+        //     return true; 
+        // }
         if (obj == null) {
             return false;
         }
@@ -31,12 +31,13 @@ public class Neighbor implements Serializable {
 
     @Override
     public int hashCode() {
-        final int prime = 37; // I saw on https://stackoverflow.com/questions/2265503/why-do-i-need-to-override-the-equals-and-hashcode-methods-in-java 
+        final int prime1 = 43; // I saw on https://stackoverflow.com/questions/2265503/why-do-i-need-to-override-the-equals-and-hashcode-methods-in-java
                               // That they used prime in auto generated code, so now we do as well ¯\_(ツ)_/¯
-        int longHash = Double.hashCode(v.getLatitude());
-        int latHash = Double.hashCode(distance);
+        final int prime2 = 47;
+        int vertexHash = v.hashCode();
+        int distHash = Double.hashCode(distance);
 
-        return (prime + longHash + latHash); 
+        return (prime1 * vertexHash + prime2 * distHash); 
     }
 
 
