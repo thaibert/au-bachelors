@@ -314,7 +314,7 @@ public class ReachGoldBerg {
 
         Map<Vertex, Double> noOfChildren = new HashMap<>();
 
-        List<Edge> edgesConsidered = new ArrayList<>();
+        //List<Edge> edgesConsidered = new ArrayList<>();
 
 
         Set<Vertex> closed = new HashSet<>();
@@ -327,7 +327,7 @@ public class ReachGoldBerg {
         
 
 
-        double bestxPrimeDist = 0.0;
+        //double bestxPrimeDist = 0.0;
         
         while (pq.size() > 0) {
 
@@ -359,9 +359,9 @@ public class ReachGoldBerg {
             // Another stopping condition 
             // users.diag.uniroma1.it/challenge9/papers/goldberg.pdf
             // Assume it's not true for all
-            Vertex q = new Vertex(56.1483202, 9.9050756);
+            //Vertex q = new Vertex(56.1483202, 9.9050756);
     
-            Vertex z = new Vertex(56.1486794,9.9164926);
+            //Vertex z = new Vertex(56.1486794,9.9164926);
             /*Pair[] list2 = pq.toArray(new Pair[0]);
             if (q.equals(x)){
                 ArrayList<Vertex> newList = new ArrayList<>();
@@ -376,23 +376,28 @@ public class ReachGoldBerg {
             if (foundMistake){
                 for (Vertex v: innerCircle){
                     // Property 1) Check for labeled descendents
-                    Pair[] list = pq.toArray(new Pair[0]);
+                    //Pair[] list = pq.toArray(new Pair[0]);
+                    Iterator<Pair> it = pq.iterator();
 
                     boolean labeledDescendent = false;
-                    for (Pair p: list){
+                    while (it.hasNext()){
+                        Vertex p = it.next().v;
+                        if (pred.get(p).equals(v)){
+                            labeledDescendent = true;
+                            break;
+                        }
+
+                    }
+                    /*for (Pair p: list){
                         //System.out.println(p.v);
-                        Set<Vertex> path = paths.get(p.v);
-                        /*if (q.equals(x)){
-                            if (p.v.equals(z)){
-                                System.out.println("pair p: " + p.v);
-                                System.out.println(" path " + path);
-                            }
-                        }*/
+                        //Set<Vertex> path = paths.get(p.v);
+  
                         //System.out.println(p.v.toString() + path);
                         if (pred.get(p.v).equals(v)){
                             labeledDescendent = true;
+                            break;
                         }
-                    }
+                    }*/
                     if (!labeledDescendent){
                         // No labeled descendent so early go on
                         continue;
@@ -425,7 +430,7 @@ public class ReachGoldBerg {
                     if (longDist){continue;}*/
     
                     foundMistake = false;
-    
+                    break;
                 } 
             }
   
@@ -444,10 +449,10 @@ public class ReachGoldBerg {
             }
             closed.add(head.v);
             // Maintain inner and outercircles.
+
             if (bestDist.get(head.v) <= epsilon ){
                 innerCircle.add(head.v);
             } else if (bestDist.get(head.v) > epsilon && xprimeDist.get(head.v) < epsilon) {
-
                 /*if (q.equals(head.v)){
                     System.out.println("\nIs in the sweet spot");
                 }*/
@@ -460,7 +465,7 @@ public class ReachGoldBerg {
 
             leafTprime.add(head.v);
 
-            bestxPrimeDist = xprimeDist.get(head.v);
+            //bestxPrimeDist = xprimeDist.get(head.v);
 
             // remove parent - it's no longer a leaf!
             Vertex parent = pred.get(head.v);
@@ -475,17 +480,18 @@ public class ReachGoldBerg {
             g.getNeighboursOf(head.v)
                 .forEach(n -> {
                     // RELAX
+                    if (closed.contains(n.v)){
+                        return;
+                    }
+
                     double maybeNewBestDistance = head.dist + n.distance;
                     double previousBestDistance = bestDist.getOrDefault(n.v, INF_DIST);
 
-                    edgesConsidered.add(new Edge(head.v, n.v, maybeNewBestDistance));
+                    //edgesConsidered.add(new Edge(head.v, n.v, maybeNewBestDistance));
 
                     /*if (head.v.equals(q)){
                         System.out.println(n.v + " -> " + previousBestDistance + " prev vs " + maybeNewBestDistance + " new best");
                     }*/
-                    if (closed.contains(n.v)){
-                        return;
-                    }
 
 
                     if (maybeNewBestDistance < previousBestDistance) {
