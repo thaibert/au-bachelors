@@ -19,7 +19,7 @@ public class TestPruningChains {
         Graph graph = GraphPopulator.populateGraph(csv);
 
         Graph pruned = GraphPopulator.populateGraph(csv);
-        pruned = GraphUtils.pruneUndirectedChains(pruned);
+        pruned = GraphUtils.pruneChains(pruned);
 
         System.out.println(graph.getAllVertices().size() + " nodes in original graph");
         System.out.println(pruned.getAllVertices().size() + " nodes in pruned graph");
@@ -91,7 +91,10 @@ public class TestPruningChains {
                 vis2.drawPath(solution2.getShortestPath());
                 vis2.drawVisited(solution2.getVisited());
                 vis2.visualize("A* pruned " + i);
-                // break;
+                break;
+            } else {
+                // It's correct; collect data!
+
             }
 
             System.out.println();

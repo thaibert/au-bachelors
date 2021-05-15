@@ -110,7 +110,13 @@ public class GraphUtils {
         return sum;
     }
 
-    public static Graph pruneDirectedChains(Graph g) {
+    public static Graph pruneChains(Graph g) {
+        g = pruneUndirectedChains(g);
+        g = pruneDirectedChains(g);
+        return g;
+    }
+
+    private static Graph pruneDirectedChains(Graph g) {
         // Prune directed chains from the graph
         // Meaning e.g.:
         //     a -1-> b -1-> c -1-> d
@@ -189,7 +195,7 @@ public class GraphUtils {
         return g;
     }
 
-    public static Graph pruneUndirectedChains(Graph g) {
+    private static Graph pruneUndirectedChains(Graph g) {
         // Undirected chains can be pruned by removing a chain link
         //   and connecting its two neighbors (with the distances added together)
         // Special care must be taken when dealing with cycles. We compress cul-de-sacs to triangles.
