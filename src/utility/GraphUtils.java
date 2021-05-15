@@ -110,6 +110,85 @@ public class GraphUtils {
         return sum;
     }
 
+    public static Graph pruneDirectedChains(Graph g) {
+        // Prune directed chains from the graph
+        // Meaning e.g.:
+        //     a -1-> b -1-> c -1-> d
+        // should turn into
+        //     a -3-> d
+        System.out.println("--> Pruning directed chains");
+
+        System.out.println("  --> inverting graph");
+        Graph g_inv = invertGraph(g);
+
+        Collection<Vertex> vertices = g.getAllVertices();
+        Iterator<Vertex> it = vertices.iterator();
+
+        int prunedNodes = 0;
+        int prunedEdges = 0;
+
+        int progressBar = 100000;
+        System.out.println("  --> Starting pruning. (Each dot is " + progressBar + " nodes)");
+
+        int iterations = 0;
+        while (it.hasNext()) {
+            iterations++;
+            if (iterations % progressBar == 0) {
+                System.out.print(".");
+            }
+
+            Vertex v = it.next();
+
+            Collection<Neighbor> neighbor_in = g_inv.getNeighboursOf(v);
+            Collection<Neighbor> neighbor_out = g.getNeighboursOf(v);
+            Collection<Vertex> in_v =  neighbor_in.stream().map(n -> n.v).collect(Collectors.toSet());
+            Collection<Vertex> out_v = neighbor_out.stream().map(n -> n.v).collect(Collectors.toSet());
+
+            boolean isLink = in_v.size() == 1
+                        && out_v.size() == 1
+                        && ! in_v.equals(out_v);
+            
+            if (! isLink) {
+                continue;
+            }
+
+            // if reached: we have a one-way chain link!
+
+            // pull out neighbors for easy access
+            Neighbor in = neighbor_in
+                .stream()
+                .collect(Collectors.toList())
+                .get(0);
+
+            Neighbor out = neighbor_out
+                .stream()
+                .collect(Collectors.toList())
+                .get(0);
+            
+            // Handle cycles not collapsing - make them a triangle
+            boolean isTriangle = isConnectedAtAll(g, in.v, out.v);
+            if (isTriangle) {
+                continue;
+            }
+
+            // Add new edges and isolate v
+            g.addEdge(    in.v, out.v, out.distance + in.distance);
+            g_inv.addEdge(out.v, in.v, out.distance + in.distance);
+
+            removeMiddleLink(g, g_inv, v);
+
+            prunedNodes += 1;
+            prunedEdges += 2-1;
+        }
+        System.out.println("    --> Pruned " + prunedNodes + " nodes");
+        System.out.println("    --> Pruned " + prunedEdges + " edges");
+
+        System.out.println("  --> Removing isolated nodes");
+        g = removeIsolatedNodes(g, g_inv);
+
+        return g;
+    }
+
     public static Graph pruneUndirectedChains(Graph g) {
         // Undirected chains can be pruned by removing a chain link
         //   and connecting its two neighbors (with the distances added together)
@@ -124,7 +203,8 @@ public class GraphUtils {
         Collection<Vertex> vertices = g.getAllVertices();
         Iterator<Vertex> it = vertices.iterator();
 
-        int pruned = 0;
+        int prunedNodes = 0;
+        int prunedEdges = 0;
 
         int progressBar = 100000;
         System.out.println("  --> Starting pruning. (Each dot is " + progressBar + " nodes)");
@@ -171,9 +251,11 @@ public class GraphUtils {
 
 
             removeMiddleLink(g, g_inv, v);
-            pruned += 1;
+            prunedNodes += 1;
+            prunedEdges += (4-2)/2; // counting undirected edges, hence div by 2
         }  
-        System.out.println("    --> Pruned " + pruned + " nodes");
+        System.out.println("    --> Pruned " + prunedNodes + " nodes");
+        System.out.println("    --> Pruned " + prunedEdges + " edges");
 
         System.out.println("  --> Removing isolated nodes");
         g = removeIsolatedNodes(g, g_inv);
@@ -200,10 +282,17 @@ public class GraphUtils {
         //  (Meaning  in = out, and  |in| = |out| = 2)
 
         // Pull vertices out of Neighbor objects, and put them in a HashSet
-        Collection<Vertex> neighbors = g.getNeighboursOf(v)
+        Collection<Vertex> out = g.getNeighboursOf(v)
             .stream()
             .map(n -> n.v)
             .collect(Collectors.toCollection(HashSet::new));
+        Collection<Vertex> in = g_inv.getNeighboursOf(v)
+            .stream()
+            .map(n -> n.v)
+            .collect(Collectors.toCollection(HashSet::new));
+        Collection<Vertex> neighbors = new HashSet<>();
+        neighbors.addAll(out);
+        neighbors.addAll(in);
 
         // For all neighbors: remove edges TO and FROM v 
         for (Vertex other : neighbors) {
