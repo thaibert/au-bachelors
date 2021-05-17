@@ -48,9 +48,9 @@ public class ReachGoldBerg {
             System.out.println("Works with gPrime size: " + graphPrime.getAllVertices().size());
 
             // Do shortcut before!
-            Graph gPrimeShortcut = shortcut(graphPrime, graph, INF_DIST, inPenalties, outPenalties, r); //TODO what graph should this be given
+            //Graph gPrimeShortcut = shortcut(graphPrime, graph, INF_DIST, inPenalties, outPenalties, r); //TODO what graph should this be given
             
-            graphPrime = gPrimeShortcut;
+            //graphPrime = gPrimeShortcut;
 
             for (Vertex v: graphPrime.getAllVertices()){
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
@@ -61,7 +61,7 @@ public class ReachGoldBerg {
 
             // Grow trees 
             int max = graphPrime.getAllVertices().size();
-            int tenProcent = max/10;
+            int tenProcent = max/20;
             int counter2 = 0;
             int counter = 0;
             long timeBefore = System.currentTimeMillis();
@@ -71,7 +71,7 @@ public class ReachGoldBerg {
                 counter++;
                 if (counter % tenProcent == 0) {
                     counter2++;
-                    System.out.println("Completed the first " + counter2*10 + "%");
+                    System.out.println("Completed the first " + counter2*5 + "%");
                     long timeAfter = System.currentTimeMillis();
                     System.out.println("Total reach calc time so far  " + totalReachCalcTime/1000 + " seconds");
                     System.out.println("Total calculating time so far " + ((timeAfter-timeBefore)/1000) + " seconds");
@@ -85,8 +85,8 @@ public class ReachGoldBerg {
                 int x = 0;
                 int y = 0;
                 Set<Vertex> newClosed = new HashSet<>(tree.closed); // Can't modify closed while we loop over it 
-                //Set<Vertex> iter = new HashSet<>(tree.dist.keySet());
-                Set<Vertex> iter = new HashSet<>(tree.leafs);
+                Set<Vertex> iter = new HashSet<>(tree.dist.keySet());
+                //Set<Vertex> iter = new HashSet<>(tree.leafs);
                 // Can probably limit this to only iterate leafs!
                 for (Vertex w: iter){ // TODO this is ugly
                     tree.leafs.remove(w);
@@ -246,7 +246,7 @@ public class ReachGoldBerg {
         }
 
 
-        writeGraphToFile("shortCuttedGraph", graph);
+        writeGraphToFile("shortCuttedGraphV2", graph);
 
         return rVertex;
     }
@@ -271,7 +271,7 @@ public class ReachGoldBerg {
     public static double height(Vertex v, Vertex u, Tree tree){
         Double h = 0.0;
         //System.out.println(u);
-        for (Vertex w: tree.leafs){
+        for (Vertex w: tree.dist.keySet()){
             if (tree.paths.get(w).contains(u) && tree.closed.contains(w)) {
                 // If we take the distance to the beginning node, we don't have to keep track of the length of the edge
                 if (tree.dist.get(w) - tree.dist.get(v) <= 0) {
@@ -331,7 +331,7 @@ public class ReachGoldBerg {
         
 
 
-        //double bestxPrimeDist = 0.0;
+        double bestxPrimeDist = 0.0;
         
         while (pq.size() > 0) {
 
@@ -375,7 +375,7 @@ public class ReachGoldBerg {
                 //System.out.println("List: " + newList.toString());
             }*/
 
-            boolean foundMistake = leafT.size() > 0 /*&& bestxPrimeDist > 2 * epsilon*/;
+            boolean foundMistake = leafT.size() > 0 && bestxPrimeDist > 2 * epsilon;
             //boolean foundMistake = true && innerCircle.size() > 0;
             if (foundMistake){
                 for (Vertex v: innerCircle){
@@ -468,8 +468,9 @@ public class ReachGoldBerg {
 
 
             //leafTprime.add(head.v);
-
-            //bestxPrimeDist = xprimeDist.get(head.v);
+            if (xprimeDist.get(head.v) > bestxPrimeDist){
+                bestxPrimeDist = xprimeDist.get(head.v);
+            }
 
             // remove parent - it's no longer a leaf!
             //Vertex parent = pred.get(head.v);
@@ -578,7 +579,7 @@ public class ReachGoldBerg {
         //System.out.println("Dijkstra done");
         
         Map<Vertex, Set<Vertex>> paths = new HashMap<>(); // This may not scale idk
-        for (Vertex v: leafT){
+        for (Vertex v: bestDist.keySet()){
             Vertex curr = v;
             Set<Vertex> path = new HashSet<>();
             while (curr != null){
@@ -1007,7 +1008,7 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{100, 500, 1500/*, 4500/*, 10000, 20000, 50000*/};
+        double[] bs = new double[]{100, 500, 1500, 4500/*, 50000*/};
         //double[] bs = new double[]{1,2,3,4,5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
@@ -1026,7 +1027,7 @@ public class ReachGoldBerg {
         }
         System.out.println("number of vertices with very high reach : " + counter);
 
-        saveReachArrayToFile("aarhus-silkeborg-GoldbergReachV4Shortcut", r);
+        saveReachArrayToFile("aarhus-silkeborg-GoldbergReachV4ShortcutV2", r);
 
     }
 

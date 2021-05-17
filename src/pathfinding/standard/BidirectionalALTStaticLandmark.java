@@ -27,8 +27,8 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
     private Set<Vertex> closed;
 
     private double bestPathLength;
-    private double fA;
-    private double fB;
+    private double distToHeadOfForwards;
+    private double distToHeadOfBackwards;
     private Vertex touchNode;
 
     private Vertex start;
@@ -79,7 +79,7 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         pq_f = new PriorityQueue<>(comp);
         pq_b = new PriorityQueue<>(comp);
 
-        fB = fA = hf(start, goal);
+        distToHeadOfBackwards = distToHeadOfForwards = hf(start, goal);
 
         dist_f.put(start, 0.0);
         dist_b.put(goal, 0.0);
@@ -151,7 +151,7 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         closed.add(currentPair.v);
         double dist = dist_f.getOrDefault(currentPair.v, INF_DIST);
         if(dist + hf(currentPair.v, goal) >= bestPathLength 
-        || dist + fB - hf(start, currentPair.v) >= bestPathLength){
+        || dist + distToHeadOfBackwards - hf(start, currentPair.v) >= bestPathLength){
             // Reject node 
         } else {
             // Stabilize
@@ -186,7 +186,7 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         }
 
         if (!pq_f.isEmpty()) {
-            fA = pq_f.peek().dist;
+            distToHeadOfForwards = pq_f.peek().dist;
         }
 
     }
@@ -201,7 +201,7 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         closed.add(currentPair.v);
         double dist = dist_b.getOrDefault(currentPair.v, INF_DIST);
         if (dist + hf(start, currentPair.v) >= bestPathLength
-        || dist + fA - hf(currentPair.v, goal) >= bestPathLength){
+        || dist + distToHeadOfForwards - hf(currentPair.v, goal) >= bestPathLength){
             // Reject
         } else {
             ginv.getNeighboursOf(currentPair.v).forEach(n -> {
@@ -232,7 +232,7 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         }
 
         if (!pq_b.isEmpty()) {
-            fB = pq_b.peek().dist;
+         distToHeadOfBackwards = pq_b.peek().dist;
         }
     }
 

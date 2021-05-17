@@ -32,9 +32,9 @@ public class NBA implements PathfindingAlgo{
     private Set<Vertex> closed;
 
     private double bestPathLength;
-    private double fA;
-    private double fB;
-    private Vertex touchNode;
+    private double distToHeadOfForward;
+    private double distToHeadOfBackward;
+    private Vertex meetingNode;
 
     private Vertex start;
     private Vertex goal;
@@ -66,7 +66,7 @@ public class NBA implements PathfindingAlgo{
         pq_f = new PriorityQueue<>(comp);
         pq_b = new PriorityQueue<>(comp);
 
-        fB = fA = hf(start, goal);
+        distToHeadOfBackward = distToHeadOfForward = hf(start, goal);
 
         dist_f.put(start, 0.0);
         dist_b.put(goal, 0.0);
@@ -89,19 +89,19 @@ public class NBA implements PathfindingAlgo{
         List<Vertex> out = new ArrayList<>();
 
         /* TODO something that checks if we actually found something */
-        if (pred_f.get(touchNode) == null && pred_b.get(touchNode) == null) {
+        if (pred_f.get(meetingNode) == null && pred_b.get(meetingNode) == null) {
             System.out.println("  --> No path exists!!");
             return new Solution(new ArrayList<>(), edgesConsidered, null);
         }
 
-        Vertex temp = touchNode;
+        Vertex temp = meetingNode;
         while (! start.equals(temp)) {
             out.add(temp);
             temp = pred_f.get(temp);
         }
 
         List<Vertex> out2 = new ArrayList<>();
-        temp = touchNode;
+        temp = meetingNode;
         while (! goal.equals(temp)) {
             temp = pred_b.get(temp);
             out2.add(temp);
@@ -118,26 +118,26 @@ public class NBA implements PathfindingAlgo{
         System.out.println("      " + comp.getComparisons() + " comparisons");
         System.out.println("      " + bestPathLength + " distance");
 
-        Solution solution = new Solution(out2, edgesConsidered, touchNode);
+        Solution solution = new Solution(out2, edgesConsidered, meetingNode);
 
         return solution;
     }
 
     public void expandForwad(){
-        Pair currentPair = pq_f.poll();
+        Pair head = pq_f.poll();
 
-        if (closed.contains(currentPair.v)){
+        if (closed.contains(head.v)){
             return;
         }
 
-        closed.add(currentPair.v);
-        double dist = dist_f.getOrDefault(currentPair.v, INF_DIST);
-        if(dist + hf(currentPair.v, goal) >= bestPathLength 
-        || dist + fB - hf(currentPair.v, start) >= bestPathLength){
+        closed.add(head.v);
+        double dist = dist_f.getOrDefault(head.v, INF_DIST);
+        if(dist + hf(head.v, goal) >= bestPathLength 
+        || dist + distToHeadOfBackward - hf(head.v, start) >= bestPathLength){
             // Reject node 
         } else {
             // Stabilize
-            g.getNeighboursOf(currentPair.v).forEach(n -> {
+            g.getNeighboursOf(head.v).forEach(n -> {
                 if (closed.contains(n.v)){
                     return; // TODO possibly fucking everything up, it should be continue, but that is not allowed
                 }
@@ -145,11 +145,11 @@ public class NBA implements PathfindingAlgo{
                 double tentDist = dist + n.distance;
 
                 // For counting amount of edges considered
-                edgesConsidered.add(new Edge(currentPair.v, n.v, tentDist));
+                edgesConsidered.add(new Edge(head.v, n.v, tentDist));
                 
                 if (dist_f.getOrDefault(n.v, INF_DIST) > tentDist) {
                     dist_f.put(n.v, tentDist);
-                    pred_f.put(n.v, currentPair.v);
+                    pred_f.put(n.v, head.v);
                     pq_f.add(new Pair(n.v, tentDist + hf(n.v, goal)));
 
                     // Checking if we found new best
@@ -157,7 +157,7 @@ public class NBA implements PathfindingAlgo{
                         double pathLength = tentDist + dist_b.get(n.v);
                         if (bestPathLength > pathLength) {
                             bestPathLength = pathLength;
-                            touchNode = n.v;
+                            meetingNode = n.v;
                         }
                     }
                 }
@@ -168,25 +168,25 @@ public class NBA implements PathfindingAlgo{
         }
 
         if (!pq_f.isEmpty()) {
-            fA = pq_f.peek().dist;
+            distToHeadOfForward = pq_f.peek().dist;
         }
 
     }
 
     public void expandBackward(){
-        Pair currentPair = pq_b.poll();
+        Pair head = pq_b.poll();
 
-        if (closed.contains(currentPair.v)){
+        if (closed.contains(head.v)){
             return;
         }
 
-        closed.add(currentPair.v);
-        double dist = dist_b.getOrDefault(currentPair.v, INF_DIST);
-        if (dist + hb(currentPair.v, start) >= bestPathLength
-        || dist + fA - hb(currentPair.v, goal) >= bestPathLength){
+        closed.add(head.v);
+        double dist = dist_b.getOrDefault(head.v, INF_DIST);
+        if (dist + hb(head.v, start) >= bestPathLength
+        || dist + distToHeadOfForward - hb(head.v, goal) >= bestPathLength){
             // Reject
         } else {
-            ginv.getNeighboursOf(currentPair.v).forEach(n -> {
+            ginv.getNeighboursOf(head.v).forEach(n -> {
                 if (closed.contains(n.v)){
                     return; // TODO this might fuck shit up, should be continue but it can't be
                 }
@@ -194,11 +194,11 @@ public class NBA implements PathfindingAlgo{
                 double tentDist = dist + n.distance;
                 
                 // For counting amount of edges considered
-                edgesConsidered.add(new Edge(currentPair.v, n.v, tentDist));
+                edgesConsidered.add(new Edge(head.v, n.v, tentDist));
 
                 if (dist_b.getOrDefault(n.v, INF_DIST) > tentDist){
                     dist_b.put(n.v, tentDist);
-                    pred_b.put(n.v, currentPair.v);
+                    pred_b.put(n.v, head.v);
                     pq_b.add(new Pair(n.v, tentDist + hb(n.v, start)));
 
                     //Checking if we found new best
@@ -206,7 +206,7 @@ public class NBA implements PathfindingAlgo{
                         double pathLength = tentDist + dist_f.get(n.v);
                         if (pathLength < bestPathLength){
                             bestPathLength = pathLength;
-                            touchNode = n.v;
+                            meetingNode = n.v;
                         }
                     }
                 }
@@ -214,7 +214,7 @@ public class NBA implements PathfindingAlgo{
         }
 
         if (!pq_b.isEmpty()) {
-            fB = pq_b.peek().dist;
+            distToHeadOfBackward = pq_b.peek().dist;
         }
     }
 

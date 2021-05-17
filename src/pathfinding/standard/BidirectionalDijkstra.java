@@ -19,7 +19,7 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
     private Map<Vertex, Vertex> predecessor_b; // S in the algo is pred.keySet()
     private Set<Vertex> s_f;
     private Set<Vertex> s_b;
-    private Vertex bestVertex; 
+    private Vertex meetingNode; 
     double mu;
 
     // For visual
@@ -41,7 +41,7 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
         predecessor_b = new HashMap<>();
         s_f = new HashSet<>();
         s_b = new HashSet<>();
-        bestVertex = null;
+        meetingNode = null;
         mu = INF_DIST;
         
         //Purely for visualising
@@ -94,9 +94,10 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
                         pq_f.add(new Pair(n.v, maybeNewBestDistance)); 
                     }
 
-                    if (s_b.contains(n.v) && bestDist_f.get(head_f.v) + n.distance + bestDist_b.get(n.v) < mu) {
-                        mu = bestDist_f.get(head_f.v) + n.distance + bestDist_b.get(n.v);
-                        bestVertex = n.v;
+                    double pathLength = bestDist_f.get(head_f.v) + n.distance + bestDist_b.get(n.v);
+                    if (s_b.contains(n.v) && pathLength < mu) {
+                        mu = pathLength;
+                        meetingNode = n.v;
                     }
                 });
            
@@ -119,7 +120,7 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
 
                 if (s_f.contains(n.v) && bestDist_b.get(head_b.v) + n.distance + bestDist_f.get(n.v) < mu) {
                     mu = bestDist_b.get(head_b.v) + n.distance + bestDist_f.get(n.v);
-                    bestVertex = n.v;
+                    meetingNode = n.v;
                 }
             });
         
@@ -133,19 +134,19 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
         List<Vertex> out = new ArrayList<>();
 
         /* TODO something that checks if we actually found something */
-        if (predecessor_f.get(bestVertex) == null && predecessor_b.get(bestVertex) == null) {
+        if (predecessor_f.get(meetingNode) == null && predecessor_b.get(meetingNode) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered, bestVertex);
+            return new Solution(new ArrayList<>(), edgesConsidered, meetingNode);
         }
 
-        Vertex temp = bestVertex;
+        Vertex temp = meetingNode;
         while (! start.equals(temp)) {
             out.add(temp);
             temp = predecessor_f.get(temp);
         }
 
         List<Vertex> out2 = new ArrayList<>();
-        temp = bestVertex;
+        temp = meetingNode;
         while (! goal.equals(temp)) {
             temp = predecessor_b.get(temp);
             out2.add(temp);
@@ -160,7 +161,7 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
         System.out.println("      " + comp.getComparisons() + " comparisons");
         System.out.println("      " + mu + " distance");
 
-        Solution solution = new Solution(out2, edgesConsidered, bestVertex);
+        Solution solution = new Solution(out2, edgesConsidered, meetingNode);
 
         return solution;
 

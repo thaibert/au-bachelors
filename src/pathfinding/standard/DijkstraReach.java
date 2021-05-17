@@ -165,13 +165,13 @@ public class DijkstraReach implements PathfindingAlgo {
 
     public static void main(String[] args) {
         // Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
-        Graph graph = readShortcutGraph("shortCuttedGraph");
+        Graph graph = readShortcutGraph("shortCuttedGraphV2");
         Graph fullG = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //double[] bs = new double[]{5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500};
         //Map<Vertex, Double> r = Reach.reach(graph, bs);
         // if run rn, this 56.1302396,9.7414558 is pruned away when it shouldn't because its reach is low.fileOne
 
-        Map<Vertex, Double> r = readReaches("aarhus-silkeborg-GoldbergReachV4Shortcut");
+        Map<Vertex, Double> r = readReaches("aarhus-silkeborg-GoldbergReachV4ShortcutV2");
 
         
         PrintStream originalStream = System.out;
@@ -184,7 +184,13 @@ public class DijkstraReach implements PathfindingAlgo {
         System.setOut(noopStream);
 
         for (int i = 0; i < 1000; i++ ){
-            
+            System.setOut(originalStream);
+            //System.out.print(".");
+            if (i % 100 == 0){
+                System.out.println("\n      " + i +  " iterations done!");
+            }
+            System.setOut(noopStream);
+
 
             Vertex a = GraphUtils.pickRandomVertex(graph);
             Vertex b = GraphUtils.pickRandomVertex(graph);
@@ -193,32 +199,32 @@ public class DijkstraReach implements PathfindingAlgo {
             Solution solution = d.shortestPath(a, b);
     
 
-            PathfindingAlgo da = new DijkstraTraditional(fullG);
+            PathfindingAlgo da = new Dijkstra(fullG);
             Solution solution2 = da.shortestPath(a, b);
 
             // if (!solution.getShortestPath().equals(solution2.getShortestPath())){
-            Collection<Vertex> dijkstraPath = new ArrayList<>(solution2.getShortestPath());
+            /*Collection<Vertex> dijkstraPath = new ArrayList<>(solution2.getShortestPath());
             Collection<Vertex> shortcutPath = new ArrayList<>(solution.getShortestPath());
 
             System.setOut(originalStream);
             int diff = dijkstraPath.size() - shortcutPath.size();
-            System.out.println("Reach path has  " + diff + "  fewer nodes");
+            //System.out.println("Reach path has  " + diff + "  fewer nodes");
             if (diff > 25) {
                 System.out.println("  diff " + diff + " @ " + a + "->" + b);
                 GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
                 vis.drawPath(solution.getShortestPath());
                 vis.drawVisited(solution.getVisited());
-                vis.visualize("Dijkstra reach");
+                //vis.visualize("Dijkstra reach");
 
                 GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
                 vis2.drawPath(solution2.getShortestPath());
                 vis2.drawVisited(solution2.getVisited());
-                vis2.visualize("Dijkstra normal");
+                //vis2.visualize("Dijkstra normal");
             }
-            System.setOut(noopStream);
+            System.setOut(noopStream);*/
 
-            //if (! solution2.getShortestPath().equals(solution.getShortestPath())) {  
-            if (! dijkstraPath.containsAll(shortcutPath)){              
+            if (! solution2.getShortestPath().equals(solution.getShortestPath())) {  
+            //if (! dijkstraPath.containsAll(shortcutPath)){              
 
                 try {
                     System.setOut(originalStream);
