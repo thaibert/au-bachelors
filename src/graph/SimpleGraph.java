@@ -17,7 +17,7 @@ public class SimpleGraph implements Graph, Serializable {
         if (neighborsMap.keySet().contains(v)) {
             // System.out.println("--> Tried adding already existing vertex");
         }
-        neighborsMap.putIfAbsent(v, new ArrayList<>());
+        neighborsMap.putIfAbsent(v, new HashSet<>());
     }
 
     @Override
@@ -31,9 +31,24 @@ public class SimpleGraph implements Graph, Serializable {
     //** Add an edge from u -> v */
     @Override
     public void addEdge(Vertex u, Vertex v, double distance) {
-        Neighbor n = new Neighbor(v, distance);
+        Neighbor newNeighbor = new Neighbor(v, distance);
         Collection<Neighbor> neighbors = neighborsMap.getOrDefault(u, new HashSet<>());
-        neighbors.add(n);
+
+        // Find those with smaller distance that are equal to v
+        Collection<Neighbor> existingSmallerThan = neighbors.stream()
+            .filter(n -> n.distance < distance)
+            .filter(n -> v.equals(n.v))
+            .collect(Collectors.toCollection(HashSet::new));
+
+        // If there are no existing smaller, don't insert the new (it'll be bigger)
+        if (existingSmallerThan.size() == 0) {
+            // Remove old v, insert new (smaller) u-->v
+            neighbors = neighbors.stream()
+                .filter(n -> ! v.equals(n.v))
+                .collect(Collectors.toCollection(HashSet::new));
+            neighbors.add(newNeighbor);
+            neighborsMap.put(u, neighbors);
+        }
     }
 
     @Override
@@ -43,15 +58,14 @@ public class SimpleGraph implements Graph, Serializable {
             System.out.println("null neighbors @ " + u + "->" + v);
             return;
         }
-        Neighbor correctPair = null;
-        for (Neighbor n : neighbors) {
-            if (! v.equals(n.v)) {
-                continue;
+        Iterator<Neighbor> it = neighbors.iterator();
+        while (it.hasNext()) {
+            Neighbor n = it.next();
+            if (v.equals(n.v)) {
+                // We found v!
+                it.remove();
             }
-            // We found v!
-            correctPair = n;
         }
-        neighbors.remove(correctPair);
         neighborsMap.put(u, neighbors);
     }
 
@@ -62,7 +76,7 @@ public class SimpleGraph implements Graph, Serializable {
 
     @Override
     public Collection<Neighbor> getNeighboursOf(Vertex v) {
-        return neighborsMap.getOrDefault(v, new ArrayList<>());
+        return neighborsMap.getOrDefault(v, new HashSet<>());
     }
 
     @Override

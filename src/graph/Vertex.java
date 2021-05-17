@@ -26,9 +26,6 @@ public class Vertex implements Serializable {
     */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true; 
-        }
         if (obj == null) {
             return false;
         }
@@ -41,12 +38,13 @@ public class Vertex implements Serializable {
 
     @Override
     public int hashCode() {
-        final int prime = 37; // I saw on https://stackoverflow.com/questions/2265503/why-do-i-need-to-override-the-equals-and-hashcode-methods-in-java 
+        final int prime1 = 23; // I saw on https://stackoverflow.com/questions/2265503/why-do-i-need-to-override-the-equals-and-hashcode-methods-in-java 
                               // That they used prime in auto generated code, so now we do as well ¯\_(ツ)_/¯
+        final int prime2 = 29;
         int longHash = Double.hashCode(longitude);
         int latHash = Double.hashCode(latitude);
 
-        return (prime + longHash + latHash); 
+        return (prime1 * longHash + prime2 * latHash); 
     }
 
     public String toString() {

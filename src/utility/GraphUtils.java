@@ -98,6 +98,7 @@ public class GraphUtils {
     }
 
     public static double pathDistance(List<Vertex> path) {
+        // TODO: remove and replace references by realLength()
         if (path.size() < 2) {
             return 0;
         }
@@ -109,209 +110,243 @@ public class GraphUtils {
         return sum;
     }
 
-    public static Graph pruneGraphOfChains(Graph g) {
-        System.out.println("pruning graph");
-        Graph g_inv = invertGraph(g);
-        Collection<Vertex> vertices = g.getAllVertices();
-        Iterator<Vertex> it = vertices.iterator();
-
-        System.out.println("  inverted graph, starting now");
-
-        Set<Vertex> removed = new HashSet<>();
-
-        Graph newGraph = new SimpleGraph();
-
-        int iterations = 0;
-        while (it.hasNext()) {
-            iterations++;
-            if (iterations % 100000 == 0) {
-                System.out.print(".");
-            }
-
-
-            Vertex curr = it.next();
-            
-            if (removed.contains(curr)) {
-                // We have pruned this node - loop again
-                continue;
-            }
-
-            Collection<Neighbor> incoming = g_inv.getNeighboursOf(curr);
-            Collection<Neighbor> outgoing = g.getNeighboursOf(curr);
-
-            boolean isMiddleLink = incoming.size() == 1 
-                                && outgoing.size() == 1
-                                && ! incoming.equals(outgoing);
-            
-            if (! isMiddleLink) {
-                // A normal node
-
-
-            } else {
-                // We're a middle link in a chain!
-                Neighbor in = incoming.iterator().next();
-                Neighbor out = outgoing.iterator().next();
-
-                removed.add(curr);
-
-                // Find start of chain
-                double distBack = 0;
-                Neighbor potentialLinkBefore = in; // neighbor on inverted graph
-                int links = 0;
-                while (g_inv.getNeighboursOf(potentialLinkBefore.v).size() == 1
-                    && g.getNeighboursOf(potentialLinkBefore.v).size() == 1
-                    && ! g_inv.getNeighboursOf(potentialLinkBefore.v).equals(g.getNeighboursOf(potentialLinkBefore.v))
-                    && ! removed.contains(potentialLinkBefore.v)) {
-                        // Looking at a node with 1 in, 1 out, and in != out.
-                        // found another middle link
-                        links++;
-                        if (links > 1000) {
-                            System.out.println(potentialLinkBefore.v); // Todo remove debug code
-                        }
-                        distBack += potentialLinkBefore.distance;
-                        removed.add(potentialLinkBefore.v);
-                        potentialLinkBefore = g_inv.getNeighboursOf(potentialLinkBefore.v).iterator().next();
-                }
-                distBack += potentialLinkBefore.distance;
-                Neighbor chainStart = potentialLinkBefore;
-
-                // Find end of chain
-                double distForward = 0;
-                Neighbor potentialLinkAfter = out; // neighbor on normal graph
-                links = 0;
-                while (g_inv.getNeighboursOf(potentialLinkAfter.v).size() == 1
-                    && g.getNeighboursOf(potentialLinkAfter.v).size() == 1
-                    && ! g_inv.getNeighboursOf(potentialLinkAfter.v).equals(g.getNeighboursOf(potentialLinkAfter.v))
-                    && ! removed.contains(potentialLinkAfter.v)) {
-                        // Looking at a node with 1 in, 1 out, and in != out.
-                        // found another middle link
-                        links++;
-                        if (links > 1000) {
-                            System.out.println(links); // todo remove debug code
-                        }
-                        distForward += potentialLinkAfter.distance;
-                        removed.add(potentialLinkAfter.v);
-                        potentialLinkAfter = g.getNeighboursOf(potentialLinkAfter.v).iterator().next();
-                }
-                distForward += potentialLinkAfter.distance;
-                Neighbor chainEnd = potentialLinkAfter;
-
-                double chainDist = distBack + distForward;
-
-                // System.out.println("chain: " + chainStart.v + "-->" + chainEnd.v + "    dist: " + chainDist);
-                if (chainDist < haversineDist(chainStart.v, chainEnd.v)) {
-                    System.out.println(chainDist + " < " + haversineDist(chainStart.v, chainEnd.v));
-                    System.out.println("  " + chainStart.v + "-->" + chainEnd.v);
-                }
-
-                newGraph.addVertex(chainStart.v);
-                newGraph.addVertex(chainEnd.v);
-                newGraph.addEdge(chainStart.v, chainEnd.v, chainDist);
-            }
-            // todo undirected chain: check if incoming == outgoing != empty?
-        }
-
-        // All nodes that were removed have been marked.
-        // Now copy everything else over
-        it = vertices.iterator();
-        System.out.println("  copying intersections over");
-
-        while (it.hasNext()) {
-            Vertex curr = it.next();
-
-            if (removed.contains(curr)) {
-                continue;
-            }
-
-            newGraph.addVertex(curr);
-            for (Neighbor n : g.getNeighboursOf(curr)) {
-                if (! removed.contains(n.v)) {
-                    newGraph.addVertex(n.v);
-                    newGraph.addEdge(curr, n.v, n.distance);
-                }
-            }
-
-        }
-
-
-
-        System.out.println("\nnodes: " + g.getAllVertices().size());
-        System.out.println("pruned: " + removed.size());
-        System.out.println("new graph: " + newGraph.getAllVertices().size());
-
-        return newGraph;
+    public static Graph pruneChains(Graph g) {
+        g = pruneUndirectedChains(g);
+        g = pruneDirectedChains(g);
+        return g;
     }
 
+    private static Graph pruneDirectedChains(Graph g) {
+        // Prune directed chains from the graph
+        // Meaning e.g.:
+        //     a -1-> b -1-> c -1-> d
+        // should turn into
+        //     a -3-> d
+        System.out.println("--> Pruning directed chains");
 
-    public static Graph pruneUndirectedChains(Graph g) {
-        System.out.println("pruning graph of undirected chains");
+        System.out.println("  --> inverting graph");
         Graph g_inv = invertGraph(g);
+
         Collection<Vertex> vertices = g.getAllVertices();
         Iterator<Vertex> it = vertices.iterator();
 
-        System.out.println("  inverted graph, starting now");
+        int prunedNodes = 0;
+        int prunedEdges = 0;
+
+        int progressBar = 100000;
+        System.out.println("  --> Starting pruning. (Each dot is " + progressBar + " nodes)");
 
         int iterations = 0;
         while (it.hasNext()) {
             iterations++;
-            if (iterations % 100000 == 0) {
+            if (iterations % progressBar == 0) {
                 System.out.print(".");
             }
 
-
             Vertex v = it.next();
-            // System.out.println("looking at " + v);
-            
+
             Collection<Neighbor> neighbor_in = g_inv.getNeighboursOf(v);
             Collection<Neighbor> neighbor_out = g.getNeighboursOf(v);
             Collection<Vertex> in_v =  neighbor_in.stream().map(n -> n.v).collect(Collectors.toSet());
             Collection<Vertex> out_v = neighbor_out.stream().map(n -> n.v).collect(Collectors.toSet());
 
-            boolean isMiddleLink = in_v.size() == 2
-                                && out_v.size() == 2
-                                && in_v.equals(out_v);
+            boolean isLink = in_v.size() == 1
+                        && out_v.size() == 1
+                        && ! in_v.equals(out_v);
             
-            if (! isMiddleLink) {
+            if (! isLink) {
+                continue;
+            }
+
+            // if reached: we have a one-way chain link!
+
+            // pull out neighbors for easy access
+            Neighbor in = neighbor_in
+                .stream()
+                .collect(Collectors.toList())
+                .get(0);
+
+            Neighbor out = neighbor_out
+                .stream()
+                .collect(Collectors.toList())
+                .get(0);
+            
+            // Handle cycles not collapsing - make them a triangle
+            boolean isTriangle = isConnectedAtAll(g, in.v, out.v);
+            if (isTriangle) {
+                continue;
+            }
+
+            // Add new edges and isolate v
+            g.addEdge(    in.v, out.v, out.distance + in.distance);
+            g_inv.addEdge(out.v, in.v, out.distance + in.distance);
+
+            removeMiddleLink(g, g_inv, v);
+
+            prunedNodes += 1;
+            prunedEdges += 2-1;
+        }
+        System.out.println("    --> Pruned " + prunedNodes + " nodes");
+        System.out.println("    --> Pruned " + prunedEdges + " edges");
+
+        System.out.println("  --> Removing isolated nodes");
+        g = removeIsolatedNodes(g, g_inv);
+
+        return g;
+    }
+
+    private static Graph pruneUndirectedChains(Graph g) {
+        // Undirected chains can be pruned by removing a chain link
+        //   and connecting its two neighbors (with the distances added together)
+        // Special care must be taken when dealing with cycles. We compress cul-de-sacs to triangles.
+        // I guess it may not be deterministic?? (technically)
+        // After removing the edges to/from the unnecessary nodes, 
+        //   we remove all isolated nodes at the end.
+        System.out.println("--> Pruning undirected chains");
+        System.out.println("  --> inverting graph");
+
+        Graph g_inv = invertGraph(g);
+        Collection<Vertex> vertices = g.getAllVertices();
+        Iterator<Vertex> it = vertices.iterator();
+
+        int prunedNodes = 0;
+        int prunedEdges = 0;
+
+        int progressBar = 100000;
+        System.out.println("  --> Starting pruning. (Each dot is " + progressBar + " nodes)");
+
+        int iterations = 0;
+        while (it.hasNext()) {
+            iterations++;
+            if (iterations % progressBar == 0) {
+                System.out.print(".");
+            }
+
+            Vertex v = it.next();
+            boolean isLink = isChainLink(g, g_inv, v);
+
+            if (! isLink) {
                 // A normal node. Skip it.
                 continue;
-            } else {
-                // A chain link!
-                Iterator<Neighbor> neigh_it = neighbor_in.iterator();
-                Neighbor a = neigh_it.next();
-                Neighbor b = neigh_it.next();
+            }
 
-                if (a.v.equals(b.v)) {
-                    System.out.println("Hold up!! pruning node between the same vertex??");
-                    System.out.println("  a: " + a.v);
-                    System.out.println("  b: " + b.v);
-                    continue;
-                }
-                // System.out.println(a.v + " <--> " + v + " <--> " + b.v);
+            // If reached: we found a chain link!
 
-                g.removeEdge(a.v, v);
-                g.removeEdge(v, a.v);
+            // pull out neighbors for easy access
+            List<Neighbor> neighbors = g.getNeighboursOf(v).stream().collect(Collectors.toList());
 
-                g.removeEdge(b.v, v);
-                g.removeEdge(v, b.v);
+            Neighbor a = neighbors.get(0);
+            Neighbor b = neighbors.get(1);
 
-                g_inv.removeEdge(a.v, v);
-                g_inv.removeEdge(v, a.v);
+            if (a.v.equals(b.v)) {
+                // TODO: still necessary?
+                continue;
+            }
 
-                g_inv.removeEdge(b.v, v);
-                g_inv.removeEdge(v, b.v);
+            // Handle the chain being reduced to a cycle
+            if (isConnectedAtAll(g, a.v, b.v)) {
+                // Got a cycle (aka a triangle)
+                continue;
+            }
 
+            g.addEdge(a.v, b.v, a.distance + b.distance);
+            g.addEdge(b.v, a.v, a.distance + b.distance);
+
+            g_inv.addEdge(a.v, b.v, a.distance + b.distance);
+            g_inv.addEdge(b.v, a.v, a.distance + b.distance);
+
+
+            removeMiddleLink(g, g_inv, v);
+            prunedNodes += 1;
+            prunedEdges += (4-2)/2; // counting undirected edges, hence div by 2
+        }  
+        System.out.println("    --> Pruned " + prunedNodes + " nodes");
+        System.out.println("    --> Pruned " + prunedEdges + " edges");
+
+        System.out.println("  --> Removing isolated nodes");
+        g = removeIsolatedNodes(g, g_inv);
+        return g;
+    }
+
+    private static boolean isChainLink(Graph g, Graph g_inv, Vertex v) {
+        // We showed that a chain link can be described by 
+        //   * |in| = |out| = 2
+        //   * in = out
+        Collection<Neighbor> neighbor_in = g_inv.getNeighboursOf(v);
+        Collection<Neighbor> neighbor_out = g.getNeighboursOf(v);
+        Collection<Vertex> in_v =  neighbor_in.stream().map(n -> n.v).collect(Collectors.toSet());
+        Collection<Vertex> out_v = neighbor_out.stream().map(n -> n.v).collect(Collectors.toSet());
+
+        boolean isLink = in_v.size() == 2
+                      && out_v.size() == 2
+                      && in_v.equals(out_v);
+        return isLink;
+    }
+
+    private static void removeMiddleLink(Graph g, Graph g_inv, Vertex v) {
+        // We can safely assume v actually is a middle link when this is called.
+        //  (Meaning  in = out, and  |in| = |out| = 2)
+
+        // Pull vertices out of Neighbor objects, and put them in a HashSet
+        Collection<Vertex> out = g.getNeighboursOf(v)
+            .stream()
+            .map(n -> n.v)
+            .collect(Collectors.toCollection(HashSet::new));
+        Collection<Vertex> in = g_inv.getNeighboursOf(v)
+            .stream()
+            .map(n -> n.v)
+            .collect(Collectors.toCollection(HashSet::new));
+        Collection<Vertex> neighbors = new HashSet<>();
+        neighbors.addAll(out);
+        neighbors.addAll(in);
+
+        // For all neighbors: remove edges TO and FROM v 
+        for (Vertex other : neighbors) {
+            g.removeEdge(other, v);
+            g.removeEdge(v, other);        
+        
+            g_inv.removeEdge(other, v);
+            g_inv.removeEdge(v, other);
+        }
+    }
+
+    private static boolean isConnectedAtAll(Graph g, Vertex a, Vertex b) {
+        // Check whether it is possible to travel from   a -> b   or   b -> a
+        // Both are also fine.
+
+        // Check a --> b
+        Collection<Vertex> neighborsA = g.getNeighboursOf(a)
+            .stream()
+            .map(n -> n.v)
+            .collect(Collectors.toCollection(HashSet::new));
+        boolean aToB = neighborsA.contains(b);
+
+        // Check a <-- b
+        Collection<Vertex> neighborsB = g.getNeighboursOf(b)
+            .stream()
+            .map(n -> n.v)
+            .collect(Collectors.toCollection(HashSet::new));
+        boolean bToA = neighborsB.contains(a);
+
+        return aToB || bToA;
+    }
+
+    private static Graph removeIsolatedNodes(Graph g, Graph g_inv) {
+        // Remove all nodes that in- and out-degree 0
+        // These were generated when pruning chains!
+        // Changes the underlying graph, but it gets returned again 
+        //   to make sure that the caller overwrites.
+        Iterator<Vertex> it = g.getAllVertices().iterator();
+        while (it.hasNext()) {
+            Vertex v = it.next();
+
+            Collection<Neighbor> out = g.getNeighboursOf(v);
+            Collection<Neighbor> in  = g_inv.getNeighboursOf(v);
+            
+            if (out.size() == 0 && in.size() == 0) {
                 it.remove();
-
-                g.addEdge(a.v, b.v, a.distance + b.distance);
-                g.addEdge(b.v, a.v, a.distance + b.distance);
-
-                g_inv.addEdge(a.v, b.v, a.distance + b.distance);
-                g_inv.addEdge(b.v, a.v, a.distance + b.distance);
-
-
             }
         }
-
         return g;
     }
 
@@ -322,16 +357,16 @@ public class GraphUtils {
         }
 
         double dist = 0;
-        Vertex curr = path.get(0);
+        Vertex prev = path.get(0);
+        Vertex curr;
         for (int i = 1; i < path.size(); i++) {
-            Vertex next = path.get(i);
-            for (Neighbor n : g.getNeighboursOf(curr)) {
-                if (! next.equals(n.v)) {
-                    continue;
+            curr = path.get(i);
+            for (Neighbor n : g.getNeighboursOf(prev)) {
+                if (curr.equals(n.v)) {
+                    dist += n.distance;
                 }
-                dist += n.distance;
             }
-            curr = next;
+            prev = curr;
         }
         return dist;
     }
