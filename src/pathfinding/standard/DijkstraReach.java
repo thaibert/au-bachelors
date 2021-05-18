@@ -176,7 +176,7 @@ public class DijkstraReach implements PathfindingAlgo {
         
         PrintStream originalStream = System.out;
 
-        PrintStream noopStream = new PrintStream(new OutputStream(){
+        /*PrintStream noopStream = new PrintStream(new OutputStream(){
             public void write(int b) {
                 // NO-OP
             }
@@ -249,9 +249,9 @@ public class DijkstraReach implements PathfindingAlgo {
                 }
 
             }
-        }/*
-        Vertex a = new Vertex(56.1842169,9.7234288);
-        Vertex b = new Vertex(56.110709,10.1999165);
+        }*/
+        Vertex a = new Vertex(56.1942739,10.1928953);
+        Vertex b = new Vertex(56.1098765,9.6501583);
 
 
         DijkstraReach d = new DijkstraReach(graph, r);
@@ -279,7 +279,7 @@ public class DijkstraReach implements PathfindingAlgo {
         vis2.drawVisited(solution2.getVisited());
         vis2.visualize("Dijkstra");
         
-        */
+        
     }
 
     public static Map<Vertex, Double> readReaches(String filename) {

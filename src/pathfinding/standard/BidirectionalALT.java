@@ -223,9 +223,6 @@ public class BidirectionalALT implements PathfindingAlgo{
         } else {
             // Stabilize
             graph.getNeighboursOf(currentPair.v).forEach(n -> {
-                if (closed.contains(n.v)){
-                    return; // TODO possibly fucking everything up, it should be continue, but that is not allowed
-                }
 
                 double tentDist = dist + n.distance;
 
@@ -297,9 +294,6 @@ public class BidirectionalALT implements PathfindingAlgo{
             // Reject
         } else {
             ginv.getNeighboursOf(currentPair.v).forEach(n -> {
-                if (closed.contains(n.v)){
-                    return; // TODO this might fuck shit up, should be continue but it can't be
-                }
 
                 double tentDist = dist + n.distance;
                 
@@ -357,14 +351,14 @@ public class BidirectionalALT implements PathfindingAlgo{
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
-    
-        Vertex a = new Vertex(56.2095925,10.0379637); 
-        Vertex b = new Vertex(56.1371326,10.1842766); 
+        //56.2350979,10.2417392  ->  56.0941631,9.5770669
+        Vertex a = new Vertex(56.2350979,10.2417392); 
+        Vertex b = new Vertex(56.0941631,9.5770669); 
 
         LandmarkSelector ls = new LandmarkSelector(graph, 16, 1); 
 
         BidirectionalALT d = new BidirectionalALT(graph, ls);
-        Solution solution = d.shortestPath(Location.Silkeborg, Location.Randersvej);
+        Solution solution = d.shortestPath(a, b);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPath(solution.getShortestPath());

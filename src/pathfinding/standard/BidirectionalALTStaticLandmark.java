@@ -156,9 +156,6 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         } else {
             // Stabilize
             graph.getNeighboursOf(currentPair.v).forEach(n -> {
-                if (closed.contains(n.v)){
-                    return; // TODO possibly fucking everything up, it should be continue, but that is not allowed
-                }
 
                 double tentDist = dist + n.distance;
 
@@ -205,9 +202,6 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
             // Reject
         } else {
             ginv.getNeighboursOf(currentPair.v).forEach(n -> {
-                if (closed.contains(n.v)){
-                    return; // TODO this might fuck shit up, should be continue but it can't be
-                }
 
                 double tentDist = dist + n.distance;
                 
