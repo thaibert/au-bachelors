@@ -49,9 +49,9 @@ public class ReachGoldBerg {
             System.out.println("Works with gPrime size: " + graphPrime.getAllVertices().size());
 
             // Do shortcut before!
-            Graph gPrimeShortcut = shortcut(graphPrime, graph, INF_DIST, inPenalties, outPenalties, r); //TODO what graph should this be given
+            //Graph gPrimeShortcut = shortcut(graphPrime, graph, INF_DIST, inPenalties, outPenalties, r); //TODO what graph should this be given
             
-            graphPrime = gPrimeShortcut;
+            //graphPrime = gPrimeShortcut;
 
             for (Vertex v: graphPrime.getAllVertices()){
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
@@ -197,9 +197,9 @@ public class ReachGoldBerg {
 
             // Shortcuts
             // TODO us bs[i+1], but avoid the last edge case with indexing out of bounds....
-            //Graph gPrimeShortcut = shortcut(graphPrime, graph, INF_DIST); //TODO what graph should this be given
+            Graph gPrimeShortcut = shortcut(graphPrime, graph, INF_DIST, inPenalties, outPenalties, r); //TODO what graph should this be given
             
-            //graphPrime = gPrimeShortcut;
+            graphPrime = gPrimeShortcut;
 
             edgesConsideredThroughout.addAll(edgesConsidered);
 
@@ -720,8 +720,9 @@ public class ReachGoldBerg {
                     continue;
                 }
 
-                Neighbor in = incoming.iterator().next();
-                Neighbor out = outgoing.iterator().next();
+                Iterator<Neighbor> itTemp = incoming.iterator();
+                Neighbor in = itTemp.next();
+                Neighbor out = itTemp.next();
 
                 // This is a place where we can actually add a shortcut. BUT we want to check if we can create a longer line.
                 // Find beginning of link 
@@ -742,6 +743,8 @@ public class ReachGoldBerg {
                         alreadyConsidered.add(potentialLinkBefore.v);
                         path.add(potentialLinkBefore.v);
                         
+
+
                         Iterator<Neighbor> neighbours = ginv.getNeighboursOf(potentialLinkBefore.v).iterator();
                         while (neighbours.hasNext()){
                             Neighbor next = neighbours.next();
@@ -755,8 +758,10 @@ public class ReachGoldBerg {
                 path.add(potentialLinkBefore.v);
                 shortCutFrom = potentialLinkBefore.v;
 
+
                 Neighbor potentialLinkAfter = out; // neighbor on normal graph
                 links = 0;
+
                 while (ginv.getNeighboursOf(potentialLinkAfter.v).size() == 2
                     && g.getNeighboursOf(potentialLinkAfter.v).size() == 2
                     && ginv.getNeighboursOf(potentialLinkAfter.v).equals(g.getNeighboursOf(potentialLinkAfter.v))
@@ -767,6 +772,7 @@ public class ReachGoldBerg {
                         if (links > 1000) {
                             System.out.println(links); // todo remove debug code
                         }
+
                         alreadyConsidered.add(potentialLinkAfter.v);
                         path.add(potentialLinkAfter.v);
 
@@ -781,6 +787,7 @@ public class ReachGoldBerg {
                 shortCutTo = potentialLinkAfter.v;
                 path.add(potentialLinkAfter.v);
 
+
                 addShortcut(shortCutFrom, shortCutTo, path, epsilon, g, gToModify, 1, origGraph, inPen, outPen, reach);
 
             }         
@@ -788,12 +795,10 @@ public class ReachGoldBerg {
         }
 
         //TODO remove bypassed vertexes?
-        System.out.println("Shortcut complete");
         return gToModify;
     }
 
     private static Graph addShortcut(Vertex from, Vertex to, Set<Vertex> path, double epsilon, Graph g, Graph gToModify, int direction, Graph origGraph, Map<Vertex, Double> inPen, Map<Vertex,Double> outPen, Map<Edge, Double> reach){
-        //System.out.println("Call to add shortcut");
         if (path.size() == 2) {
             // This case can happen if you try and shortcut something with 4 vertices originally
             return gToModify;
@@ -802,12 +807,17 @@ public class ReachGoldBerg {
             // This is a circle, idk how to shortcut it
             return gToModify;
         }
+        for (Neighbor n: g.getNeighboursOf(from)) {
+            if (n.v.equals(from)){
+                return gToModify;
+            }
+        }
         // Find length of path!
 
         double length = 0;
         double lengthReverse = 0;
         Vertex curr = from;
-        System.out.println("1");
+        //System.out.println("1");
         boolean calcLength = false;
         //System.out.println(path);
         //System.out.println(to);
@@ -817,54 +827,59 @@ public class ReachGoldBerg {
         alreadySeen.add(from);
         int i = 0;
         while (!calcLength){
-            if (i > path.size()*2){
+            /*if (i > path.size()*2){
                 // TODO Shit way to avoid perma looping atm
                 System.out.println("We exit because of perma loop?");
                 return gToModify;
-            }
+            }*/
+
             for (Neighbor n: g.getNeighboursOf(curr)){
                 if (path.contains(n.v) && ! alreadySeen.contains(n.v)){
                     // We found the neighbor that is in the link!
                     alreadySeen.add(n.v);
                     length += n.distance;
-                    curr = n.v;
+                    curr = n.v; 
+
                     if (curr.equals(to)){
                         calcLength = true;
                         break;
-                    }                    
+                    }  
                 }
             }
             i++;
             //System.out.println("does this loop?");
         }
-        System.out.println("2");
+        //System.out.println("2");
 
         alreadySeen = new HashSet<>();
-        /*if (direction == 1){
+        int j = 0;
+        if (direction == 1){
+            
             curr = to;
             alreadySeen.add(to);
             calcLength = false;
 
             while (!calcLength){
+
                 for (Neighbor n: g.getNeighboursOf(curr)){
                     if (path.contains(n.v) && ! alreadySeen.contains(n.v)){
                         // We found the neighbor that is in the link!
                         alreadySeen.add(n.v);
                         lengthReverse += n.distance;
                         curr = n.v;
-                        if (curr.equals(to)){
+                        if (curr.equals(from)){
                             calcLength = true;
                             break;
-                        }                    
+                        } 
                     }
                 }
             }
             if (length != lengthReverse) {
                 System.out.println("Length: " + length + ",  reverse: " + lengthReverse);
             }
-        }*/
-        lengthReverse = length;
-        System.out.println("3");
+        }
+        //lengthReverse = length;
+        //System.out.println("3");
 
 
         // Make the recursive calls !
@@ -897,7 +912,7 @@ public class ReachGoldBerg {
                 }
             }
         }
-        System.out.println("4");
+        //System.out.println("4");
 
         if (path.size() > 3){
             curr = from;
@@ -925,7 +940,7 @@ public class ReachGoldBerg {
             }
             //System.out.println("Found the middle");
 
-            System.out.println("5");
+            //System.out.println("5");
 
             
             Set<Vertex> pathToEnd = new HashSet<>(path);
@@ -934,9 +949,11 @@ public class ReachGoldBerg {
             pathToEnd.add(middle);
             pathToEnd.add(to);
 
+
             //System.out.println("from -> middle");
             addShortcut(from, middle, pathToMiddle, epsilon, g, gToModify, direction, origGraph, inPen, outPen, reach);
             //System.out.println("middle -> to");
+
             addShortcut(middle, to, pathToEnd, epsilon, g, gToModify, direction, origGraph, inPen, outPen, reach);
         }
         // Add the "full length" shortcut
@@ -1018,7 +1035,7 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{100, 500, 1500, 4500/*, 50000*/};
+        double[] bs = new double[]{100, 500, 1500/*, 4500/*, 50000*/};
         //double[] bs = new double[]{1,2,3,4,5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();
