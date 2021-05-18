@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import org.checkerframework.checker.units.qual.Length;
 import org.checkerframework.checker.units.qual.h;
 
 import graph.*;
@@ -48,9 +49,9 @@ public class ReachGoldBerg {
             System.out.println("Works with gPrime size: " + graphPrime.getAllVertices().size());
 
             // Do shortcut before!
-            //Graph gPrimeShortcut = shortcut(graphPrime, graph, INF_DIST, inPenalties, outPenalties, r); //TODO what graph should this be given
+            Graph gPrimeShortcut = shortcut(graphPrime, graph, INF_DIST, inPenalties, outPenalties, r); //TODO what graph should this be given
             
-            //graphPrime = gPrimeShortcut;
+            graphPrime = gPrimeShortcut;
 
             for (Vertex v: graphPrime.getAllVertices()){
                 for (Neighbor n: graphPrime.getNeighboursOf(v)){
@@ -246,7 +247,7 @@ public class ReachGoldBerg {
         }
 
 
-        writeGraphToFile("shortCuttedGraphV2", graph);
+        writeGraphToFile("shortCuttedGraph3", graph);
 
         return rVertex;
     }
@@ -271,7 +272,7 @@ public class ReachGoldBerg {
     public static double height(Vertex v, Vertex u, Tree tree){
         Double h = 0.0;
         //System.out.println(u);
-        for (Vertex w: tree.dist.keySet()){
+        for (Vertex w: tree.leafs){
             if (tree.paths.get(w).contains(u) && tree.closed.contains(w)) {
                 // If we take the distance to the beginning node, we don't have to keep track of the length of the edge
                 if (tree.dist.get(w) - tree.dist.get(v) <= 0) {
@@ -806,17 +807,19 @@ public class ReachGoldBerg {
         double length = 0;
         double lengthReverse = 0;
         Vertex curr = from;
-        //System.out.println("1");
+        System.out.println("1");
         boolean calcLength = false;
         //System.out.println(path);
         //System.out.println(to);
         //System.out.println(from);
 
         Set<Vertex> alreadySeen = new HashSet<>();
+        alreadySeen.add(from);
         int i = 0;
         while (!calcLength){
             if (i > path.size()*2){
                 // TODO Shit way to avoid perma looping atm
+                System.out.println("We exit because of perma loop?");
                 return gToModify;
             }
             for (Neighbor n: g.getNeighboursOf(curr)){
@@ -831,14 +834,15 @@ public class ReachGoldBerg {
                     }                    
                 }
             }
+            i++;
             //System.out.println("does this loop?");
         }
-        //System.out.println("2");
-
+        System.out.println("2");
 
         alreadySeen = new HashSet<>();
-        if (direction == 1){
+        /*if (direction == 1){
             curr = to;
+            alreadySeen.add(to);
             calcLength = false;
 
             while (!calcLength){
@@ -858,11 +862,11 @@ public class ReachGoldBerg {
             if (length != lengthReverse) {
                 System.out.println("Length: " + length + ",  reverse: " + lengthReverse);
             }
-        }
-        //System.out.println("3");
+        }*/
+        lengthReverse = length;
+        System.out.println("3");
 
 
-        alreadySeen = new HashSet<>();
         // Make the recursive calls !
         // TODO update the paths, so they only include the ones needed. May give issues in "bidirectional" else
         
@@ -874,6 +878,8 @@ public class ReachGoldBerg {
         double distanceToCur = 0;
         //System.out.println("curr: " + curr);
         //System.out.println("to  :" + to);
+        alreadySeen = new HashSet<>();
+        alreadySeen.add(from);
         while (!curr.equals(to)){
             for (Neighbor n: g.getNeighboursOf(curr)){
                 if (path.contains(n.v) && ! alreadySeen.contains(n.v)){
@@ -891,9 +897,12 @@ public class ReachGoldBerg {
                 }
             }
         }
+        System.out.println("4");
+
         if (path.size() > 3){
             curr = from;
             alreadySeen = new HashSet<>();
+            alreadySeen.add(from);
             //System.out.println("Moving to middle " + middle);
             //System.out.println("path:" + path);
             boolean foundMid = false;
@@ -916,6 +925,7 @@ public class ReachGoldBerg {
             }
             //System.out.println("Found the middle");
 
+            System.out.println("5");
 
             
             Set<Vertex> pathToEnd = new HashSet<>(path);
@@ -935,7 +945,7 @@ public class ReachGoldBerg {
                 gToModify.addEdge(from, to, length);
                 origGraph.addEdge(from, to, length);
 
-                // Update reach of removed edges
+                /*// Update reach of removed edges
                 Edge edge1 = new Edge(from, middle, bestDistToMiddle);
                 reach.put(edge1, bestDistToMiddle + outPen.getOrDefault(middle, 0.0));
 
@@ -944,7 +954,7 @@ public class ReachGoldBerg {
                 // Remove vertex, and edges
                 gToModify.removeEdge(from, middle);
                 gToModify.removeEdge(middle, to);
-                gToModify.removeVertex(middle);
+                gToModify.removeVertex(middle);*/
 
             }
             else { // TODO should calculate the correct distance from both ends!
@@ -953,7 +963,7 @@ public class ReachGoldBerg {
                 origGraph.addEdge(from, to, length);
                 origGraph.addEdge(to, from, lengthReverse);
 
-                // Update reach of removed edges
+                /*// Update reach of removed edges
                 Edge edge1 = new Edge(from, middle, bestDistToMiddle);
                 reach.put(edge1, bestDistToMiddle + outPen.getOrDefault(middle, 0.0));
 
@@ -971,7 +981,7 @@ public class ReachGoldBerg {
                 gToModify.removeEdge(middle, to);
                 gToModify.removeEdge(middle, from);
                 gToModify.removeEdge(to, middle);
-                gToModify.removeVertex(middle);
+                gToModify.removeVertex(middle);*/
 
             }
         } 
@@ -1021,13 +1031,13 @@ public class ReachGoldBerg {
 
         int counter = 0;
         for (Vertex v : r.keySet()){
-            if (r.get(v) > 10000){
+            if (r.get(v) > bs[bs.length-1]){
                 counter++;
             }
         }
         System.out.println("number of vertices with very high reach : " + counter);
 
-        saveReachArrayToFile("aarhus-silkeborg-GoldbergReachV4ShortcutV2", r);
+        saveReachArrayToFile("aarhus-silkeborg-GoldbergReachV4Shortcut3", r);
 
     }
 

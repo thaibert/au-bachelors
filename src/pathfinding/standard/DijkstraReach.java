@@ -165,13 +165,13 @@ public class DijkstraReach implements PathfindingAlgo {
 
     public static void main(String[] args) {
         // Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
-        Graph graph = readShortcutGraph("shortCuttedGraphV2");
+        Graph graph = readShortcutGraph("shortCuttedGraph3");
         Graph fullG = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //double[] bs = new double[]{5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500};
         //Map<Vertex, Double> r = Reach.reach(graph, bs);
         // if run rn, this 56.1302396,9.7414558 is pruned away when it shouldn't because its reach is low.fileOne
 
-        Map<Vertex, Double> r = readReaches("aarhus-silkeborg-GoldbergReachV4ShortcutV2");
+        Map<Vertex, Double> r = readReaches("aarhus-silkeborg-GoldbergReachV4Shortcut3");
 
         
         PrintStream originalStream = System.out;
@@ -203,7 +203,7 @@ public class DijkstraReach implements PathfindingAlgo {
             Solution solution2 = da.shortestPath(a, b);
 
             // if (!solution.getShortestPath().equals(solution2.getShortestPath())){
-            /*Collection<Vertex> dijkstraPath = new ArrayList<>(solution2.getShortestPath());
+            Collection<Vertex> dijkstraPath = new ArrayList<>(solution2.getShortestPath());
             Collection<Vertex> shortcutPath = new ArrayList<>(solution.getShortestPath());
 
             System.setOut(originalStream);
@@ -221,10 +221,10 @@ public class DijkstraReach implements PathfindingAlgo {
                 vis2.drawVisited(solution2.getVisited());
                 //vis2.visualize("Dijkstra normal");
             }
-            System.setOut(noopStream);*/
+            System.setOut(noopStream);
 
-            if (! solution2.getShortestPath().equals(solution.getShortestPath())) {  
-            //if (! dijkstraPath.containsAll(shortcutPath)){              
+            //if (! solution2.getShortestPath().equals(solution.getShortestPath())) {  
+            if (! dijkstraPath.containsAll(shortcutPath)){              
 
                 try {
                     System.setOut(originalStream);
