@@ -94,9 +94,8 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
                         pq_f.add(new Pair(n.v, maybeNewBestDistance)); 
                     }
 
-                    double pathLength = bestDist_f.get(head_f.v) + n.distance + bestDist_b.get(n.v);
-                    if (s_b.contains(n.v) && pathLength < mu) {
-                        mu = pathLength;
+                    if (s_b.contains(n.v) && bestDist_f.get(head_f.v) + n.distance + bestDist_b.get(n.v) < mu) {
+                        mu = bestDist_f.get(head_f.v) + n.distance + bestDist_b.get(n.v);
                         meetingNode = n.v;
                     }
                 });
