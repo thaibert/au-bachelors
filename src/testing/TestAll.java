@@ -18,6 +18,7 @@ public class TestAll {
     static final int ASTAR_BIDIRECTIONAL = 5;
     static final int ALT_BIDIRECTIONAL = 6;
     static final int REACH_DIJKSTRA = 7;
+    static final int REACH_ALT = 8;
 
     static String[] names = new String[]{"TradDijk   ", 
                                          "OurDijk    ", 
@@ -26,7 +27,8 @@ public class TestAll {
                                          "ALT        ",
                                          "BidrecAstar",
                                          "BidrecALT  ",
-                                         "ReachDijk  "};
+                                         "ReachDijk  ",
+                                         "ReachALT   "};
     static int numAlgos = names.length;
 
     static PathfindingAlgo[] algos = new PathfindingAlgo[numAlgos];
@@ -174,6 +176,7 @@ public class TestAll {
         algos[ASTAR_BIDIRECTIONAL] = new NBA(g);
         algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, ls);
         algos[REACH_DIJKSTRA] = new DijkstraReach(gReach, r);
+        algos[REACH_ALT] = new ALTReach(gReach, ls, r);
         
         // Prepare data logging file
         csv = new File("log-"+ runs + "-" + fileIn);
