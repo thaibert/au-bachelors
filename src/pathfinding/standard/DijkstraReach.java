@@ -59,6 +59,8 @@ public class DijkstraReach implements PathfindingAlgo {
         DistComparator comp = new DistComparator();
         PriorityQueue<Pair> pq = new PriorityQueue<>(comp);
 
+        Set<Vertex> closed = new HashSet<>();
+
         Collection<Vertex> Q = new HashSet<>(g.getAllVertices()); // Initially all vertices are added
         /*g.getAllVertices().stream()
             .map(p -> new Pair(p, INF_DIST))
@@ -85,8 +87,10 @@ public class DijkstraReach implements PathfindingAlgo {
             Q.remove(head.v);
 
             VminusS.remove(head.v); // Put v in S ==> V-S loses v
-
-            
+            if (closed.contains(head.v)){
+                continue;
+            }
+            closed.add(head.v);
 
             if (head.v.equals(goal)) {
                 System.out.println("  --> Finished early at " + iterations);
@@ -96,26 +100,31 @@ public class DijkstraReach implements PathfindingAlgo {
             g.getNeighboursOf(head.v)
                 .forEach(n -> {
                     // RELAX                    
+                    if(closed.contains(n.v)){
+                        return;
+                    }
 
                     double maybeNewBestDistance = head.dist + n.distance;
                     double previousBestDistance = bestDist.getOrDefault(n.v, INF_DIST);
+
+                    if (reaches.get(n.v)*1.00001 < maybeNewBestDistance && reaches.get(n.v)*1.00001 < GraphUtils.haversineDist(n.v, goal) ){
+                        //System.out.println("Node pruned with reaching");
+                        prunedNodes.add(n.v);
+                        nodesPruned++;
+                        //System.out.println("First check " + reaches.get(n.v) + " < " + maybeNewBestDistance);
+                        //System.out.println("Second check " + reaches.get(n.v) + " < " + GraphUtils.haversineDist(n.v, goal));
+                        //System.out.println("Vertex: " + n.v + "\n");
+
+                        //Gutmans test is false, and the node is not worth considering.
+                        return; //Again this ugly return statement inside a foreach loop, its equal to continue
+                    }
 
                     edgesConsidered.add(new Edge(head.v, n.v, maybeNewBestDistance));
 
 
                     if (maybeNewBestDistance < previousBestDistance) {
                         // Reach pruning:
-                        if (reaches.get(n.v)*1.00001 < maybeNewBestDistance && reaches.get(n.v)*1.00001 < GraphUtils.haversineDist(n.v, goal) ){
-                            //System.out.println("Node pruned with reaching");
-                            prunedNodes.add(n.v);
-                            nodesPruned++;
-                            //System.out.println("First check " + reaches.get(n.v) + " < " + maybeNewBestDistance);
-                            //System.out.println("Second check " + reaches.get(n.v) + " < " + GraphUtils.haversineDist(n.v, goal));
-                            //System.out.println("Vertex: " + n.v + "\n");
 
-                            //Gutmans test is false, and the node is not worth considering.
-                            return; //Again this ugly return statement inside a foreach loop, its equal to continue
-                        }
 
                         // Update v.d and v.pi
                         bestDist.put(n.v, maybeNewBestDistance);

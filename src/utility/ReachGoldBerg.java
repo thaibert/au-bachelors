@@ -1035,7 +1035,7 @@ public class ReachGoldBerg {
         }*/
 
         long timeBefore = System.currentTimeMillis();
-        double[] bs = new double[]{100, 500, 1500/*, 4500/*, 50000*/};
+        double[] bs = new double[]{100, 500, 1500, 4500, 10000, 20000};
         //double[] bs = new double[]{1,2,3,4,5, 10, 25};
         Map<Vertex, Double> r = reach(graph, bs);
         long timeAfter = System.currentTimeMillis();

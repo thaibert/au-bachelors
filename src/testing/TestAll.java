@@ -198,7 +198,7 @@ public class TestAll {
         double sec = 1e9; // nanoseconds per second
         double ms = 1e6;  // nanoseconds per millisecond
 
-        System.out.println("[*] Done!");
+        System.out.println("[*]  Done!");
         System.out.println("     Total runs: " + runs + "\n");
 
         pw.flush();
