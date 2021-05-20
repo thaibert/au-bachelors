@@ -17,9 +17,11 @@ public class Dijkstra implements PathfindingAlgo {
     private Graph g;
     private Map<Vertex, Double> dist;
     private Map<Vertex, Vertex> pred; // S in the algo is pred.keySet()
+    Set<Vertex> closed = new HashSet<>();
     
     // For visual
     private List<Edge> edgesConsidered;
+
 
     public Dijkstra(Graph g) {
         this.g = g;
@@ -39,6 +41,7 @@ public class Dijkstra implements PathfindingAlgo {
 
         dist = new HashMap<>();
         pred = new HashMap<>();
+        closed = new HashSet<>();
         
         //Purely for visualising
         edgesConsidered = new ArrayList<>();
@@ -51,6 +54,7 @@ public class Dijkstra implements PathfindingAlgo {
         DistComparator comp = new DistComparator();
         PriorityQueue<Vertex> pq = new PriorityQueue<>(comp);
         pq.add(start);
+        
 
         System.out.println("vertices: " + g.getAllVertices().size() + ",    pq: " + pq.size());
 
@@ -63,12 +67,21 @@ public class Dijkstra implements PathfindingAlgo {
 
             Vertex head = pq.poll();
 
+            if (closed.contains(head)){
+                continue;
+            }
+
             if (head.equals(goal)) {
                 System.out.println("  --> Finished early at " + num);
                 break;
             }
 
+            closed.add(head);
+
             g.getNeighboursOf(head).forEach(n -> {
+                if (closed.contains(n.v)){
+                    return;
+                }
                 boolean relaxed = relax(head, n);
                 if (relaxed) {
                     pq.remove(n.v); // To ensure we don't fuck some invariant up in the tree

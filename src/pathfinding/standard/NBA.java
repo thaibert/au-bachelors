@@ -74,8 +74,8 @@ public class NBA implements PathfindingAlgo{
         pq_b.add(new Pair(goal, 0));
 
         // ALGO
-        while (pq_f.size() > 0 || pq_b.size() > 0) {
-            if((pq_f.size() < pq_b.size() && pq_f.size() > 0) || pq_b.size() == 0){
+        while (pq_f.size() > 0 && pq_b.size() > 0) {
+            if(pq_f.size() < pq_b.size()){
                 expandForwad();
             }else{
                 expandBackward();
