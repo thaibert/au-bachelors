@@ -18,19 +18,21 @@ public class TestPruningChains {
 
         Graph graph = GraphPopulator.populateGraph(csv);
 
-        Graph pruned = GraphPopulator.populateGraph(csv);
-        pruned = GraphUtils.pruneChains(pruned);
+        // Graph pruned = GraphPopulator.populateGraph(csv);
+        graph = GraphUtils.pruneChains(graph);
+        Graph pruned = graph;
+        // pruned = GraphUtils.pruneChains(pruned);
 
         System.out.println(graph.getAllVertices().size() + " nodes in original graph");
         System.out.println(pruned.getAllVertices().size() + " nodes in pruned graph");
         
         Astar d = null;
-        Astar d2 = null;
+        // Astar d2 = null;
         Solution solution = null;
-        Solution solution2 = null;
+        // Solution solution2 = null;
 
         d = new Astar(graph);
-        d2 = new Astar(pruned);
+        // d2 = new Astar(pruned);
 
         System.out.println("--> Testing " + csv);
         System.out.println("   (Doing " + runs + " runs)");
@@ -41,43 +43,44 @@ public class TestPruningChains {
                 // NO-OP
             }
         });
-        System.setOut(noopStream);
+        // System.setOut(noopStream);
 
         for (int i = 0; i < runs; i++) {
             if (i % 50 == 0) {
                 System.setOut(originalStream);
                 System.out.println(i + " runs done");
-                System.setOut(noopStream);
+                // System.setOut(noopStream);
             }
             Vertex a = GraphUtils.pickRandomVertex(pruned);
             Vertex b = GraphUtils.pickRandomVertex(pruned);
 
             System.out.println("Original:");
-            solution = d.shortestPath(a, b);
+            solution = d.shortestPath(GraphUtils.findNearestVertex(pruned, Location.CPH), 
+                                      GraphUtils.findNearestVertex(pruned, Location.Skagen));
 
-            System.out.println("Pruned:");
-            solution2 = d2.shortestPath(a, b);
+            // System.out.println("Pruned:");
+            // solution2 = d2.shortestPath(a, b);
 
-            double lengthOriginal = GraphUtils.realLength(graph, solution.getShortestPath());
-            double lengthPruned = GraphUtils.realLength(pruned, solution2.getShortestPath());
-            // Assume  delta  =  1 * 10^-3  =  0.001m  =  1mm
-            boolean isPlusMinusDelta = Math.abs(lengthOriginal - lengthPruned) <= 1e-3;
+            // double lengthOriginal = GraphUtils.realLength(graph, solution.getShortestPath());
+            // double lengthPruned = GraphUtils.realLength(pruned, solution2.getShortestPath());
+            // // Assume  delta  =  1 * 10^-3  =  0.001m  =  1mm
+            // boolean isPlusMinusDelta = Math.abs(lengthOriginal - lengthPruned) <= 1e-3;
 
-            List<Vertex> originalPath = new ArrayList<>(solution.getShortestPath());
-            List<Vertex> prunedPath = new ArrayList<>(solution2.getShortestPath());
-            boolean isSubsetOfLongPath = originalPath.containsAll(prunedPath);
+            // List<Vertex> originalPath = new ArrayList<>(solution.getShortestPath());
+            // List<Vertex> prunedPath = new ArrayList<>(solution2.getShortestPath());
+            // boolean isSubsetOfLongPath = originalPath.containsAll(prunedPath);
 
-            if (! isPlusMinusDelta || ! isSubsetOfLongPath ) {
+            // if (! isPlusMinusDelta || ! isSubsetOfLongPath ) {
                 System.setOut(originalStream);
 
-                System.out.println(i + ":  " + a + "-->" + b);
-                System.out.println("  original: " + lengthOriginal);
-                System.out.println("  pruned:   " + lengthPruned);
+                // System.out.println(i + ":  " + a + "-->" + b);
+                // System.out.println("  original: " + lengthOriginal);
+                // System.out.println("  pruned:   " + lengthPruned);
 
                 // System.out.println("original path: " + solution.getShortestPath());
                 // System.out.println("pruned path:   " + solution2.getShortestPath());
 
-                System.setOut(noopStream);
+                // System.setOut(noopStream);
 
 
                 // DRAW!
@@ -87,17 +90,17 @@ public class TestPruningChains {
                 vis.visualize("A* " + i);
         
         
-                GraphVisualiser vis2 = new GraphVisualiser(pruned, bbox);
-                vis2.drawPath(solution2.getShortestPath());
-                vis2.drawVisited(solution2.getVisited());
-                vis2.visualize("A* pruned " + i);
-                break;
-            } else {
-                // It's correct; collect data!
+                // GraphVisualiser vis2 = new GraphVisualiser(pruned, bbox);
+                // vis2.drawPath(solution2.getShortestPath());
+                // vis2.drawVisited(solution2.getVisited());
+                // vis2.visualize("A* pruned " + i);
+            // //     break;
+            // // } else {
+            // //     // It's correct; collect data!
 
-            }
+            // // }
 
-            System.out.println();
+            // System.out.println();
         }
         System.setOut(originalStream);
     }

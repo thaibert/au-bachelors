@@ -16,10 +16,11 @@ public class GraphVisualiser extends Canvas {
     final static int zoom_level = 1;
     private static boolean DRAW_NODES = false;
 
-    private static double MIN_LONG;
-    private static double MAX_LONG;
-    private static double MIN_LAT;
-    private static double MAX_LAT;
+    private static final double RADIUS = 6378137.0; /* in meters on the equator */
+    private static double MIN_X; // meters
+    private static double MAX_X; // meters
+    private static double MIN_Y; // meters
+    private static double MAX_Y; // meters
     static int window_x, window_y;
     static int image_width, image_height;
     final static int radius = 12*zoom_level;
@@ -37,10 +38,13 @@ public class GraphVisualiser extends Canvas {
     public GraphVisualiser(Graph graph, BoundingBox bbox) {
         this.graph = graph;
 
-        MIN_LAT = bbox.SOUTH;
-        MAX_LAT = bbox.NORTH;
-        MIN_LONG = bbox.WEST;
-        MAX_LONG = bbox.EAST;
+
+        MIN_Y = Math.log(Math.tan(Math.PI / 4 + Math.toRadians(bbox.SOUTH) / 2));
+        MAX_Y = Math.log(Math.tan(Math.PI / 4 + Math.toRadians(bbox.NORTH) / 2));
+        MIN_X = Math.toRadians(bbox.WEST);
+        MAX_X = Math.toRadians(bbox.EAST);
+
+        System.out.println("south: " + bbox.SOUTH + "    minY: " + MIN_Y);
 
         double dx = Math.abs(bbox.EAST - bbox.WEST);
         double dy = Math.abs(bbox.NORTH - bbox.SOUTH);
@@ -48,18 +52,19 @@ public class GraphVisualiser extends Canvas {
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         double screenRatio = screenSize.getWidth()/(screenSize.getHeight()-100);
-        if (bboxRatio > screenRatio) {
-            // long bounding box
-            window_x = (int) (screenSize.getWidth()-100);
-            window_y = (int) (dy * (screenSize.getWidth()-100)/dx);
-        } else {
-            // tall bounding box
-            window_x = (int) (dx * (screenSize.getHeight()-100)/dy);
-            window_y = (int) (screenSize.getHeight()-100);
-        }
-        image_width = window_x * zoom_level;
-        image_height = window_y * zoom_level;
-        window_y += 100;
+        // if (bboxRatio > screenRatio) {
+        //     // long bounding box
+        //     window_x = (int) (screenSize.getWidth()-100);
+        //     window_y = (int) (dy * (screenSize.getWidth()-100)/dx);
+        // } else {
+        //     // tall bounding box
+        //     window_x = (int) (dx * (screenSize.getHeight()-100)/dy);
+        //     window_y = (int) (screenSize.getHeight()-100);
+        // }
+        window_x = (int) screenSize.getWidth() - 50;
+        window_y = (int) screenSize.getHeight() - 50;
+        image_width = (window_x - 100) * zoom_level;
+        image_height = (window_y - 100) * zoom_level;
 
         setBackground(Color.WHITE);
     }
@@ -284,31 +289,39 @@ public class GraphVisualiser extends Canvas {
 
     public static int[] convertToXAndY(String[] arg){
         
-        double lon = Double.parseDouble(arg[1]);
-        double lat = Double.parseDouble(arg[0]);
+        double lon = Math.toRadians(Double.parseDouble(arg[1]));
+        double lat = Math.toRadians(Double.parseDouble(arg[0]));
+        // System.out.println("lat: " + lat);
 
-        //System.out.printf("Input lon: %f, lat: %f\n", lon, lat);
+        // https://wiki.openstreetmap.org/wiki/Mercator#Java
+        // https://stackoverflow.com/a/14330009
+        double y = Math.log(Math.tan(Math.PI / 4 + lat / 2));
+        double x = lon;
 
-        double d_long = MAX_LONG-MIN_LONG;
-        double d_lat=  MAX_LAT - MIN_LAT;
+        x = x - MIN_X; // ensure no negative coords
+        y = y - MIN_Y;
 
-        //System.out.printf("temp dlon: %f, dlat: %f\n", d_long, d_lat);
+        int paddingBothSides = 50 * 2; // pad 50px on all sides
 
-        //double tempx = (lon-MIN_LONG)/d_long * window_x;
-        //double tempy = (lat-MIN_LAT)/d_lat * window_y;
+        int mapWidth = image_width - paddingBothSides;
+        int mapHeight = image_height - paddingBothSides;
 
-        //System.out.printf("lon-min_long: %f, lat-min_lat: %f \n", lon-MIN_LONG, lat-MIN_LAT);
+        double adjusted_max_x = MAX_X - MIN_X;
+        double adjusted_max_y = MAX_Y - MIN_Y;
+        
 
-        //System.out.printf("temp dx: %f, dy: %f\n", tempx, tempy);
+        double mapWidthRatio = mapWidth / (adjusted_max_x);
+        double mapHeightRatio = mapHeight / (adjusted_max_y);
 
-        int x = (int) Math.round((lon-MIN_LONG)/d_long * image_width);
-        int y = image_height - (int) Math.round((lat-MIN_LAT)/d_lat * image_height);
+        double globalRatio = Math.min(mapWidthRatio, mapHeightRatio);
 
-        //System.out.printf("output x: %d, y: %d\n", x, y);
+        double heightPadding = (image_height - (globalRatio * adjusted_max_y)) / 2;
+        double widthPadding = (image_width - (globalRatio * adjusted_max_x)) / 2;
 
+        int imgX = (int) (widthPadding + (x * globalRatio));
+        int imgY = (int) (image_height - heightPadding - (y * globalRatio));
 
-        int[] result = {x,y};
-        return result;
+        return new int[]{imgX, imgY};
     }
 
     private static void drawThickLine(Graphics g, int x1, int y1, int x2, int y2) {
