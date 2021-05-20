@@ -59,6 +59,8 @@ public class DijkstraReach implements PathfindingAlgo {
         DistComparator comp = new DistComparator();
         PriorityQueue<Pair> pq = new PriorityQueue<>(comp);
 
+        Set<Vertex> closed = new HashSet<>();
+
         Collection<Vertex> Q = new HashSet<>(g.getAllVertices()); // Initially all vertices are added
         /*g.getAllVertices().stream()
             .map(p -> new Pair(p, INF_DIST))
@@ -85,8 +87,10 @@ public class DijkstraReach implements PathfindingAlgo {
             Q.remove(head.v);
 
             VminusS.remove(head.v); // Put v in S ==> V-S loses v
-
-            
+            if (closed.contains(head.v)){
+                continue;
+            }
+            closed.add(head.v);
 
             if (head.v.equals(goal)) {
                 System.out.println("  --> Finished early at " + iterations);
@@ -96,26 +100,31 @@ public class DijkstraReach implements PathfindingAlgo {
             g.getNeighboursOf(head.v)
                 .forEach(n -> {
                     // RELAX                    
+                    if(closed.contains(n.v)){
+                        return;
+                    }
 
                     double maybeNewBestDistance = head.dist + n.distance;
                     double previousBestDistance = bestDist.getOrDefault(n.v, INF_DIST);
+
+                    if (reaches.get(n.v)*1.00001 < maybeNewBestDistance && reaches.get(n.v)*1.00001 < GraphUtils.haversineDist(n.v, goal) ){
+                        //System.out.println("Node pruned with reaching");
+                        prunedNodes.add(n.v);
+                        nodesPruned++;
+                        //System.out.println("First check " + reaches.get(n.v) + " < " + maybeNewBestDistance);
+                        //System.out.println("Second check " + reaches.get(n.v) + " < " + GraphUtils.haversineDist(n.v, goal));
+                        //System.out.println("Vertex: " + n.v + "\n");
+
+                        //Gutmans test is false, and the node is not worth considering.
+                        return; //Again this ugly return statement inside a foreach loop, its equal to continue
+                    }
 
                     edgesConsidered.add(new Edge(head.v, n.v, maybeNewBestDistance));
 
 
                     if (maybeNewBestDistance < previousBestDistance) {
                         // Reach pruning:
-                        if (reaches.get(n.v)*1.00001 < maybeNewBestDistance && reaches.get(n.v)*1.00001 < GraphUtils.haversineDist(n.v, goal) ){
-                            //System.out.println("Node pruned with reaching");
-                            prunedNodes.add(n.v);
-                            nodesPruned++;
-                            //System.out.println("First check " + reaches.get(n.v) + " < " + maybeNewBestDistance);
-                            //System.out.println("Second check " + reaches.get(n.v) + " < " + GraphUtils.haversineDist(n.v, goal));
-                            //System.out.println("Vertex: " + n.v + "\n");
 
-                            //Gutmans test is false, and the node is not worth considering.
-                            return; //Again this ugly return statement inside a foreach loop, its equal to continue
-                        }
 
                         // Update v.d and v.pi
                         bestDist.put(n.v, maybeNewBestDistance);
@@ -165,18 +174,18 @@ public class DijkstraReach implements PathfindingAlgo {
 
     public static void main(String[] args) {
         // Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
-        Graph graph = readShortcutGraph("shortCuttedGraph");
+        Graph graph = readShortcutGraph("shortCuttedGraph3");
         Graph fullG = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         //double[] bs = new double[]{5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500};
         //Map<Vertex, Double> r = Reach.reach(graph, bs);
         // if run rn, this 56.1302396,9.7414558 is pruned away when it shouldn't because its reach is low.fileOne
 
-        Map<Vertex, Double> r = readReaches("aarhus-silkeborg-GoldbergReachV4Shortcut");
+        Map<Vertex, Double> r = readReaches("aarhus-silkeborg-GoldbergReachV4Shortcut3");
 
         
         PrintStream originalStream = System.out;
 
-        PrintStream noopStream = new PrintStream(new OutputStream(){
+        /*PrintStream noopStream = new PrintStream(new OutputStream(){
             public void write(int b) {
                 // NO-OP
             }
@@ -184,7 +193,13 @@ public class DijkstraReach implements PathfindingAlgo {
         System.setOut(noopStream);
 
         for (int i = 0; i < 1000; i++ ){
-            
+            System.setOut(originalStream);
+            //System.out.print(".");
+            if (i % 100 == 0){
+                System.out.println("\n      " + i +  " iterations done!");
+            }
+            System.setOut(noopStream);
+
 
             Vertex a = GraphUtils.pickRandomVertex(graph);
             Vertex b = GraphUtils.pickRandomVertex(graph);
@@ -193,7 +208,7 @@ public class DijkstraReach implements PathfindingAlgo {
             Solution solution = d.shortestPath(a, b);
     
 
-            PathfindingAlgo da = new DijkstraTraditional(fullG);
+            PathfindingAlgo da = new Dijkstra(fullG);
             Solution solution2 = da.shortestPath(a, b);
 
             // if (!solution.getShortestPath().equals(solution2.getShortestPath())){
@@ -202,18 +217,18 @@ public class DijkstraReach implements PathfindingAlgo {
 
             System.setOut(originalStream);
             int diff = dijkstraPath.size() - shortcutPath.size();
-            System.out.println("Reach path has  " + diff + "  fewer nodes");
+            //System.out.println("Reach path has  " + diff + "  fewer nodes");
             if (diff > 25) {
                 System.out.println("  diff " + diff + " @ " + a + "->" + b);
                 GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
                 vis.drawPath(solution.getShortestPath());
                 vis.drawVisited(solution.getVisited());
-                vis.visualize("Dijkstra reach");
+                //vis.visualize("Dijkstra reach");
 
                 GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
                 vis2.drawPath(solution2.getShortestPath());
                 vis2.drawVisited(solution2.getVisited());
-                vis2.visualize("Dijkstra normal");
+                //vis2.visualize("Dijkstra normal");
             }
             System.setOut(noopStream);
 
@@ -243,9 +258,9 @@ public class DijkstraReach implements PathfindingAlgo {
                 }
 
             }
-        }/*
-        Vertex a = new Vertex(56.1842169,9.7234288);
-        Vertex b = new Vertex(56.110709,10.1999165);
+        }*/
+        Vertex a = new Vertex(56.1942739,10.1928953);
+        Vertex b = new Vertex(56.1098765,9.6501583);
 
 
         DijkstraReach d = new DijkstraReach(graph, r);
@@ -273,7 +288,7 @@ public class DijkstraReach implements PathfindingAlgo {
         vis2.drawVisited(solution2.getVisited());
         vis2.visualize("Dijkstra");
         
-        */
+        
     }
 
     public static Map<Vertex, Double> readReaches(String filename) {

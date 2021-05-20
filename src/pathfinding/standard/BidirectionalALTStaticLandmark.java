@@ -27,8 +27,8 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
     private Set<Vertex> closed;
 
     private double bestPathLength;
-    private double fA;
-    private double fB;
+    private double distToHeadOfForwards;
+    private double distToHeadOfBackwards;
     private Vertex touchNode;
 
     private Vertex start;
@@ -50,13 +50,13 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         // List<Vertex> landmarks = new ArrayList<>();
         // landmarks.add(GraphUtils.findNearestVertex(graph, 56.21684389259911, 9.517964491806737));
         // landmarks.add(new Vertex(56.0929669, 10.0084564));
-        landmarkSelector.setAllLandmarks();
 
     }
 
 
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
+        landmarkSelector.setAllLandmarks();
 
         // TODO visuellisering
         this.start = start;
@@ -79,7 +79,7 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         pq_f = new PriorityQueue<>(comp);
         pq_b = new PriorityQueue<>(comp);
 
-        fB = fA = hf(start, goal);
+        distToHeadOfBackwards = distToHeadOfForwards = hf(start, goal);
 
         dist_f.put(start, 0.0);
         dist_b.put(goal, 0.0);
@@ -87,13 +87,13 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         pq_b.add(new Pair(goal, 0));
 
         // ALGO
-        while (pq_f.size() > 0 && pq_b.size() > 0) {
+        while (pq_f.size() > 0 || pq_b.size() > 0) {
             //try{
             //    Thread.sleep(4);
             //} catch(Exception e){
             //    e.printStackTrace();
             //}
-            if(pq_f.size() < pq_b.size()){
+            if((pq_f.size() < pq_b.size() && pq_f.size() > 0) || pq_b.size() == 0){
                 expandForwad();
             }else{
                 expandBackward();
@@ -151,15 +151,11 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         closed.add(currentPair.v);
         double dist = dist_f.getOrDefault(currentPair.v, INF_DIST);
         if(dist + hf(currentPair.v, goal) >= bestPathLength 
-        || dist + fB - hf(start, currentPair.v) >= bestPathLength){
+        || dist + distToHeadOfBackwards - hf(start, currentPair.v) >= bestPathLength){
             // Reject node 
         } else {
             // Stabilize
             graph.getNeighboursOf(currentPair.v).forEach(n -> {
-                if (closed.contains(n.v)){
-                    return; // TODO possibly fucking everything up, it should be continue, but that is not allowed
-                }
-
                 double tentDist = dist + n.distance;
 
                 // For counting amount of edges considered
@@ -186,7 +182,7 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         }
 
         if (!pq_f.isEmpty()) {
-            fA = pq_f.peek().dist;
+            distToHeadOfForwards = pq_f.peek().dist;
         }
 
     }
@@ -201,14 +197,10 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         closed.add(currentPair.v);
         double dist = dist_b.getOrDefault(currentPair.v, INF_DIST);
         if (dist + hf(start, currentPair.v) >= bestPathLength
-        || dist + fA - hf(currentPair.v, goal) >= bestPathLength){
+        || dist + distToHeadOfForwards - hf(currentPair.v, goal) >= bestPathLength){
             // Reject
         } else {
             ginv.getNeighboursOf(currentPair.v).forEach(n -> {
-                if (closed.contains(n.v)){
-                    return; // TODO this might fuck shit up, should be continue but it can't be
-                }
-
                 double tentDist = dist + n.distance;
                 
                 // For counting amount of edges considered
@@ -232,7 +224,7 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         }
 
         if (!pq_b.isEmpty()) {
-            fB = pq_b.peek().dist;
+         distToHeadOfBackwards = pq_b.peek().dist;
         }
     }
 

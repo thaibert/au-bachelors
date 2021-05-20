@@ -7,7 +7,10 @@ import utility.*;
 
 import java.util.*;
 
-public class ALT implements PathfindingAlgo {
+import java.io.*;
+
+
+public class ALTReach implements PathfindingAlgo {
     private static final double INF_DIST = Double.MAX_VALUE;
 
     private Graph graph;
@@ -16,12 +19,19 @@ public class ALT implements PathfindingAlgo {
 
     private Map<Vertex, Double> dist;
     private Map<Vertex, Vertex> parent;
+    private Map<Vertex, Double> reaches;
+
+    //DEBUGGING
+    private int nodesPruned = 0;
+
+    public Set<Vertex> prunedNodes = new HashSet<>();
 
     // For visual
     private List<Edge> edgesConsidered;
 
-    public ALT(Graph graph, LandmarkSelector landmarkSelector) {
+    public ALTReach(Graph graph, LandmarkSelector landmarkSelector, Map<Vertex, Double> reaches) {
         this.graph = graph;
+        this.reaches = reaches;
 
         // List<Vertex> landmarks = new ArrayList<>();
         // landmarks.add(GraphUtils.findNearestVertex(graph, 56.21684389259911, 9.517964491806737));
@@ -96,13 +106,21 @@ public class ALT implements PathfindingAlgo {
                 double maybeNewBestDistance = dist.get(head.v) + n.distance; // dist(s,v) + len(v,u)
                 double previousBestDistance = dist.getOrDefault(n.v, INF_DIST); // dist(s,u)
 
+                double pi = landmarkSelector.pi(n.v, goal);
+                if (reaches.get(n.v)*1.00001 < maybeNewBestDistance && reaches.get(n.v)*1.00001 < pi ){
+                    //System.out.println("Node pruned with reaching");
+                    prunedNodes.add(n.v);
+                    nodesPruned++;
+
+                    continue; 
+                }
+
                 edgesConsidered.add(new Edge(head.v, n.v, maybeNewBestDistance));
 
                 if (maybeNewBestDistance < previousBestDistance) {
                     dist.put(n.v, maybeNewBestDistance);
                     parent.put(n.v, head.v);
 
-                    double pi = landmarkSelector.pi(n.v, goal);
 
                     // b(10−i)/10,    b is original lower bound from s->t, i is checkpoint
                     boolean tenPercentMore = pi < originalPi * (10 - landmarkCheckpoint) / 10;
@@ -180,21 +198,24 @@ public class ALT implements PathfindingAlgo {
 
     
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
+        Graph graph = readShortcutGraph("shortCuttedGraph3");
+        Graph fullG = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
-        Vertex a = new Vertex(56.0440049,9.9025227);
-        Vertex b = new Vertex(56.0418177, 9.8967658); // 52 Skanderborg V 
+        Map<Vertex, Double> r = readReaches("aarhus-silkeborg-GoldbergReachV4Shortcut3");
+
+        Vertex a = new Vertex(56.1942739,10.1928953);
+        Vertex b = new Vertex(56.1098765,9.6501583);
 
         // a = GraphUtils.pickRandomVertex(graph);
         // b = GraphUtils.pickRandomVertex(graph);
 
-        LandmarkSelector landmarkSelector = new LandmarkSelector(graph, 16, 2);
+        LandmarkSelector landmarkSelector = new LandmarkSelector(graph, 16, 1);
 
-        ALT d = new ALT(graph, landmarkSelector);
-        Solution solution = d.shortestPath(Location.CPH, Location.Skagen);
+        ALTReach d = new ALTReach(graph, landmarkSelector, r);
+        Solution solution = d.shortestPath(a, b);
         // Solution solution = d.shortestPath(GraphUtils.pickRandomVertex(graph), GraphUtils.pickRandomVertex(graph));
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
         vis.drawPoint(landmarkSelector.getAllLandmarks(), landmarkSelector.getActiveLandmarks());
         System.out.println("allLandmarks size:    " + landmarkSelector.getAllLandmarks().size());
         System.out.println("activeLandmarks size: " + landmarkSelector.getActiveLandmarks().size());
@@ -203,6 +224,43 @@ public class ALT implements PathfindingAlgo {
         vis.drawVisited(solution.getVisited());
         vis.visualize("ALT");
 
+    }
+
+    public static Map<Vertex, Double> readReaches(String filename) {
+        Map<Vertex, Double> r = null;
+        try {
+            File toRead = new File(filename);
+            FileInputStream fis = new FileInputStream(toRead);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+    
+            r = (HashMap<Vertex,Double>) ois.readObject();
+    
+            ois.close();
+            fis.close();
+            //print All data in MAP
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return r;
+    }
+
+    private static Graph readShortcutGraph(String filename) {
+        Graph g = null;
+        try {
+            File toRead = new File(filename);
+            FileInputStream fis = new FileInputStream(toRead);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+    
+            g = (Graph) ois.readObject();
+    
+            ois.close();
+            fis.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return g;
     }
 
 }

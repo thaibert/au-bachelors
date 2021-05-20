@@ -17,6 +17,8 @@ public class TestAll {
     static final int ALT = 4;
     static final int ASTAR_BIDIRECTIONAL = 5;
     static final int ALT_BIDIRECTIONAL = 6;
+    static final int REACH_DIJKSTRA = 7;
+    static final int REACH_ALT = 8;
 
     static String[] names = new String[]{"TradDijk   ", 
                                          "OurDijk    ", 
@@ -24,7 +26,9 @@ public class TestAll {
                                          "A*         ",
                                          "ALT        ",
                                          "BidrecAstar",
-                                         "BidrecALT  "};
+                                         "BidrecALT  ",
+                                         "ReachDijk  ",
+                                         "ReachALT   "};
     static int numAlgos = names.length;
 
     static PathfindingAlgo[] algos = new PathfindingAlgo[numAlgos];
@@ -95,7 +99,8 @@ public class TestAll {
         boolean[] solutionsEqual = new boolean[numAlgos];
         boolean hasDifference = false;
         for (int i = 0; i < numAlgos; i++) {
-            boolean isEqual = solutions[DIJKSTRA_TRADITIONAL].getShortestPath().equals(solutions[i].getShortestPath());
+
+            boolean isEqual = solutions[DIJKSTRA_TRADITIONAL].getShortestPath().containsAll(solutions[i].getShortestPath());
             solutionsEqual[i] = isEqual;
             if (! isEqual) {
                 hasDifference = true;
@@ -151,6 +156,14 @@ public class TestAll {
 
 
         Graph g = GraphPopulator.populateGraph(fileIn);
+        Graph gReach = readShortcutGraph("shortCuttedGraph3");
+        Map<Vertex, Double> r = readReaches("aarhus-silkeborg-GoldbergReachV4Shortcut3");
+
+        int edgeNumber = 0;
+        for (Vertex v: g.getAllVertices()){
+            edgeNumber += g.getNeighboursOf(v).size();
+        }
+
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
         LandmarkSelector ls = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
@@ -162,7 +175,8 @@ public class TestAll {
         algos[ALT] = new ALT(g, ls); 
         algos[ASTAR_BIDIRECTIONAL] = new NBA(g);
         algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, ls);
-
+        algos[REACH_DIJKSTRA] = new DijkstraReach(gReach, r);
+        algos[REACH_ALT] = new ALTReach(gReach, ls, r);
         
         // Prepare data logging file
         csv = new File("log-"+ runs + "-" + fileIn);
@@ -187,7 +201,7 @@ public class TestAll {
         double sec = 1e9; // nanoseconds per second
         double ms = 1e6;  // nanoseconds per millisecond
 
-        System.out.println("[*] Done!");
+        System.out.println("[*]  Done!");
         System.out.println("     Total runs: " + runs + "\n");
 
         pw.flush();
@@ -207,6 +221,43 @@ public class TestAll {
             System.out.printf("     Average edges expanded for %s     %8d edges \n", names[i], (long) totalExpanded[i]/runs);
         }
 
+    }
+
+    public static Map<Vertex, Double> readReaches(String filename) {
+        Map<Vertex, Double> r = null;
+        try {
+            File toRead = new File(filename);
+            FileInputStream fis = new FileInputStream(toRead);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+    
+            r = (HashMap<Vertex,Double>) ois.readObject();
+    
+            ois.close();
+            fis.close();
+            //print All data in MAP
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return r;
+    }
+
+    private static Graph readShortcutGraph(String filename) {
+        Graph g = null;
+        try {
+            File toRead = new File(filename);
+            FileInputStream fis = new FileInputStream(toRead);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+    
+            g = (Graph) ois.readObject();
+    
+            ois.close();
+            fis.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return g;
     }
 
 
