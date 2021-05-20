@@ -74,8 +74,8 @@ public class NBA implements PathfindingAlgo{
         pq_b.add(new Pair(goal, 0));
 
         // ALGO
-        while (pq_f.size() > 0 && pq_b.size() > 0) {
-            if(pq_f.size() < pq_b.size()){
+        while (pq_f.size() > 0 || pq_b.size() > 0) {
+            if((pq_f.size() < pq_b.size() && pq_f.size() > 0) || pq_b.size() == 0){
                 expandForwad();
             }else{
                 expandBackward();
@@ -138,9 +138,7 @@ public class NBA implements PathfindingAlgo{
         } else {
             // Stabilize
             g.getNeighboursOf(head.v).forEach(n -> {
-                if (closed.contains(n.v)){
-                    return;
-                }
+
                 double tentDist = dist + n.distance;
 
                 // For counting amount of edges considered
@@ -186,9 +184,6 @@ public class NBA implements PathfindingAlgo{
             // Reject
         } else {
             ginv.getNeighboursOf(head.v).forEach(n -> {
-                if (closed.contains(n.v)){
-                    return;
-                }
                 double tentDist = dist + n.distance;
                 
                 // For counting amount of edges considered
@@ -230,7 +225,7 @@ public class NBA implements PathfindingAlgo{
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-all-roads.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
 
         //Vertex a = new Vertex(56.1336391,9.7235112);
         //Vertex b = new Vertex(56.1906785,10.0880127);
@@ -240,7 +235,7 @@ public class NBA implements PathfindingAlgo{
         Vertex a = GraphUtils.findNearestVertex(graph, 56.0337, 9.4807);
         Vertex b = GraphUtils.findNearestVertex(graph, 56.2794, 10.259);
         PathfindingAlgo d = new NBA(graph);
-        Solution solution = d.shortestPath(Location.Skagen, Location.CPH);
+        Solution solution = d.shortestPath(Location.CPH, Location.Skagen);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());

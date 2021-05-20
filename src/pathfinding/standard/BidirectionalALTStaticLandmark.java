@@ -50,13 +50,13 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         // List<Vertex> landmarks = new ArrayList<>();
         // landmarks.add(GraphUtils.findNearestVertex(graph, 56.21684389259911, 9.517964491806737));
         // landmarks.add(new Vertex(56.0929669, 10.0084564));
-        landmarkSelector.setAllLandmarks();
 
     }
 
 
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
+        landmarkSelector.setAllLandmarks();
 
         // TODO visuellisering
         this.start = start;
@@ -87,13 +87,13 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         pq_b.add(new Pair(goal, 0));
 
         // ALGO
-        while (pq_f.size() > 0 && pq_b.size() > 0) {
+        while (pq_f.size() > 0 || pq_b.size() > 0) {
             //try{
             //    Thread.sleep(4);
             //} catch(Exception e){
             //    e.printStackTrace();
             //}
-            if(pq_f.size() < pq_b.size()){
+            if((pq_f.size() < pq_b.size() && pq_f.size() > 0) || pq_b.size() == 0){
                 expandForwad();
             }else{
                 expandBackward();
@@ -156,9 +156,6 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         } else {
             // Stabilize
             graph.getNeighboursOf(currentPair.v).forEach(n -> {
-                if (closed.contains(n.v)){
-                    return;
-                }
                 double tentDist = dist + n.distance;
 
                 // For counting amount of edges considered
@@ -204,9 +201,6 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
             // Reject
         } else {
             ginv.getNeighboursOf(currentPair.v).forEach(n -> {
-                if (closed.contains(n.v)){
-                    return;
-                }
                 double tentDist = dist + n.distance;
                 
                 // For counting amount of edges considered

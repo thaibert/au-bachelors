@@ -19,7 +19,7 @@ import crosby.binary.osmosis.OsmosisReader;
 
 public class PBFExtractor {
 
-    public static final String FILE_PREFIX = "denmark-latest";
+    public static final String FILE_PREFIX = "iceland-latest";
     public static final int NODES_PER_CHUNK = (int) 2e7;
     // 1e6 = 1 000 000 nodes per chunk gives ~12mb chunk files and 32mb csv files
 
