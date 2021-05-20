@@ -138,7 +138,9 @@ public class NBA implements PathfindingAlgo{
         } else {
             // Stabilize
             g.getNeighboursOf(head.v).forEach(n -> {
-
+                if (closed.contains(n.v)){
+                    return;
+                }
                 double tentDist = dist + n.distance;
 
                 // For counting amount of edges considered
@@ -184,6 +186,9 @@ public class NBA implements PathfindingAlgo{
             // Reject
         } else {
             ginv.getNeighboursOf(head.v).forEach(n -> {
+                if (closed.contains(n.v)){
+                    return;
+                }
                 double tentDist = dist + n.distance;
                 
                 // For counting amount of edges considered

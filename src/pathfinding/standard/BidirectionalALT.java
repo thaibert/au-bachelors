@@ -98,7 +98,7 @@ public class BidirectionalALT implements PathfindingAlgo{
 
         int iterations = 0;
         // ALGO
-        while (pq_f.size() > 0 && pq_b.size() > 0) {
+        while (pq_f.size() > 0 || pq_b.size() > 0) {
             
             iterations++;
             iterationsSinceLastLandmarkUpdate++;
@@ -225,7 +225,9 @@ public class BidirectionalALT implements PathfindingAlgo{
         } else {
             // Stabilize
             graph.getNeighboursOf(currentPair.v).forEach(n -> {
-
+                if (closed.contains(n.v)){
+                    return;
+                }
                 double tentDist = dist + n.distance;
 
                 // For counting amount of edges considered
@@ -296,6 +298,9 @@ public class BidirectionalALT implements PathfindingAlgo{
             // Reject
         } else {
             ginv.getNeighboursOf(currentPair.v).forEach(n -> {
+                if (closed.contains(n.v)){
+                    return;
+                }
                 double tentDist = dist + n.distance;
                 
                 // For counting amount of edges considered

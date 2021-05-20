@@ -379,10 +379,13 @@ public class GraphUtils {
         Map<Vertex, Map<Vertex, Double>> distanceToLandmark = new HashMap<>();
         Map<Vertex, Map<Vertex, Double>> distanceFromLandmark = new HashMap<>();
 
-        List<Vertex> landmarks = new ArrayList<>();  
+        List<Vertex> landmarks = new ArrayList<>();
+        int seed = 10;  
+        Random rnd = new Random(seed);
+
 
         for (int i = 0; i < noOfLandmarks; i++) {
-            landmarks.add(GraphUtils.pickRandomVertex(g));
+            landmarks.add(GraphUtils.pickRandomVertexWithSeed(g, rnd));
         }
 
 

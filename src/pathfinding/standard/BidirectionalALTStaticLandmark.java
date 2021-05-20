@@ -156,6 +156,9 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
         } else {
             // Stabilize
             graph.getNeighboursOf(currentPair.v).forEach(n -> {
+                if (closed.contains(n.v)){
+                    return;
+                }
                 double tentDist = dist + n.distance;
 
                 // For counting amount of edges considered
@@ -201,6 +204,9 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
             // Reject
         } else {
             ginv.getNeighboursOf(currentPair.v).forEach(n -> {
+                if (closed.contains(n.v)){
+                    return;
+                }
                 double tentDist = dist + n.distance;
                 
                 // For counting amount of edges considered

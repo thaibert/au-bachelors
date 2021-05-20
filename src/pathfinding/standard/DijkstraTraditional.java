@@ -39,6 +39,8 @@ public class DijkstraTraditional implements PathfindingAlgo {
         Map<Vertex, Vertex> predecessor = new HashMap<>(); 
         List<Edge> edgesConsidered = new ArrayList<>();
 
+        Set<Vertex> closed = new HashSet<>();
+
         DistComparator comp = new DistComparator();
         PriorityQueue<Pair> pq = new PriorityQueue<>(comp);
 
@@ -81,7 +83,7 @@ public class DijkstraTraditional implements PathfindingAlgo {
             assert(VminusS.contains(head.v)); // Each edge is only extracted once; v \in V-S ==> v \notin S
             VminusS.remove(head.v); // Put v in S ==> V-S loses v
 
-            
+            closed.add(head.v);
 
             if (head.v.equals(goal)) {
                 System.out.println("  --> Finished early at " + iterations);
@@ -91,6 +93,9 @@ public class DijkstraTraditional implements PathfindingAlgo {
             g.getNeighboursOf(head.v)
                 .forEach(n -> {
                     // RELAX
+                    if (closed.contains(n.v)){
+                        return;
+                    }
 
                     double maybeNewBestDistance = head.dist + n.distance;
                     double previousBestDistance = bestDist.getOrDefault(n.v, INF_DIST);

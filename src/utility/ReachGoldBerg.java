@@ -197,9 +197,11 @@ public class ReachGoldBerg {
 
             // Shortcuts
             // TODO us bs[i+1], but avoid the last edge case with indexing out of bounds....
-            Graph gPrimeShortcut = shortcut(graphPrime, graph, INF_DIST, inPenalties, outPenalties, r); //TODO what graph should this be given
+            if (bs.length - 2 > i){
+                Graph gPrimeShortcut = shortcut(graphPrime, graph, bs[i+1], inPenalties, outPenalties, r); //TODO what graph should this be given
+                graphPrime = gPrimeShortcut;
+            }
             
-            graphPrime = gPrimeShortcut;
 
             edgesConsideredThroughout.addAll(edgesConsidered);
 
@@ -247,7 +249,7 @@ public class ReachGoldBerg {
         }
 
 
-        writeGraphToFile("shortCuttedGraph3", graph);
+        writeGraphToFile("island-shortcut", graph);
 
         return rVertex;
     }
@@ -1011,7 +1013,7 @@ public class ReachGoldBerg {
         // 56.1349785,9.7198848: with reach 240.59535364050208 wrong reach
 
         //Graph graph = makeExampleGraph();
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("island-latest-roads.csv");
         //Graph graph = makeSquareGraph(); 
 
         // Graph graph = makeSingleLineGraph();
@@ -1054,7 +1056,7 @@ public class ReachGoldBerg {
         }
         System.out.println("number of vertices with very high reach : " + counter);
 
-        saveReachArrayToFile("aarhus-silkeborg-GoldbergReachV4Shortcut3", r);
+        saveReachArrayToFile("island-reach", r);
 
     }
 

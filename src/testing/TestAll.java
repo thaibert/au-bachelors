@@ -152,7 +152,7 @@ public class TestAll {
 
     public static void main(String[] args) throws FileNotFoundException {
         String fileIn = "aarhus-silkeborg-intersections.csv";
-        int runs = (int) 1e3;
+        int runs = (int) 1e2;
 
 
         Graph g = GraphPopulator.populateGraph(fileIn);
