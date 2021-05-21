@@ -36,8 +36,6 @@ public class BidirectionalALT implements PathfindingAlgo{
 
     private List<Edge> edgesConsidered;
 
-    private List<Map<Vertex, Map<Vertex, Double>>> landmarks;
-
     private double originalPi;
     private int landmarkCheckpoint = 0; // ranges from 0-10
     private int iterationsSinceLastLandmarkUpdate = 0;
@@ -62,10 +60,12 @@ public class BidirectionalALT implements PathfindingAlgo{
 
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
+        
         // Reset landmarks, so they don't carry over if multiple queries are run in series.
         landmarkSelector.resetLandmarks();
 
         landmarkSelector.updateLandmarks(start, goal, 2);
+        landmarkSelector.updateLandmarks(goal, start, 2);
         originalPi = hf(start, goal);
 
         // TODO visuellisering
@@ -73,7 +73,11 @@ public class BidirectionalALT implements PathfindingAlgo{
         this.goal = goal;
 
         bestPathLength = INF_DIST;
-        
+
+        landmarkCheckpoint = 0;
+        iterationsSinceLastLandmarkUpdate = 0;
+        landmarksUpdated = false;
+        landmarkUpdateVertex = null;
 
         // SETUP
         edgesConsidered = new ArrayList<>();
@@ -89,7 +93,8 @@ public class BidirectionalALT implements PathfindingAlgo{
         pq_f = new PriorityQueue<>(comp);
         pq_b = new PriorityQueue<>(comp);
 
-        distToHeadOfBackwards = distToHeadOfForwards = hf(start, goal);
+        distToHeadOfForwards = hf(start, goal);
+        distToHeadOfBackwards = hf(goal, start);
 
         dist_f.put(start, 0.0);
         dist_b.put(goal, 0.0);
@@ -98,14 +103,14 @@ public class BidirectionalALT implements PathfindingAlgo{
 
         int iterations = 0;
         // ALGO
-        while (pq_f.size() > 0 && pq_b.size() > 0) {
+        while (pq_f.size() > 0 || pq_b.size() > 0) {
             
             iterations++;
             iterationsSinceLastLandmarkUpdate++;
 
-            if(pq_f.size() < pq_b.size()){
+            if((pq_f.size() < pq_b.size() && pq_f.size() > 0) || pq_b.size() == 0){
                 expandForwad();
-            }else{
+            }else if (pq_b.size() > 0){
                 expandBackward();
             }
 
@@ -114,6 +119,8 @@ public class BidirectionalALT implements PathfindingAlgo{
                 System.out.printf("Updated landmarks #%d @ iteration %d", landmarkCheckpoint, iterations);
 
                 boolean addedLandmark = landmarkSelector.updateLandmarks(landmarkUpdateVertex, goal, 1);
+                addedLandmark = addedLandmark || landmarkSelector.updateLandmarks(landmarkUpdateVertex, start, 1);
+
 
                 if (addedLandmark) {
                     // Updates both priority ques
@@ -144,7 +151,7 @@ public class BidirectionalALT implements PathfindingAlgo{
                             continue;
                         }
                         Vertex v = next.v;
-                        double d = dist_b.get(v) + landmarkSelector.pi(v, goal);
+                        double d = dist_b.get(v) + landmarkSelector.pi(start, v);
 
                         newPQ_b.add(new Pair(v, d));
                     }
@@ -219,8 +226,8 @@ public class BidirectionalALT implements PathfindingAlgo{
 
         closed.add(currentPair.v);
         double dist = dist_f.getOrDefault(currentPair.v, INF_DIST);
-        if(dist + hf(currentPair.v, goal) >= bestPathLength 
-        || dist + distToHeadOfBackwards - hf(start, currentPair.v) >= bestPathLength){
+        if(dist + hf(currentPair.v, goal) >= bestPathLength  
+        || dist + distToHeadOfBackwards - hf(start,currentPair.v) >= bestPathLength ){
             // Reject node 
         } else {
             // Stabilize
@@ -253,14 +260,14 @@ public class BidirectionalALT implements PathfindingAlgo{
 
                     pq_f.add(new Pair(n.v, tentDist + pi));
 
-                // Checking if we found new best
-                if (dist_b.containsKey(n.v)) {
-                    double pathLength = tentDist + dist_b.get(n.v);
-                    if (bestPathLength > pathLength) {
-                        bestPathLength = pathLength;
-                        touchNode = n.v;
+                    // Checking if we found new best
+                    if (dist_b.containsKey(n.v)) {
+                        double pathLength = tentDist + dist_b.get(n.v);
+                        if (bestPathLength > pathLength) {
+                            bestPathLength = pathLength;
+                            touchNode = n.v;
+                        }
                     }
-                }
                 }
 
 
@@ -293,7 +300,7 @@ public class BidirectionalALT implements PathfindingAlgo{
 
         closed.add(currentPair.v);
         double dist = dist_b.getOrDefault(currentPair.v, INF_DIST);
-        if (dist + hf(start, currentPair.v) >= bestPathLength
+        if (dist + hf(start,currentPair.v) >= bestPathLength
         || dist + distToHeadOfForwards - hf(currentPair.v, goal) >= bestPathLength){
             // Reject
         } else {
@@ -358,8 +365,8 @@ public class BidirectionalALT implements PathfindingAlgo{
         Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
 
         //56.2350979,10.2417392  ->  56.0941631,9.5770669
-        Vertex a = new Vertex(56.2350979,10.2417392); 
-        Vertex b = new Vertex(56.0941631,9.5770669); 
+        Vertex a = new Vertex(56.1698251,9.5473751); 
+        Vertex b = new Vertex(56.1368312,10.1555562); 
 
         LandmarkSelector ls = new LandmarkSelector(graph, 16, 1); 
 

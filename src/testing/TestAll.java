@@ -42,7 +42,7 @@ public class TestAll {
     static PrintWriter pw;
 
 
-    static void testAllShortestPath(Graph g) throws FileNotFoundException {
+    static void testAllShortestPath(Graph g, Random rnd) throws FileNotFoundException {
         // TODO in "actual" runs, we should comment in out in files, as it still takes time?
         // Disable printing while running 
         PrintStream originalStream = System.out;
@@ -54,8 +54,8 @@ public class TestAll {
         });
         System.setOut(noopStream);
 
-        Vertex a = GraphUtils.pickRandomVertex(g);
-        Vertex b = GraphUtils.pickRandomVertex(g);
+        Vertex a = GraphUtils.pickRandomVertexWithSeed(g, rnd);
+        Vertex b = GraphUtils.pickRandomVertexWithSeed(g, rnd);
 
         if (a.equals(b)) {
             System.setOut(originalStream);
@@ -166,9 +166,10 @@ public class TestAll {
 
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
-        LandmarkSelector ls = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
+        LandmarkSelector ls = new LandmarkSelector(g, 16, 2); // TODO how many landmarks
+        LandmarkSelector ls2 = new LandmarkSelector(gReach, 16, 2);
 
-        algos[DIJKSTRA_TRADITIONAL] = new Dijkstra(g); //TODO change to DijkstraTraditional, its just slow to run
+        algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g); //TODO change to DijkstraTraditional, its just slow to run
         algos[DIJKSTRA_OURS] = new Dijkstra(g);
         algos[ASTAR] = new Astar(g);
         algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
@@ -176,19 +177,21 @@ public class TestAll {
         algos[ASTAR_BIDIRECTIONAL] = new NBA(g);
         algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, ls);
         algos[REACH_DIJKSTRA] = new DijkstraReach(gReach, r);
-        algos[REACH_ALT] = new ALTReach(gReach, ls, r);
+        algos[REACH_ALT] = new ALTReach(gReach, ls2, r);
         
         // Prepare data logging file
         csv = new File("log-"+ runs + "-" + fileIn);
         pw = new PrintWriter(csv);
         pw.write("algo,time,edges_expanded,no_nodes,driven_len\n");
+        
+        Random rnd = new Random(0);
 
         System.out.println();
         for (int i = 0; i < runs; i++) {
             System.out.print(" -> " + i);
             try {
 
-                testAllShortestPath(g);
+                testAllShortestPath(g, rnd);
 
             } catch(Exception e) {
                 System.out.println(" failed (exception)");

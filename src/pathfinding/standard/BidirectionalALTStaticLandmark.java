@@ -246,12 +246,12 @@ public class BidirectionalALTStaticLandmark implements PathfindingAlgo{
     public static void main(String[] args) {
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
 
-    
-        Vertex a = new Vertex(56.1702261,10.1700643); 
-        Vertex b = new Vertex(56.1728893,10.1981565); 
+        //56.2350979,10.2417392  ->  56.0941631,9.5770669
+        Vertex a = new Vertex(56.1698251,9.5473751); 
+        Vertex b = new Vertex(56.1368312,10.1555562); 
 
 
-        LandmarkSelector ls = new LandmarkSelector(graph, 16, 1); 
+        LandmarkSelector ls = new LandmarkSelector(graph, 16, 2); 
 
         PathfindingAlgo d = new BidirectionalALTStaticLandmark(graph, ls);
         Solution solution = d.shortestPath(a, b);
