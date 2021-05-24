@@ -44,7 +44,7 @@ public class GraphVisualiser extends Canvas {
         MIN_X = Math.toRadians(bbox.WEST);
         MAX_X = Math.toRadians(bbox.EAST);
 
-        System.out.println("south: " + bbox.SOUTH + "    minY: " + MIN_Y);
+        //System.out.println("south: " + bbox.SOUTH + "    minY: " + MIN_Y);
 
         double dx = Math.abs(bbox.EAST - bbox.WEST);
         double dy = Math.abs(bbox.NORTH - bbox.SOUTH);
