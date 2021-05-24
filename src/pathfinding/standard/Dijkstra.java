@@ -62,7 +62,7 @@ public class Dijkstra implements PathfindingAlgo {
         while (pq.size() > 0) {
             num++;
             if (num % 1000 == 0) {
-                System.out.println("    --> " + num + ",   pq size: " + pq.size());
+                //System.out.println("    --> " + num + ",   pq size: " + pq.size());
             }
 
             Vertex head = pq.poll();

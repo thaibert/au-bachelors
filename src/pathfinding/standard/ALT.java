@@ -89,6 +89,7 @@ public class ALT implements PathfindingAlgo {
             boolean landmarksUpdated = false;
 
             for (Neighbor n : graph.getNeighboursOf(head.v)) {
+
                 if (settled.contains(n.v)){
                     continue;
                 }
@@ -97,6 +98,7 @@ public class ALT implements PathfindingAlgo {
                 double previousBestDistance = dist.getOrDefault(n.v, INF_DIST); // dist(s,u)
 
                 edgesConsidered.add(new Edge(head.v, n.v, maybeNewBestDistance));
+
 
                 if (maybeNewBestDistance < previousBestDistance) {
                     dist.put(n.v, maybeNewBestDistance);
@@ -170,6 +172,7 @@ public class ALT implements PathfindingAlgo {
         System.out.println("      " + dist.get(goal));
 
         Solution solution = new Solution(out, edgesConsidered, null);
+
 
 
 

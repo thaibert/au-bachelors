@@ -174,24 +174,25 @@ public class DijkstraReach implements PathfindingAlgo {
 
     public static void main(String[] args) {
         // Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
-        Graph graph = readShortcutGraph("shortCuttedGraph3");
-        Graph fullG = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = readShortcutGraph("iceland-shortcut");
+        Graph fullG = GraphPopulator.populateGraph("iceland-latest-roads.csv");
         //double[] bs = new double[]{5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500};
         //Map<Vertex, Double> r = Reach.reach(graph, bs);
         // if run rn, this 56.1302396,9.7414558 is pruned away when it shouldn't because its reach is low.fileOne
 
-        Map<Vertex, Double> r = readReaches("aarhus-silkeborg-GoldbergReachV4Shortcut3");
+        Map<Vertex, Double> r = readReaches("iceland-reach");
 
         
         PrintStream originalStream = System.out;
 
-        /*PrintStream noopStream = new PrintStream(new OutputStream(){
+        PrintStream noopStream = new PrintStream(new OutputStream(){
             public void write(int b) {
                 // NO-OP
             }
         });
-        System.setOut(noopStream);
-
+        
+        /*System.setOut(noopStream);
+        
         for (int i = 0; i < 1000; i++ ){
             System.setOut(originalStream);
             //System.out.print(".");
@@ -228,6 +229,7 @@ public class DijkstraReach implements PathfindingAlgo {
                 GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
                 vis2.drawPath(solution2.getShortestPath());
                 vis2.drawVisited(solution2.getVisited());
+                System.out.println("Nodes considered reach: " + solution.getVisited().size() + " vs normal dijkstra " + solution2.getVisited().size());
                 //vis2.visualize("Dijkstra normal");
             }
             System.setOut(noopStream);
@@ -240,13 +242,13 @@ public class DijkstraReach implements PathfindingAlgo {
 
                     System.out.println("Mistake found on :" + a + " -> " + b);
 
-                    GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+                    GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Iceland);
                     vis.drawPath(solution.getShortestPath());
                     vis.drawVisited(solution.getVisited());
                     vis.visualize("Dijkstra Reaches");
 
 
-                    GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+                    GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.Iceland);
                     vis2.drawPath(solution2.getShortestPath());
                     vis2.drawVisited(solution2.getVisited());
                     vis2.visualize("Dijkstra");
@@ -259,36 +261,39 @@ public class DijkstraReach implements PathfindingAlgo {
 
             }
         }*/
-        Vertex a = new Vertex(56.1942739,10.1928953);
-        Vertex b = new Vertex(56.1098765,9.6501583);
+
+        Vertex a = new Vertex(63.441994,-20.27212);
+        Vertex b = new Vertex(65.50189,-18.131573);
 
 
         DijkstraReach d = new DijkstraReach(graph, r);
         Solution solution = d.shortestPath(a, b);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Iceland);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
 
+        System.out.println("Edges considered      " + solution.getVisited().size() );
 
 
-        PathfindingAlgo da = new DijkstraTraditional(graph);
+
+        PathfindingAlgo da = new DijkstraTraditional(fullG);
         Solution solution2 = da.shortestPath(a, b);
 
         for (Vertex v: solution2.getShortestPath()) {
             if (d.prunedNodes.contains(v)){
-                System.out.println(v + ": with reach " + r.get(v));
+                //System.out.println(v + ": with reach " + r.get(v));
                 vis.drawMeetingNode(v);
             }
         }
         vis.visualize("Dijkstra Reaches");
 
-        GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.Iceland);
         vis2.drawPath(solution2.getShortestPath());
         vis2.drawVisited(solution2.getVisited());
         vis2.visualize("Dijkstra");
         
-        
+      
     }
 
     public static Map<Vertex, Double> readReaches(String filename) {

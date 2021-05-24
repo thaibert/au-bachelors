@@ -50,7 +50,7 @@ public class DijkstraTraditional implements PathfindingAlgo {
             iterations++;
 
             if (iterations % 1000 == 0) {
-                System.out.println("    --> " + iterations + ",   pq size: " + pq.size());
+                //System.out.println("    --> " + iterations + ",   pq size: " + pq.size());
             }
 
             Pair head = pq.poll();

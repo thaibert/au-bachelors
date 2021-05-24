@@ -107,6 +107,7 @@ public class TestAll {
             }
         }
 
+
         // TODO wrap so only on when assertions are on
         if (hasDifference) {
             System.out.println(" not equal!");
@@ -118,7 +119,7 @@ public class TestAll {
             GraphUtils.pathDistance(path));
 
             // Draw traditional dijkstra
-            GraphVisualiser vis1 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
+            GraphVisualiser vis1 = new GraphVisualiser(g, BoundingBox.Iceland);
             vis1.drawPath(path);
             vis1.visualize(names[0]);
             
@@ -131,11 +132,12 @@ public class TestAll {
                         names[i], 
                         path.size(), 
                         GraphUtils.pathDistance(path));
-                    GraphVisualiser vis2 = new GraphVisualiser(g, BoundingBox.AarhusSilkeborg);
+                    GraphVisualiser vis2 = new GraphVisualiser(g, BoundingBox.Iceland);
                     vis2.drawPath(solutions[i].getShortestPath());
                     vis2.visualize(names[i]);
                 }
             }
+
 
             try{
             Thread.sleep(400000);
@@ -143,6 +145,7 @@ public class TestAll {
                 System.out.println(e);
             }
         }
+
         System.out.print("  [" + solutions[DIJKSTRA_TRADITIONAL].getShortestPath().size() + " nodes]");
         System.out.println();   
     }
@@ -151,13 +154,14 @@ public class TestAll {
 
 
     public static void main(String[] args) throws FileNotFoundException {
-        String fileIn = "aarhus-silkeborg-intersections.csv";
-        int runs = (int) 1e2;
+        String fileIn = "iceland-latest-roads.csv";
+        int runs = (int) 50;//1e2;
 
 
         Graph g = GraphPopulator.populateGraph(fileIn);
-        Graph gReach = readShortcutGraph("shortCuttedGraph3");
-        Map<Vertex, Double> r = readReaches("aarhus-silkeborg-GoldbergReachV4Shortcut3");
+        //g = GraphUtils.pruneChains(g);
+        Graph gReach = readShortcutGraph("iceland-shortcut");
+        Map<Vertex, Double> r = readReaches("iceland-reach");
 
         int edgeNumber = 0;
         for (Vertex v: g.getAllVertices()){
@@ -166,8 +170,8 @@ public class TestAll {
 
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
-        LandmarkSelector ls = new LandmarkSelector(g, 16, 2); // TODO how many landmarks
-        LandmarkSelector ls2 = new LandmarkSelector(gReach, 16, 2);
+        LandmarkSelector ls = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
+        LandmarkSelector ls2 = new LandmarkSelector(gReach, 16, 1);
 
         algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g); //TODO change to DijkstraTraditional, its just slow to run
         algos[DIJKSTRA_OURS] = new Dijkstra(g);
@@ -184,13 +188,12 @@ public class TestAll {
         pw = new PrintWriter(csv);
         pw.write("algo,time,edges_expanded,no_nodes,driven_len\n");
         
-        Random rnd = new Random(0);
+        Random rnd = new Random(1);
 
         System.out.println();
         for (int i = 0; i < runs; i++) {
             System.out.print(" -> " + i);
             try {
-
                 testAllShortestPath(g, rnd);
 
             } catch(Exception e) {

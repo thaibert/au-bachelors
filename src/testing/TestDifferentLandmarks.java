@@ -54,7 +54,7 @@ public class TestDifferentLandmarks {
             System.out.print("\n");
             return;
         }
-
+        
         System.setOut(originalStream);
         System.out.print("  " + a + "  ->  " + b);
         System.setOut(noopStream);

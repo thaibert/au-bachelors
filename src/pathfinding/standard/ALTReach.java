@@ -50,6 +50,7 @@ public class ALTReach implements PathfindingAlgo {
         // Now find the two best ones
         landmarkSelector.updateLandmarks(start, goal, 2);
 
+
         double originalPi = landmarkSelector.pi(start, goal);
         int landmarkCheckpoint = 0; // ranges from 0-10
 
@@ -67,6 +68,10 @@ public class ALTReach implements PathfindingAlgo {
 
         Set<Vertex> settled = new HashSet<>();
 
+        if(landmarkSelector.getActiveLandmarks().size() == 0){
+            return new Solution(new ArrayList<>(), edgesConsidered, null);
+        }
+
         int iterations = 0;
         int iterationsSinceLastLandmarkUpdate = 0;
         while(pq.size() > 0){
@@ -76,7 +81,7 @@ public class ALTReach implements PathfindingAlgo {
             Pair head = pq.poll();
 
             if (originalPi == 0 && iterationsSinceLastLandmarkUpdate >= 100) {
-                 // If the first pi was 0, no landmarks could reach start.
+                // If the first pi was 0, no landmarks could reach start.
                 // So try again after at least 100 opened edges. Maybe we can see the landmarks now!
                 iterationsSinceLastLandmarkUpdate = 0;
                
@@ -167,6 +172,9 @@ public class ALTReach implements PathfindingAlgo {
             }
         }
 
+
+        System.out.println("Nodes pruned: " + nodesPruned);
+    
         // Get out the shortest path
         System.out.println("  --> backtracking solution");
         List<Vertex> out = new ArrayList<>();
@@ -198,16 +206,16 @@ public class ALTReach implements PathfindingAlgo {
 
     
     public static void main(String[] args) {
-        Graph graph = readShortcutGraph("shortCuttedGraph3");
-        Graph fullG = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = readShortcutGraph("iceland-shortcut");
+        Graph fullG = GraphPopulator.populateGraph("iceland-latest-roads.csv");
 
-        Map<Vertex, Double> r = readReaches("aarhus-silkeborg-GoldbergReachV4Shortcut3");
+        Map<Vertex, Double> r = readReaches("iceland-reach");
 
-        Vertex a = new Vertex(56.1942739,10.1928953);
-        Vertex b = new Vertex(56.1098765,9.6501583);
-
-        // a = GraphUtils.pickRandomVertex(graph);
-        // b = GraphUtils.pickRandomVertex(graph);
+        Vertex a = new Vertex(65.68043,-18.087887);
+        Vertex b = new Vertex(63.433376,-20.286596);
+        Random rnd = new Random(21);
+        //Vertex a = GraphUtils.pickRandomVertexWithSeed(graph, rnd);
+        //Vertex b = GraphUtils.pickRandomVertexWithSeed(graph, rnd);
 
         LandmarkSelector landmarkSelector = new LandmarkSelector(graph, 16, 1);
 
@@ -215,10 +223,11 @@ public class ALTReach implements PathfindingAlgo {
         Solution solution = d.shortestPath(a, b);
         // Solution solution = d.shortestPath(GraphUtils.pickRandomVertex(graph), GraphUtils.pickRandomVertex(graph));
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Iceland);
         vis.drawPoint(landmarkSelector.getAllLandmarks(), landmarkSelector.getActiveLandmarks());
         System.out.println("allLandmarks size:    " + landmarkSelector.getAllLandmarks().size());
         System.out.println("activeLandmarks size: " + landmarkSelector.getActiveLandmarks().size());
+        System.out.println("Edges considered      " + solution.getVisited().size() );
         
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
