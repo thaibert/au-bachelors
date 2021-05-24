@@ -159,7 +159,7 @@ public class TestAll {
 
 
         Graph g = GraphPopulator.populateGraph(fileIn);
-        //g = GraphUtils.pruneChains(g);
+        g = GraphUtils.pruneChains(g);
         Graph gReach = readShortcutGraph("iceland-shortcut");
         Map<Vertex, Double> r = readReaches("iceland-reach");
 

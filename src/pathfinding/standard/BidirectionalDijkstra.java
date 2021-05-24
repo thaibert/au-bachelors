@@ -44,6 +44,10 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
         meetingNode = null;
         mu = INF_DIST;
         
+        Set<Vertex> closed_f = new HashSet<>(); 
+        Set<Vertex> closed_b = new HashSet<>(); 
+
+
         //Purely for visualising
         edgesConsidered = new ArrayList<>();
 
@@ -77,9 +81,13 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
                 break;
             }
 
-
+            closed_f.add(head_f.v);
+            closed_b.add(head_b.v);
             g.getNeighboursOf(head_f.v)
                 .forEach(n -> {
+                    if (closed_f.contains(n.v)){
+                        return;
+                    }
                     // RELAX
                     double maybeNewBestDistance = head_f.dist + n.distance;
                     double previousBestDistance = bestDist_f.getOrDefault(n.v, INF_DIST);
@@ -102,6 +110,9 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
            
             ginv.getNeighboursOf(head_b.v)
             .forEach(n -> {
+                if (closed_b.contains(n.v)){
+                    return;
+                }
                 // RELAX
                 double maybeNewBestDistance = head_b.dist + n.distance;
                 double previousBestDistance = bestDist_b.getOrDefault(n.v, INF_DIST);

@@ -33,6 +33,10 @@ public class ReachGoldBerg {
         int i = 0;
 
         //TODO do a shortcut step before we start?
+        //TODO what should epsilon be fore start?
+        Graph gPrimeShortcut = shortcut(graphPrime, graph, epsilon*0.5, inPenalties, outPenalties, r); 
+        graphPrime = gPrimeShortcut;
+
 
         while (true) {
         //for (int i = 0; i < bs.length; i++){
@@ -197,10 +201,8 @@ public class ReachGoldBerg {
             saveReachArrayToFile("iceland-reach"+i, rVertex);
 
 
-            // Shortcuts
-            // TODO us bs[i+1], but avoid the last edge case with indexing out of bounds....
-            
-            Graph gPrimeShortcut = shortcut(graphPrime, graph, epsilon*1.5, inPenalties, outPenalties, r); //TODO what graph should this be given
+            // Shortcuts            
+            gPrimeShortcut = shortcut(graphPrime, graph, epsilon*1.5, inPenalties, outPenalties, r); 
             graphPrime = gPrimeShortcut;
             
             
@@ -906,7 +908,7 @@ public class ReachGoldBerg {
                     curr = n.v;
 
                     //System.out.println(distanceToCur-(length/2));
-                    if (Math.abs(distanceToCur-(length/2)) < bestDistToMiddle){
+                    if (Math.abs(distanceToCur-(length/2)) < bestDistToMiddle && curr != to){
                         middle = curr;
                         bestDistToMiddle = Math.abs(distanceToCur-(length/2));
                     }
@@ -950,7 +952,6 @@ public class ReachGoldBerg {
             pathToMiddle.add(middle);
             pathToEnd.add(middle);
             pathToEnd.add(to);
-
 
             //System.out.println("from -> middle");
             addShortcut(from, middle, pathToMiddle, epsilon, g, gToModify, direction, origGraph, inPen, outPen, reach);
@@ -1014,7 +1015,7 @@ public class ReachGoldBerg {
 
         //Graph graph = makeExampleGraph();
         Graph graph = GraphPopulator.populateGraph("iceland-latest-roads.csv");
-        Graph prunedGraph = GraphUtils.pruneChains(graph);
+        //Graph prunedGraph = GraphUtils.pruneChains(graph);
         //Graph graph = makeSquareGraph(); 
 
         // Graph graph = makeSingleLineGraph();
@@ -1040,7 +1041,7 @@ public class ReachGoldBerg {
         long timeBefore = System.currentTimeMillis();
         //double[] bs = new double[]{100, 500, 1500, 4500, 10000, 20000};
         //double[] bs = new double[]{1,2,3,4,5, 10, 25};
-        Map<Vertex, Double> r = reach(prunedGraph, 500);
+        Map<Vertex, Double> r = reach(graph, 500);
         long timeAfter = System.currentTimeMillis();
 
         
