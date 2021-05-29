@@ -286,9 +286,9 @@ public class DijkstraReach implements PathfindingAlgo {
 
         for (Vertex v: solution2.getShortestPath()) {
             if (d.prunedNodes.contains(v)){
-                System.out.println(v + ": with reach " + r.get(v));
-                System.out.println(GraphUtils.realLength(pruned, solution2.getShortestPath().subList(0, solution2.getShortestPath().indexOf(v))));
-                System.out.println(GraphUtils.realLength(pruned, solution2.getShortestPath().subList(solution2.getShortestPath().indexOf(v), solution2.getShortestPath().size()-1)));
+                //System.out.println(v + ": with reach " + r.get(v));
+                //System.out.println(GraphUtils.realLength(pruned, solution2.getShortestPath().subList(0, solution2.getShortestPath().indexOf(v))));
+                //System.out.println(GraphUtils.realLength(pruned, solution2.getShortestPath().subList(solution2.getShortestPath().indexOf(v), solution2.getShortestPath().size()-1)));
                 vis.drawMeetingNode(v);
             }
         }
