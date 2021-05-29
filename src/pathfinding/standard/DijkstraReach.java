@@ -150,7 +150,9 @@ public class DijkstraReach implements PathfindingAlgo {
 
         if (predecessor.get(goal) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered, null);
+            out.add(goal);
+            out.add(start);
+            return new Solution(out, edgesConsidered, null);
         }
 
         Vertex temp = goal;
@@ -174,14 +176,11 @@ public class DijkstraReach implements PathfindingAlgo {
 
     public static void main(String[] args) {
         // Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
-        Graph graph = readShortcutGraph("iceland-shortcut");
+        Graph graph = readShortcutGraph("iceland-shortcutV2");
         Graph fullG = GraphPopulator.populateGraph("iceland-latest-roads.csv");
         Graph pruned = GraphUtils.pruneChains(fullG);
-        //double[] bs = new double[]{5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500};
-        //Map<Vertex, Double> r = Reach.reach(graph, bs);
-        // if run rn, this 56.1302396,9.7414558 is pruned away when it shouldn't because its reach is low.fileOne
 
-        Map<Vertex, Double> r = readReaches("iceland-reach");
+        Map<Vertex, Double> r = readReaches("iceland-reachV2");
 
         
         PrintStream originalStream = System.out;
@@ -227,7 +226,7 @@ public class DijkstraReach implements PathfindingAlgo {
                 vis.drawVisited(solution.getVisited());
                 //vis.visualize("Dijkstra reach");
 
-                GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+                GraphVisualiser vis2 = new GraphVisualiser(fullG, BoundingBox.AarhusSilkeborg);
                 vis2.drawPath(solution2.getShortestPath());
                 vis2.drawVisited(solution2.getVisited());
                 System.out.println("Nodes considered reach: " + solution.getVisited().size() + " vs normal dijkstra " + solution2.getVisited().size());
@@ -263,8 +262,12 @@ public class DijkstraReach implements PathfindingAlgo {
             }
         }*/
 
-        Vertex a = new Vertex(63.739067,-20.12924);
-        Vertex b = new Vertex(65.67908,-18.131926);
+        // 63.615295,-20.239555 -> 63.606285,-20.230413
+        //Vertex a = new Vertex(63.739067,-20.12924);
+        //Vertex b = new Vertex(65.67908,-18.131926);
+
+        Vertex a = GraphUtils.pickRandomVertex(fullG);
+        Vertex b = GraphUtils.pickRandomVertex(fullG);
 
 
         DijkstraReach d = new DijkstraReach(graph, r);
@@ -278,12 +281,14 @@ public class DijkstraReach implements PathfindingAlgo {
 
 
 
-        PathfindingAlgo da = new DijkstraTraditional(fullG);
+        PathfindingAlgo da = new DijkstraTraditional(pruned);
         Solution solution2 = da.shortestPath(a, b);
 
         for (Vertex v: solution2.getShortestPath()) {
             if (d.prunedNodes.contains(v)){
-                //System.out.println(v + ": with reach " + r.get(v));
+                System.out.println(v + ": with reach " + r.get(v));
+                System.out.println(GraphUtils.realLength(pruned, solution2.getShortestPath().subList(0, solution2.getShortestPath().indexOf(v))));
+                System.out.println(GraphUtils.realLength(pruned, solution2.getShortestPath().subList(solution2.getShortestPath().indexOf(v), solution2.getShortestPath().size()-1)));
                 vis.drawMeetingNode(v);
             }
         }
