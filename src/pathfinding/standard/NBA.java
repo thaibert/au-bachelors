@@ -68,6 +68,8 @@ public class NBA implements PathfindingAlgo{
 
         distToHeadOfBackward = distToHeadOfForward = hf(start, goal);
 
+        meetingNode = null;
+
         dist_f.put(start, 0.0);
         dist_b.put(goal, 0.0);
         pq_f.add(new Pair(start, 0));
@@ -230,19 +232,20 @@ public class NBA implements PathfindingAlgo{
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("iceland-latest-roads.csv");
+        graph = GraphUtils.pruneChains(graph);
 
         //Vertex a = new Vertex(56.1336391,9.7235112);
         //Vertex b = new Vertex(56.1906785,10.0880127);
 
         //56.0337, 56.2794, 9.4807, 10.259
 
-        Vertex a = GraphUtils.findNearestVertex(graph, 56.0337, 9.4807);
-        Vertex b = GraphUtils.findNearestVertex(graph, 56.2794, 10.259);
+        Vertex a = GraphUtils.findNearestVertex(graph, 64.13637,-21.889263);
+        Vertex b = GraphUtils.findNearestVertex(graph, 63.432827,-20.300999);
         PathfindingAlgo d = new NBA(graph);
-        Solution solution = d.shortestPath(Location.CPH, Location.Skagen);
+        Solution solution = d.shortestPath(a,b);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Iceland);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.drawMeetingNode(solution.getMeetingNode());

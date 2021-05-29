@@ -104,7 +104,7 @@ public class BidirectionalALT implements PathfindingAlgo{
 
         int iterations = 0;
         // ALGO
-        while (pq_f.size() > 0 || pq_b.size() > 0) {
+        while (pq_f.size() > 0 && pq_b.size() > 0) {
             
             iterations++;
             iterationsSinceLastLandmarkUpdate++;

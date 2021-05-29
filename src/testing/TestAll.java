@@ -155,13 +155,13 @@ public class TestAll {
 
     public static void main(String[] args) throws FileNotFoundException {
         String fileIn = "iceland-latest-roads.csv";
-        int runs = (int) 50;//1e2;
+        int runs = (int) 50;
 
 
         Graph g = GraphPopulator.populateGraph(fileIn);
         g = GraphUtils.pruneChains(g);
-        Graph gReach = readShortcutGraph("iceland-shortcut");
-        Map<Vertex, Double> r = readReaches("iceland-reach");
+        Graph gReach = readShortcutGraph("iceland-shortcutV2");
+        Map<Vertex, Double> r = readReaches("iceland-reachV2");
 
         int edgeNumber = 0;
         for (Vertex v: g.getAllVertices()){
@@ -170,8 +170,8 @@ public class TestAll {
 
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
-        LandmarkSelector ls = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
-        LandmarkSelector ls2 = new LandmarkSelector(gReach, 16, 1);
+        LandmarkSelector ls = new LandmarkSelector(g, 16, 0); // TODO how many landmarks
+        LandmarkSelector ls2 = new LandmarkSelector(gReach, 16, 0);
 
         algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g); //TODO change to DijkstraTraditional, its just slow to run
         algos[DIJKSTRA_OURS] = new Dijkstra(g);

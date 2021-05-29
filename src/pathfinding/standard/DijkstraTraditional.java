@@ -122,15 +122,15 @@ public class DijkstraTraditional implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
 
         Vertex a = new Vertex(56.1336391,9.7235112);
         Vertex b = new Vertex(56.1906785,10.0880127);
 
         PathfindingAlgo d = new DijkstraTraditional(graph);
-        Solution solution = d.shortestPath(a, b);
+        Solution solution = d.shortestPath(Location.CPH, Location.Viborgvej);
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.visualize("Dijkstra traditional");

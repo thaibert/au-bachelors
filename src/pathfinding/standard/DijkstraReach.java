@@ -176,6 +176,7 @@ public class DijkstraReach implements PathfindingAlgo {
         // Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
         Graph graph = readShortcutGraph("iceland-shortcut");
         Graph fullG = GraphPopulator.populateGraph("iceland-latest-roads.csv");
+        Graph pruned = GraphUtils.pruneChains(fullG);
         //double[] bs = new double[]{5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500};
         //Map<Vertex, Double> r = Reach.reach(graph, bs);
         // if run rn, this 56.1302396,9.7414558 is pruned away when it shouldn't because its reach is low.fileOne
@@ -262,8 +263,8 @@ public class DijkstraReach implements PathfindingAlgo {
             }
         }*/
 
-        Vertex a = new Vertex(63.441994,-20.27212);
-        Vertex b = new Vertex(65.50189,-18.131573);
+        Vertex a = new Vertex(63.739067,-20.12924);
+        Vertex b = new Vertex(65.67908,-18.131926);
 
 
         DijkstraReach d = new DijkstraReach(graph, r);
@@ -288,7 +289,7 @@ public class DijkstraReach implements PathfindingAlgo {
         }
         vis.visualize("Dijkstra Reaches");
 
-        GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.Iceland);
+        GraphVisualiser vis2 = new GraphVisualiser(pruned, BoundingBox.Iceland);
         vis2.drawPath(solution2.getShortestPath());
         vis2.drawVisited(solution2.getVisited());
         vis2.visualize("Dijkstra");

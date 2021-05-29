@@ -55,7 +55,7 @@ public class Astar implements PathfindingAlgo {
                 double tent_gScore = dist.getOrDefault(min.v, INF_DIST) + n.distance;
                 double potentialNewFscore = tent_gScore + heuristic(n.v, goal);
 
-                edgesConsidered.add(new Edge(min.v, n.v, tent_gScore));
+                edgesConsidered.add(new Edge(min.v, n.v, potentialNewFscore));
                 if (tent_gScore < dist.getOrDefault(n.v, INF_DIST)) {
                     pred.put(n.v, min.v);
                     dist.put(n.v, tent_gScore);
@@ -96,15 +96,15 @@ public class Astar implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-latest-roads.csv");
-        Graph pruned = GraphUtils.pruneChains(graph);
+        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
+        //Graph pruned = GraphUtils.pruneChains(graph);
 
 
         Vertex a = new Vertex(56.0440049,9.9025227);
         Vertex b = new Vertex(56.1814955,10.2042923);
 
-        Astar d = new Astar(pruned);
-        Solution solution = d.shortestPath(GraphUtils.findNearestVertex(pruned,Location.CPH), GraphUtils.findNearestVertex(pruned,Location.Skagen));
+        Astar d = new Astar(graph);
+        Solution solution = d.shortestPath(Location.CPH, Location.Viborgvej);
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());

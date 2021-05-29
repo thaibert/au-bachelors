@@ -25,6 +25,9 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
     // For visual
     private List<Edge> edgesConsidered;
 
+    Set<Vertex> closed_f;
+    Set<Vertex> closed_b;
+
     public BidirectionalDijkstra(Graph g) {
         this.g = g;
         this.ginv = GraphUtils.invertGraph(g);
@@ -44,8 +47,8 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
         meetingNode = null;
         mu = INF_DIST;
         
-        Set<Vertex> closed_f = new HashSet<>(); 
-        Set<Vertex> closed_b = new HashSet<>(); 
+        closed_f = new HashSet<>(); 
+        closed_b = new HashSet<>(); 
 
 
         //Purely for visualising
@@ -68,22 +71,33 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
 
         while (pq_f.size() > 0 && pq_b.size() > 0) {
 
-            Pair head_f = pq_f.poll();
-            Pair head_b = pq_b.poll();
-
-            s_f.add(head_f.v); 
-            s_b.add(head_b.v);
+            Pair min_b = pq_b.peek();
+            Pair min_f = pq_f.peek();
 
             // TODO BREAK CONDITION
-            if (bestDist_b.get(head_b.v) + 
-                bestDist_f.get(head_f.v) >= mu) {
+            if (bestDist_b.get(min_b.v) + 
+                bestDist_f.get(min_f.v) >= mu) {
                 System.out.println("Entered exit");
                 break;
             }
 
-            closed_f.add(head_f.v);
-            closed_b.add(head_b.v);
-            g.getNeighboursOf(head_f.v)
+            if ((pq_f.size() < pq_b.size() && pq_f.size() > 0) || pq_b.size() == 0){
+                Pair head_f = pq_f.poll();
+                s_f.add(head_f.v); 
+                closed_f.add(head_f.v);
+
+                expandForwad(head_f, pq_f);
+            } else {
+                Pair head_b = pq_b.poll();
+                s_b.add(head_b.v);
+                closed_b.add(head_b.v);
+
+                expandBackward(head_b, pq_b);
+            }
+
+
+
+            /*g.getNeighboursOf(head_f.v)
                 .forEach(n -> {
                     if (closed_f.contains(n.v)){
                         return;
@@ -134,7 +148,7 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
                 }
             });
         
-
+        */
 
 
         }
@@ -177,6 +191,62 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
 
     }
     
+    public void expandForwad(Pair head_f, PriorityQueue<Pair> pq_f){
+        g.getNeighboursOf(head_f.v)
+        .forEach(n -> {
+            if (closed_f.contains(n.v)){
+                return;
+            }
+            // RELAX
+            double maybeNewBestDistance = head_f.dist + n.distance;
+            double previousBestDistance = bestDist_f.getOrDefault(n.v, INF_DIST);
+
+            edgesConsidered.add(new Edge(head_f.v, n.v, maybeNewBestDistance));
+
+            if (maybeNewBestDistance < previousBestDistance) {
+                bestDist_f.put(n.v, maybeNewBestDistance);
+                predecessor_f.put(n.v, head_f.v);
+
+                // put back in PQ with new dist, but leave the old, "wrong" dist in there too.
+                pq_f.add(new Pair(n.v, maybeNewBestDistance)); 
+            }
+
+            if (s_b.contains(n.v) && bestDist_f.get(head_f.v) + n.distance + bestDist_b.get(n.v) < mu) {
+                mu = bestDist_f.get(head_f.v) + n.distance + bestDist_b.get(n.v);
+                meetingNode = n.v;
+            }
+        });
+    }
+
+    public void expandBackward(Pair head_b, PriorityQueue<Pair> pq_b){
+        ginv.getNeighboursOf(head_b.v)
+        .forEach(n -> {
+            if (closed_b.contains(n.v)){
+                return;
+            }
+            // RELAX
+            double maybeNewBestDistance = head_b.dist + n.distance;
+            double previousBestDistance = bestDist_b.getOrDefault(n.v, INF_DIST);
+
+            edgesConsidered.add(new Edge(head_b.v, n.v, maybeNewBestDistance));
+
+
+            if (maybeNewBestDistance < previousBestDistance) {
+                bestDist_b.put(n.v, maybeNewBestDistance);
+                predecessor_b.put(n.v, head_b.v);
+
+                // put back in PQ with new dist, but leave the old, "wrong" dist in there too.
+                pq_b.add(new Pair(n.v, maybeNewBestDistance)); 
+            }
+
+            if (s_f.contains(n.v) && bestDist_b.get(head_b.v) + n.distance + bestDist_f.get(n.v) < mu) {
+                mu = bestDist_b.get(head_b.v) + n.distance + bestDist_f.get(n.v);
+                meetingNode = n.v;
+            }
+        });
+    }
+
+
     public static void main(String[] args) {
         // We need to be able to utilize the inverted graph, so for now we ignore space efficiency and just create 2 graphs
         Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");

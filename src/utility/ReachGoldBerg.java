@@ -82,7 +82,7 @@ public class ReachGoldBerg {
                     System.out.println("Total calculating time so far " + ((timeAfter-timeBefore)/1000) + " seconds");
 
                 }
-                Tree tree = partialTree(graphPrime, v, epsilon);
+                Tree tree = partialTree(graphPrime, v, epsilon, outPenalties, inPenalties);
                 // We do not include v according to Goldberg
                 //tree.inner.remove(v);
 
@@ -116,8 +116,13 @@ public class ReachGoldBerg {
                         if (tree.pred.get(n.v) == null || !tree.pred.get(n.v).equals(u)){   
                             continue;
                         }
-                        Double tempR = calcReach(u,n.v, tree, inPenalties.getOrDefault(v, 0.0));
                         Edge un = new Edge(u, n.v, n.distance);
+                        if (r.getOrDefault(un, 0.0) > epsilon){
+                            continue; 
+                            // We already know we're gonna keep this edge for next iteration, so it won't matter if we find something higher
+                        }
+
+                        Double tempR = calcReach(u,n.v, tree, inPenalties.getOrDefault(v, 0.0));
                         edgesConsidered.add(un);
 
                         if (r.getOrDefault(un, 0.0) < tempR){
@@ -178,7 +183,7 @@ public class ReachGoldBerg {
             }
 
             // Save graph and reach of this iteration
-            writeGraphToFile("iceland-shortcut"+i, graph);
+            writeGraphToFile("iceland-shortcutV2"+i, graph);
 
             // Arc into vertex
             Map<Vertex, Double> maxIncomming = new HashMap<>();
@@ -198,7 +203,7 @@ public class ReachGoldBerg {
                     rVertex.put(v, INF_DIST);
                 }
             }
-            saveReachArrayToFile("iceland-reach"+i, rVertex);
+            saveReachArrayToFile("iceland-reachV2"+i, rVertex);
 
 
             // Shortcuts            
@@ -251,7 +256,7 @@ public class ReachGoldBerg {
         }
 
 
-        writeGraphToFile("iceland-shortcut", graph);
+        writeGraphToFile("iceland-shortcutV2", graph);
 
         return rVertex;
     }
@@ -259,11 +264,7 @@ public class ReachGoldBerg {
     public static Double calcReach(Vertex v, Vertex u, Tree tree, double penalty){
         double depth = depth(v,u, tree, penalty);
         double height =  height(v,u,tree);
-        //Vertex q = new Vertex(56.1486677,9.9171252);
-        /*if (q.equals(v) || q.equals(u)){
-            System.out.println(v.toString() + " -> " + u + " depth  = " + depth);
-            System.out.println(v.toString() + " -> " + u + " height = " + height);
-        }*/
+
 
         return Math.min(depth, height);
 
@@ -278,26 +279,17 @@ public class ReachGoldBerg {
         //System.out.println(u);
         for (Vertex w: tree.leafs){
             if (tree.paths.get(w).contains(u) && tree.closed.contains(w)) {
-                // If we take the distance to the beginning node, we don't have to keep track of the length of the edge
-                if (tree.dist.get(w) - tree.dist.get(v) <= 0) {
-                    //System.out.println(w.toString() + " -> " + v);
-                    //System.out.println("Impossible case");
-                }
                 h = Math.max(h, tree.dist.get(w) - tree.dist.get(v)); 
             } else if (tree.paths.get(w).contains(u) && !tree.closed.contains(w)){
                 h = Math.max(h, INF_DIST);
+                // No need to keep going, never beating INF
                 break;
-            } else {
-                // This happens when the leaf does not have v in its path
             }
-        }
-        if (h == 0){
-            //System.out.println(v + " -> " + u + " value h=" + h);
         }
         return h;
     }
 
-    public static Tree partialTree(Graph g, Vertex x, double epsilon){
+    public static Tree partialTree(Graph g, Vertex x, double epsilon, Map<Vertex, Double> outpen, Map<Vertex, Double> inpen){
         //System.out.print(".");
         // This may be super inefficient to maintain all this, but we find it easier than trying to squeze it all 
         // into one data structure.
@@ -338,49 +330,13 @@ public class ReachGoldBerg {
 
         double bestxPrimeDist = 0.0;
         
+
+        Set<Vertex> relevant = new HashSet<>();
+        Map<Vertex, Double> ext = new HashMap<>();
+
         while (pq.size() > 0) {
 
-            //boolean trueForAllLeaf = leafTprime.size() > 0 && bestxPrimeDist > 2 * epsilon ; // if there are any, assume it's tru and disprove in for loop
-            
-            /*System.out.println(bestDist);
-            System.out.println(xprimeDist);
-            System.out.println(leafT);
-            System.out.println(leafTprime + "\n");*/
-
-
-            // Stopping condition as shown in https://www.microsoft.com/en-us/research/wp-content/uploads/2006/01/tr-2005-132.pdf
-            /*for (Vertex v: leafTprime) {
-                if (!(leafT.contains(v) || xprimeDist.get(v) >= 2 * epsilon)){
-                    trueForAllLeaf = false;
-                    break;
-                }
-            }*/
-
-            //if (trueForAllLeaf){                
-                //System.out.println("Break 1");
-                /*System.out.println("Start: " + start);
-                System.out.println(leafT);
-                System.out.println(leafTprime + "\n");*/
-            //    break;
-            //}
-
-
-            // Another stopping condition 
-            // users.diag.uniroma1.it/challenge9/papers/goldberg.pdf
-            // Assume it's not true for all
-            //Vertex q = new Vertex(56.1483202, 9.9050756);
-    
-            //Vertex z = new Vertex(56.1486794,9.9164926);
-            /*Pair[] list2 = pq.toArray(new Pair[0]);
-            if (q.equals(x)){
-                ArrayList<Vertex> newList = new ArrayList<>();
-                for (int l = 0; l < list2.length; l++){
-                    newList.add(l, list2[l].v);
-                }
-                //System.out.println("List: " + newList.toString());
-            }*/
-
-            boolean foundMistake = leafT.size() > 0 && bestxPrimeDist > 2 * epsilon;
+            /*boolean foundMistake = leafT.size() > 0 && bestxPrimeDist > 2 * epsilon;
             //boolean foundMistake = true && innerCircle.size() > 0;
             if (foundMistake){
                 for (Vertex v: innerCircle){
@@ -396,7 +352,7 @@ public class ReachGoldBerg {
                             break;
                         }
 
-                    }
+                    }*/
                     /*for (Pair p: list){
                         //System.out.println(p.v);
                         //Set<Vertex> path = paths.get(p.v);
@@ -407,10 +363,10 @@ public class ReachGoldBerg {
                             break;
                         }
                     }*/
-                    if (!labeledDescendent){
+                    /*if (!labeledDescendent){
                         // No labeled descendent so early go on
                         continue;
-                    }
+                    }*/
     
                     // Property 2 relaxed)   
                     /*boolean longDist = true;
@@ -438,16 +394,16 @@ public class ReachGoldBerg {
     
                     if (longDist){continue;}*/
     
-                    foundMistake = false;
+                    /*foundMistake = false;
                     break;
                 } 
-            }
+            }*/
   
 
 
-            if (foundMistake){
+            /*if (foundMistake){
                 break;
-            }
+            }*/
 
 
 
@@ -457,35 +413,41 @@ public class ReachGoldBerg {
                 continue;
             }
             closed.add(head.v);
+            
             // Maintain inner and outercircles.
 
-            if (bestDist.get(head.v) <= epsilon ){
+            if (head.v.equals(x)){
                 innerCircle.add(head.v);
-            } else if (bestDist.get(head.v) > epsilon && xprimeDist.get(head.v) < epsilon) {
-                /*if (q.equals(head.v)){
-                    System.out.println("\nIs in the sweet spot");
-                }*/
+            } else if (pred.get(head.v).equals(x)) { 
                 innerCircle.add(head.v);
-            } //else {
-                //outerCircle.add(head.v);
-            //}
-            
+            } else if (xprimeDist.get(head.v) < epsilon && 
+                       xprimeDist.get(pred.get(head.v)) >= 
+                       inpen.getOrDefault(pred.get(head.v), 0.0)){
+                innerCircle.add(head.v);
+            }
+
+            if (innerCircle.contains(head.v)){
+                ext.put(head.v, 0.0);
+            } else {
+                ext.put(head.v, ext.get(pred.get(head.v)) + head.dist);
+            }
+
+            if (innerCircle.contains(head.v)){
+                relevant.add(head.v);
+            } else if (relevant.contains(pred.get(head.v)) && ext.get(head.v) + outpen.getOrDefault(pred.get(head.v), 0.0) <=  1.1 * epsilon) {
+                relevant.add(head.v);
+            }
+
+            if (!relevant.contains(head.v)){
+                continue;
+            }
+
 
 
             //leafTprime.add(head.v);
             if (xprimeDist.get(head.v) > bestxPrimeDist){
                 bestxPrimeDist = xprimeDist.get(head.v);
             }
-
-            // remove parent - it's no longer a leaf!
-            //Vertex parent = pred.get(head.v);
-            //if (parent != null) {
-            //    leafTprime.remove(parent);
-            //}
-
-            /*if (head.v.equals(q)){
-                System.out.println("Origin " + x);
-            }*/
             
             g.getNeighboursOf(head.v)
                 .forEach(n -> {
@@ -1058,7 +1020,7 @@ public class ReachGoldBerg {
         }
         System.out.println("number of vertices with very high reach : " + counter);*/
 
-        saveReachArrayToFile("iceland-reach", r);
+        saveReachArrayToFile("iceland-reachV2", r);
 
     }
 
