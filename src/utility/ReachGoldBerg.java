@@ -341,6 +341,8 @@ public class ReachGoldBerg {
         Map<Vertex, Double> ext = new HashMap<>();
         Map<Vertex, Vertex> innerParent = new HashMap<>();
 
+        Map<Vertex, Vertex> xPrimeVertex = new HashMap<>();
+
         pred.put(x, x);
 
         while (pq.size() > 0) {
@@ -425,12 +427,18 @@ public class ReachGoldBerg {
             
             // Maintain inner and outercircles.
 
+            if (head.v.equals(x) || pred.get(head.v).equals(x)){
+                xPrimeVertex.put(head.v, head.v);
+            } else {
+                xPrimeVertex.put(head.v, xPrimeVertex.get(pred.get(head.v)));
+            }
+
             if (head.v.equals(x)){
                 innerCircle.add(head.v);
             } else if (pred.get(head.v).equals(x)) { 
                 innerCircle.add(head.v);
-            } else if (xprimeDist.get(head.v) < epsilon && 
-                       bestDist.get(pred.get(head.v)) >= 
+            } else if (xprimeDist.get(head.v) + inpen.getOrDefault(xPrimeVertex.get(head.v), 0.0) < epsilon && 
+                       bestDist.get(pred.get(head.v)) + inpen.getOrDefault(x, 0.0) >= 
                        inpen.getOrDefault(pred.get(head.v), 0.0)){
                 innerCircle.add(head.v);
             }
@@ -452,9 +460,7 @@ public class ReachGoldBerg {
             if (innerCircle.contains(head.v)){
                 relevant.add(head.v);
             } else if (relevant.contains(pred.get(head.v)) && 
-                        ext.get(pred.get(head.v)) + 
-                        outpen.getOrDefault(pred.get(head.v), 0.0) 
-                        <= epsilon) {
+                        ext.get(pred.get(head.v)) + outpen.getOrDefault(pred.get(head.v), 0.0) <= epsilon) {
                 relevant.add(head.v);
             }
 
