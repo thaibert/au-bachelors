@@ -17,7 +17,7 @@ DRIVEN_LEN_AVG_LINE = "Average driven length (meters)"
 ##################################################################
 
 plot_type = DRIVEN_LEN_AVG_LINE
-file_in = "log-1000-aarhus-silkeborg-intersections.csv"
+file_in = "log-1000-pruned-iceland-latest-roads-4"
 sections = 20
 
 ##################################################################
@@ -142,6 +142,6 @@ elif (plot_type == DRIVEN_LEN_AVG_LINE):
             c=list(colors.values())[algo],
             marker=".")
 
-
+plt.savefig(file_in.png)
 plt.show()
 

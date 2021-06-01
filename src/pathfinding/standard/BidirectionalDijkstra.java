@@ -160,7 +160,7 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
         /* TODO something that checks if we actually found something */
         if (predecessor_f.get(meetingNode) == null && predecessor_b.get(meetingNode) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered, meetingNode);
+            return new Solution(new ArrayList<>(), edgesConsidered, meetingNode, closed_b.size() + closed_f.size());
         }
 
         Vertex temp = meetingNode;
@@ -185,7 +185,7 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
         System.out.println("      " + comp.getComparisons() + " comparisons");
         System.out.println("      " + mu + " distance");
 
-        Solution solution = new Solution(out2, edgesConsidered, meetingNode);
+        Solution solution = new Solution(out2, edgesConsidered, meetingNode, closed_b.size() + closed_f.size());
 
         return solution;
 

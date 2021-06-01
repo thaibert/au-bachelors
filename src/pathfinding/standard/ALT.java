@@ -157,7 +157,7 @@ public class ALT implements PathfindingAlgo {
 
         if (parent.get(goal) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered, null);
+            return new Solution(new ArrayList<>(), edgesConsidered, null, settled.size());
         }
 
         Vertex temp = goal;
@@ -171,8 +171,7 @@ public class ALT implements PathfindingAlgo {
         System.out.println("      " + distComparator.getComparisons() + " comparisons");
         System.out.println("      " + dist.get(goal));
 
-        Solution solution = new Solution(out, edgesConsidered, null);
-
+        Solution solution = new Solution(out, edgesConsidered, null, settled.size());
 
 
 

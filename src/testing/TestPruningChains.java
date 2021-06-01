@@ -11,20 +11,35 @@ import java.util.*;
 
 public class TestPruningChains {
     public static void main(String[] args) {
-        String csv = "aarhus-silkeborg-all-roads.csv";
-        // String csv = "denmark-latest-roads.csv";
+        String csv = "iceland-latest-roads.csv";
+        // String csv = 2443753"denmark-latest-roads.csv";
         BoundingBox bbox = BoundingBox.AarhusSilkeborg;
-        int runs = (int) 1e6;
+        int runs = (int) 1e0;
 
         Graph graph = GraphPopulator.populateGraph(csv);
 
         // Graph pruned = GraphPopulator.populateGraph(csv);
-        graph = GraphUtils.pruneChains(graph);
-        Graph pruned = graph;
+        
         // pruned = GraphUtils.pruneChains(pruned);
+        int edgeOrig = 0;
+        for (Vertex v : graph.getAllVertices()){
+            edgeOrig += graph.getNeighboursOf(v).size();
+        }
+
 
         System.out.println(graph.getAllVertices().size() + " nodes in original graph");
+        System.out.println(edgeOrig + " edges in original graph");
+
+        Graph pruned  = GraphUtils.pruneChains(graph);
+
+        int edgePruned = 0;
+        for (Vertex v: pruned.getAllVertices()){
+            edgePruned += pruned.getNeighboursOf(v).size();
+        }
+
         System.out.println(pruned.getAllVertices().size() + " nodes in pruned graph");
+        System.out.println(edgePruned + " edges in pruned graph");
+
         
         Astar d = null;
         // Astar d2 = null;

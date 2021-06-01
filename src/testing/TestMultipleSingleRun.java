@@ -65,7 +65,7 @@ public class TestMultipleSingleRun {
         } catch(Exception e) {
             System.setOut(originalStream);
             e.printStackTrace();
-            Solution emptySolution = new Solution(new ArrayList<>(), new ArrayList<>(), null);
+            Solution emptySolution = new Solution(new ArrayList<>(), new ArrayList<>(), null, 0);
             for (int i = 0; i < numAlgos; i++) {
                 solutions[i] = emptySolution;
             }

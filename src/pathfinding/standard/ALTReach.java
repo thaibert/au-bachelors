@@ -69,7 +69,7 @@ public class ALTReach implements PathfindingAlgo {
         Set<Vertex> settled = new HashSet<>();
 
         if(landmarkSelector.getActiveLandmarks().size() == 0){
-            return new Solution(new ArrayList<>(), edgesConsidered, null);
+            return new Solution(new ArrayList<>(), edgesConsidered, null, settled.size());
         }
 
         int iterations = 0;
@@ -181,7 +181,7 @@ public class ALTReach implements PathfindingAlgo {
 
         if (parent.get(goal) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered, null);
+            return new Solution(new ArrayList<>(), edgesConsidered, null, settled.size());
         }
 
         Vertex temp = goal;
@@ -195,7 +195,7 @@ public class ALTReach implements PathfindingAlgo {
         System.out.println("      " + distComparator.getComparisons() + " comparisons");
         System.out.println("      " + dist.get(goal));
 
-        Solution solution = new Solution(out, edgesConsidered, null);
+        Solution solution = new Solution(out, edgesConsidered, null, settled.size());
 
 
 

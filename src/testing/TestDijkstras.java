@@ -50,7 +50,7 @@ public class TestDijkstras {
         } catch(Exception e) {
             System.setOut(originalStream);
             System.out.println(e.getMessage());
-            solutionTraditional = solutionOurs = new Solution(new ArrayList<>(), new ArrayList<>(), null);
+            solutionTraditional = solutionOurs = new Solution(new ArrayList<>(), new ArrayList<>(), null, 0);
         }
         System.setOut(originalStream);
         System.out.print("  " + a + "  ->  " + b);

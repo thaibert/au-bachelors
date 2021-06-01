@@ -174,7 +174,7 @@ public class BidirectionalALT implements PathfindingAlgo{
         /* TODO something that checks if we actually found something */
         if (pred_f.get(touchNode) == null && pred_b.get(touchNode) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered, null);
+            return new Solution(new ArrayList<>(), edgesConsidered, null, closed.size());
         }
 
         Vertex temp = touchNode;
@@ -201,7 +201,7 @@ public class BidirectionalALT implements PathfindingAlgo{
         System.out.println("      " + comp.getComparisons() + " comparisons");
         System.out.println("      " + bestPathLength + " distance");
 
-        Solution solution = new Solution(out2, edgesConsidered, touchNode);
+        Solution solution = new Solution(out2, edgesConsidered, touchNode, closed.size());
 
 
 

@@ -93,7 +93,7 @@ public class NBA implements PathfindingAlgo{
         /* TODO something that checks if we actually found something */
         if (pred_f.get(meetingNode) == null && pred_b.get(meetingNode) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered, null);
+            return new Solution(new ArrayList<>(), edgesConsidered, null, closed.size());
         }
 
         Vertex temp = meetingNode;
@@ -120,7 +120,7 @@ public class NBA implements PathfindingAlgo{
         System.out.println("      " + comp.getComparisons() + " comparisons");
         System.out.println("      " + bestPathLength + " distance");
 
-        Solution solution = new Solution(out2, edgesConsidered, meetingNode);
+        Solution solution = new Solution(out2, edgesConsidered, meetingNode, closed.size());
 
         return solution;
     }

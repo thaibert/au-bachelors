@@ -83,13 +83,14 @@ public class TestAll {
                     + (stop-start) + "," 
                     + solutions[i].getVisited().size() + ","
                     + solutions[i].getShortestPath().size() + ","
-                    + GraphUtils.realLength(g, solutions[i].getShortestPath()) + "\n");
+                    + GraphUtils.realLength(g, solutions[i].getShortestPath()) + ","+ 
+                    + solutions[i].getAmountOfScannedVertices() + "\n");
             }
 
         } catch(Exception e) {
             System.setOut(originalStream);
             e.printStackTrace();
-            Solution emptySolution = new Solution(new ArrayList<>(), new ArrayList<>(), null);
+            Solution emptySolution = new Solution(new ArrayList<>(), new ArrayList<>(), null, 0);
             for (int i = 0; i < numAlgos; i++) {
                 solutions[i] = emptySolution;
             }
@@ -155,7 +156,7 @@ public class TestAll {
 
     public static void main(String[] args) throws FileNotFoundException {
         String fileIn = "iceland-latest-roads.csv";
-        int runs = (int) 50;
+        int runs = (int) 1000;
 
 
         Graph g = GraphPopulator.populateGraph(fileIn);
@@ -163,15 +164,11 @@ public class TestAll {
         Graph gReach = readShortcutGraph("iceland-shortcutV2");
         Map<Vertex, Double> r = readReaches("iceland-reachV2");
 
-        int edgeNumber = 0;
-        for (Vertex v: g.getAllVertices()){
-            edgeNumber += g.getNeighboursOf(v).size();
-        }
 
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
-        LandmarkSelector ls = new LandmarkSelector(g, 16, 0); // TODO how many landmarks
-        LandmarkSelector ls2 = new LandmarkSelector(gReach, 16, 0);
+        LandmarkSelector ls = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
+        LandmarkSelector ls2 = new LandmarkSelector(gReach, 16, 1);
 
         algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g); //TODO change to DijkstraTraditional, its just slow to run
         algos[DIJKSTRA_OURS] = new Dijkstra(g);
@@ -186,7 +183,7 @@ public class TestAll {
         // Prepare data logging file
         csv = new File("log-"+ runs + "-" + fileIn);
         pw = new PrintWriter(csv);
-        pw.write("algo,time,edges_expanded,no_nodes,driven_len\n");
+        pw.write("algo,time,edges_expanded,no_nodes,driven_len,verticesScanned\n");
         
         Random rnd = new Random(1);
 

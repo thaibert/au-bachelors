@@ -421,7 +421,8 @@ public class GraphUtils {
         // Random landmark to get started
         //System.out.println("Searching for landmarks");
 
-        Vertex random = GraphUtils.pickRandomVertex(g);
+        Random rnd = new Random(5);
+        Vertex random = GraphUtils.pickRandomVertexWithSeed(g, rnd);
         landmarks.add(random);
 
         //Keep track of all distances from landmarks to other vertices, so we can find the one furthest away
@@ -483,9 +484,10 @@ public class GraphUtils {
         // This is hardcore an hack
         // Find a vertex that can reach at least 70% of all nodes in the graph
         Set<Vertex> reachable = null;
-        boolean keepSearching = true;
+        boolean keepSearching = true;        
+        Random rnd = new Random(5);
         while (keepSearching){
-            Vertex v = pickRandomVertex(g);
+            Vertex v = pickRandomVertexWithSeed(g, rnd);
             Map<Vertex, Double> distance = dijkstra(g, v);
             if (distance.keySet().size() > g.getAllVertices().size() * 0.7){
                 reachable = distance.keySet();

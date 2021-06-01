@@ -36,7 +36,7 @@ public class ALTStaticLandmark implements PathfindingAlgo {
 
     @Override
     public Solution shortestPath(Vertex start, Vertex goal) {
-
+        landmarkSelector.setAllLandmarks();
 
         Map<Vertex, Double> dist = new HashMap<>();
         Map<Vertex, Vertex> parent = new HashMap<>(); 
@@ -92,7 +92,7 @@ public class ALTStaticLandmark implements PathfindingAlgo {
 
         if (parent.get(goal) == null) {
             System.out.println("  --> No path exists!!");
-            return new Solution(new ArrayList<>(), edgesConsidered, null);
+            return new Solution(new ArrayList<>(), edgesConsidered, null, settled.size());
         }
 
         Vertex temp = goal;
@@ -106,7 +106,7 @@ public class ALTStaticLandmark implements PathfindingAlgo {
         System.out.println("      " + distComparator.getComparisons() + " comparisons");
         System.out.println("      " + dist.get(goal));
 
-        Solution solution = new Solution(out, edgesConsidered, null);
+        Solution solution = new Solution(out, edgesConsidered, null, settled.size());
 
         return solution;
     }

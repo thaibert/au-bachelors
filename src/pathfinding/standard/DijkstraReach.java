@@ -107,7 +107,7 @@ public class DijkstraReach implements PathfindingAlgo {
                     double maybeNewBestDistance = head.dist + n.distance;
                     double previousBestDistance = bestDist.getOrDefault(n.v, INF_DIST);
 
-                    if (reaches.get(n.v)*1.00001 < maybeNewBestDistance && reaches.get(n.v)*1.00001 < GraphUtils.haversineDist(n.v, goal) ){
+                    if (reaches.get(n.v)*1.0001 < maybeNewBestDistance && reaches.get(n.v)*1.0001 < GraphUtils.haversineDist(n.v, goal) ){
                         //System.out.println("Node pruned with reaching");
                         prunedNodes.add(n.v);
                         nodesPruned++;
@@ -150,9 +150,9 @@ public class DijkstraReach implements PathfindingAlgo {
 
         if (predecessor.get(goal) == null) {
             System.out.println("  --> No path exists!!");
-            out.add(goal);
-            out.add(start);
-            return new Solution(out, edgesConsidered, null);
+            //out.add(goal);
+            //out.add(start);
+            return new Solution(out, edgesConsidered, null, closed.size());
         }
 
         Vertex temp = goal;
@@ -166,7 +166,7 @@ public class DijkstraReach implements PathfindingAlgo {
         System.out.println("      " + comp.getComparisons() + " comparisons");
         System.out.println("      " + bestDist.get(goal) + " distance");
 
-        Solution solution = new Solution(out, edgesConsidered, null);
+        Solution solution = new Solution(out, edgesConsidered, null, closed.size());
 
         return solution;
     }
@@ -263,11 +263,11 @@ public class DijkstraReach implements PathfindingAlgo {
         }*/
 
         // 63.615295,-20.239555 -> 63.606285,-20.230413
-        //Vertex a = new Vertex(63.739067,-20.12924);
-        //Vertex b = new Vertex(65.67908,-18.131926);
+        Vertex a = new Vertex(66.04895,-23.149605);
+        Vertex b = new Vertex(65.703186,-16.76588);
 
-        Vertex a = GraphUtils.pickRandomVertex(fullG);
-        Vertex b = GraphUtils.pickRandomVertex(fullG);
+        //Vertex a = GraphUtils.pickRandomVertex(fullG);
+        //Vertex b = GraphUtils.pickRandomVertex(fullG);
 
 
         DijkstraReach d = new DijkstraReach(graph, r);
