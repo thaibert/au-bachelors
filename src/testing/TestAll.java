@@ -26,14 +26,16 @@ public class TestAll {
                                          "A*         ",
                                          "ALT        ",
                                          "BidrecAstar",
-                                         "BidrecALT  ",
+                                         "BidrecALT  "/*,
                                          "ReachDijk  ",
-                                         "ReachALT   "};
+"ReachALT   "*/};
     static int numAlgos = names.length;
 
     static PathfindingAlgo[] algos = new PathfindingAlgo[numAlgos];
     static long[] totalTimes = new long[numAlgos];
     static long[] totalExpanded = new long[numAlgos];
+    static long[] nodeScanned = new long[numAlgos];
+    static long nodesInAllPaths = 0;
 
     static long start;
     static long stop;
@@ -71,11 +73,16 @@ public class TestAll {
         Solution[] solutions = new Solution[numAlgos];
         try {
             for (int i = 0; i < numAlgos; i++) {
+
                 start = System.nanoTime();
                 solutions[i] = algos[i].shortestPath(a, b);
                 stop = System.nanoTime();
+                if(i == 0){
+                    nodesInAllPaths += solutions[i].getShortestPath().size();
+                }
                 totalTimes[i] += (stop - start);
                 totalExpanded[i] += solutions[i].getVisited().size();
+                nodeScanned[i] += solutions[i].getAmountOfScannedVertices();
 
                 // WRITE TO CSV
                 //  algo, time(ns), edges expanded, #nodes, driven_len
@@ -160,15 +167,15 @@ public class TestAll {
 
 
         Graph g = GraphPopulator.populateGraph(fileIn);
-        g = GraphUtils.pruneChains(g);
-        Graph gReach = readShortcutGraph("iceland-shortcutV2");
-        Map<Vertex, Double> r = readReaches("iceland-reachV2");
+        //g = GraphUtils.pruneChains(g);
+        //Graph gReach = readShortcutGraph("iceland-shortcutV2");
+        //Map<Vertex, Double> r = readReaches("iceland-reachV2");
 
 
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
         LandmarkSelector ls = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
-        LandmarkSelector ls2 = new LandmarkSelector(gReach, 16, 1);
+        //LandmarkSelector ls2 = new LandmarkSelector(gReach, 16, 1);
 
         algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g); //TODO change to DijkstraTraditional, its just slow to run
         algos[DIJKSTRA_OURS] = new Dijkstra(g);
@@ -177,8 +184,8 @@ public class TestAll {
         algos[ALT] = new ALT(g, ls); 
         algos[ASTAR_BIDIRECTIONAL] = new NBA(g);
         algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, ls);
-        algos[REACH_DIJKSTRA] = new DijkstraReach(gReach, r);
-        algos[REACH_ALT] = new ALTReach(gReach, ls2, r);
+        //algos[REACH_DIJKSTRA] = new DijkstraReach(gReach, r);
+        //algos[REACH_ALT] = new ALTReach(gReach, ls2, r);
         
         // Prepare data logging file
         csv = new File("log-"+ runs + "-" + fileIn);
@@ -223,6 +230,18 @@ public class TestAll {
         for (int i = 0; i < numAlgos; i++) {
             System.out.printf("     Average edges expanded for %s     %8d edges \n", names[i], (long) totalExpanded[i]/runs);
         }
+
+        System.out.println();
+        for (int i = 0; i < numAlgos; i++) {
+            System.out.printf("     Average Nodes scanned for %s     %8d nodes \n", names[i], (long) nodeScanned[i]/runs);
+        }
+
+        System.out.println();
+        for (int i = 0; i < numAlgos; i++) {
+            System.out.printf("     Efficiency for %s     %8.6f  \n", names[i], (double) (nodesInAllPaths*1.0/nodeScanned[i]*1.0));
+        }
+
+
 
     }
 

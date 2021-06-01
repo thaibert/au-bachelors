@@ -70,13 +70,13 @@ public class Dijkstra implements PathfindingAlgo {
             if (closed.contains(head)){
                 continue;
             }
+            closed.add(head);
 
             if (head.equals(goal)) {
                 System.out.println("  --> Finished early at " + num);
                 break;
             }
 
-            closed.add(head);
 
             g.getNeighboursOf(head).forEach(n -> {
                 if (closed.contains(n.v)){

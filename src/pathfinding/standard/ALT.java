@@ -182,7 +182,8 @@ public class ALT implements PathfindingAlgo {
 
     
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-intersections.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-latest-roads.csv");
+        graph = GraphUtils.pruneChains(graph);
 
         Vertex a = new Vertex(56.0440049,9.9025227);
         Vertex b = new Vertex(56.0418177, 9.8967658); // 52 Skanderborg V 
@@ -190,10 +191,10 @@ public class ALT implements PathfindingAlgo {
         // a = GraphUtils.pickRandomVertex(graph);
         // b = GraphUtils.pickRandomVertex(graph);
 
-        LandmarkSelector landmarkSelector = new LandmarkSelector(graph, 16, 1);
+        LandmarkSelector landmarkSelector = new LandmarkSelector(graph, 16, 0);
 
         ALT d = new ALT(graph, landmarkSelector);
-        Solution solution = d.shortestPath(Location.CPH, Location.Skagen);
+        Solution solution = d.shortestPath(GraphUtils.findNearestVertex(graph, Location.CPH), GraphUtils.findNearestVertex(graph,Location.Skagen));
         // Solution solution = d.shortestPath(GraphUtils.pickRandomVertex(graph), GraphUtils.pickRandomVertex(graph));
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
