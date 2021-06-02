@@ -51,11 +51,9 @@ elif COUNTRY == "denmark":
 axes.yaxis.set_major_formatter(formatter)
 
 
-
 data = pd.read_csv(file_in)
 
 
-# ============ https://stackoverflow.com/a/46246771 ==================
 # build the legend
 colors = {"OurDijk    ": "xkcd:baby poop green",
           "TradDijk   ": "blue",     
@@ -68,17 +66,6 @@ colors = {"OurDijk    ": "xkcd:baby poop green",
           ################
           "ReachDijk  ": "cyan",
           "ReachALT   ": "lime"}
-# p0 = mpatches.Patch(color='xkcd:baby poop green', label="OurDijk    ")
-p1 = mpatches.Patch(color='blue', label="Dijkstra")
-p2 = mpatches.Patch(color='red', label="A*")
-p3 = mpatches.Patch(color='xkcd:green', label="ALT")
-#############
-p4 = mpatches.Patch(color='turquoise', label="Bidirectional Dijkstra")
-p5 = mpatches.Patch(color='xkcd:orange', label="Bidirectional A*")
-p6 = mpatches.Patch(color='xkcd:yellowgreen', label="Bidirectional ALT")
-##############
-p7 = mpatches.Patch(color='cyan', label="Reach (dijkstra)")
-p8 = mpatches.Patch(color='lime', label="Reach (ALT)")
 
 markers = ["<",  # Our dijkstra - IGNORE 
            ">", # Traditional dijkstra
@@ -109,6 +96,9 @@ elif plot_type == NODES_IN_PATH:
     x_data = data["no_nodes"]
 
 
+
+############ Begin calculating and plotting! ###########
+
 max_len = max(x_data)
 lengths =       [None] * (len(colors) * sections)
 average_y = [None] * (len(colors) * sections)
@@ -123,7 +113,7 @@ for algo in range(len(colors)):
         sum_data_points = 0
         for i in range(algo, len(data), len(colors)):
             x = x_data[i]
-            if (lower < x and x < upper):
+            if (lower < x and x <= upper):
                 num_data_points += 1
                 sum_data_points += y_data[i]
         average_y[index] = sum_data_points / (num_data_points + 0.00001) # avoiding divbyzero
