@@ -142,6 +142,6 @@ elif (plot_type == DRIVEN_LEN_AVG_LINE):
             c=list(colors.values())[algo],
             marker=".")
 
-plt.savefig(file_in.png)
+plt.savefig(file_in)
 plt.show()
 

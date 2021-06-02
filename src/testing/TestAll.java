@@ -26,9 +26,9 @@ public class TestAll {
                                          "A*         ",
                                          "ALT        ",
                                          "BidrecAstar",
-                                         "BidrecALT  "/*,
+                                         "BidrecALT  ",
                                          "ReachDijk  ",
-"ReachALT   "*/};
+                                         "ReachALT   "};
     static int numAlgos = names.length;
 
     static PathfindingAlgo[] algos = new PathfindingAlgo[numAlgos];
@@ -89,8 +89,8 @@ public class TestAll {
                 pw.write(names[i] + "," 
                     + (stop-start) + "," 
                     + solutions[i].getVisited().size() + ","
-                    + solutions[i].getShortestPath().size() + ","
-                    + GraphUtils.realLength(g, solutions[i].getShortestPath()) + ","+ 
+                    + solutions[0].getShortestPath().size() + ","
+                    + GraphUtils.realLength(g, solutions[0].getShortestPath()) + ","+ 
                     + solutions[i].getAmountOfScannedVertices() + "\n");
             }
 
@@ -167,15 +167,15 @@ public class TestAll {
 
 
         Graph g = GraphPopulator.populateGraph(fileIn);
-        //g = GraphUtils.pruneChains(g);
-        //Graph gReach = readShortcutGraph("iceland-shortcutV2");
-        //Map<Vertex, Double> r = readReaches("iceland-reachV2");
+        g = GraphUtils.pruneChains(g);
+        Graph gReach = readShortcutGraph("iceland-shortcutV2");
+        Map<Vertex, Double> r = readReaches("iceland-reachV2");
 
 
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
         LandmarkSelector ls = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
-        //LandmarkSelector ls2 = new LandmarkSelector(gReach, 16, 1);
+        LandmarkSelector ls2 = new LandmarkSelector(gReach, 16, 1);
 
         algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g); //TODO change to DijkstraTraditional, its just slow to run
         algos[DIJKSTRA_OURS] = new Dijkstra(g);
@@ -184,11 +184,11 @@ public class TestAll {
         algos[ALT] = new ALT(g, ls); 
         algos[ASTAR_BIDIRECTIONAL] = new NBA(g);
         algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, ls);
-        //algos[REACH_DIJKSTRA] = new DijkstraReach(gReach, r);
-        //algos[REACH_ALT] = new ALTReach(gReach, ls2, r);
+        algos[REACH_DIJKSTRA] = new DijkstraReach(gReach, r);
+        algos[REACH_ALT] = new ALTReach(gReach, ls2, r);
         
         // Prepare data logging file
-        csv = new File("log-"+ runs + "-" + fileIn);
+        csv = new File("log-"+ runs + "-" +fileIn+"-pruned");
         pw = new PrintWriter(csv);
         pw.write("algo,time,edges_expanded,no_nodes,driven_len,verticesScanned\n");
         

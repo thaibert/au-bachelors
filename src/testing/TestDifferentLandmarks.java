@@ -35,7 +35,7 @@ public class TestDifferentLandmarks {
     
     //static String[] names = new String[]{"ALT_FARTHEST_1", "ALT_FARTHEST_2"/*, "ALT_FARTHEST_4", "ALT_FARTHEST_8", "ALT_FARTHEST_16", "ALT_FARTHEST_32"*/};
                    
-    static String[] names = new String[]{"Active_ALT", "Active_BidirecALT", "Static_ALT", "Static_BidrecALT"};
+    static String[] names = new String[]{"Active_ALT"/*, "Active_BidirecALT", "Static_ALT", "Static_BidrecALT"*/};
 
     static int numAlgos = names.length;
 
@@ -176,7 +176,7 @@ public class TestDifferentLandmarks {
         int runs = (int) 1e3;
 
         
-        Graph g = GraphPopulator.populateGraph("iceland-latest-roads.csv");
+        Graph g = GraphPopulator.populateGraph("denmark-latest-roads.csv");
         //g = GraphUtils.pruneChains(g);
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
@@ -218,18 +218,18 @@ public class TestDifferentLandmarks {
         //LandmarkSelector ls2 = new LandmarkSelector(g, 16, 2);
 
         lms[ACTIVE_ALT] = ls0;
-        lms[ACTIVE_BIDIRECALT] = ls0;
-        lms[STATIC_ALT] = ls0;
-        lms[STATIC_BIDIRECALT] = ls0;
+        //lms[ACTIVE_BIDIRECALT] = ls0;
+        //lms[STATIC_ALT] = ls0;
+        //lms[STATIC_BIDIRECALT] = ls0;
 
         algos[ACTIVE_ALT] = new ALT(g, ls0);
-        algos[ACTIVE_BIDIRECALT] = new BidirectionalALT(g, ls0);
-        algos[STATIC_ALT] = new ALTStaticLandmark(g, ls0);
-        algos[STATIC_BIDIRECALT] = new BidirectionalALTStaticLandmark(g, ls0);
+        //algos[ACTIVE_BIDIRECALT] = new BidirectionalALT(g, ls0);
+        //algos[STATIC_ALT] = new ALTStaticLandmark(g, ls0);
+        //algos[STATIC_BIDIRECALT] = new BidirectionalALTStaticLandmark(g, ls0);
 
 
         // Prepare data logging file
-        csv = new File("log-" + runs + "-" + "denmark-latest-roads-active-vs-static-farthest");
+        csv = new File("log-" + runs + "-" + "denmark-latest-roads-farthest-16");
         pw = new PrintWriter(csv);
         pw.write("algo,time,edges_expanded,no_nodes,driven_len,verticesScanned\n");
         
@@ -275,7 +275,7 @@ public class TestDifferentLandmarks {
         }
         System.out.println();
         for (int i = 0; i < numAlgos; i++) {
-            System.out.printf("     Efficiency for %s     %8.6f  \n", names[i], (double) (efficiency[i]/runs)*100);
+            System.out.printf("     Efficiency for %s     %8.6f  \n", names[i], (double) (efficiency[i]*1.0/runs*1.0)*100);
         }
         System.out.println();
         for (int i = 0; i < numAlgos; i++) {

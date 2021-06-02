@@ -206,18 +206,98 @@ public class ALTReach implements PathfindingAlgo {
 
     
     public static void main(String[] args) {
-        Graph graph = readShortcutGraph("iceland-shortcut");
+        Graph graph = readShortcutGraph("iceland-shortcutV2");
         Graph fullG = GraphPopulator.populateGraph("iceland-latest-roads.csv");
-
-        Map<Vertex, Double> r = readReaches("iceland-reach");
-
-        Vertex a = new Vertex(65.68043,-18.087887);
-        Vertex b = new Vertex(63.433376,-20.286596);
-        Random rnd = new Random(21);
-        //Vertex a = GraphUtils.pickRandomVertexWithSeed(graph, rnd);
-        //Vertex b = GraphUtils.pickRandomVertexWithSeed(graph, rnd);
-
         LandmarkSelector landmarkSelector = new LandmarkSelector(graph, 16, 1);
+
+        Map<Vertex, Double> r = readReaches("iceland-reachV2");
+        PrintStream originalStream = System.out;
+
+        PrintStream noopStream = new PrintStream(new OutputStream(){
+            public void write(int b) {
+                // NO-OP
+            }
+        });
+        
+        System.setOut(noopStream);
+        
+        for (int i = 0; i < 1000; i++ ){
+            System.setOut(originalStream);
+            //System.out.print(".");
+            if (i % 100 == 0){
+                System.out.println("\n      " + i +  " iterations done!");
+            }
+            System.setOut(noopStream);
+
+
+            Vertex a = GraphUtils.pickRandomVertex(graph);
+            Vertex b = GraphUtils.pickRandomVertex(graph);
+
+            ALTReach d = new ALTReach(graph,landmarkSelector, r);
+            Solution solution = d.shortestPath(a, b);
+    
+
+            PathfindingAlgo da = new Dijkstra(fullG);
+            Solution solution2 = da.shortestPath(a, b);
+
+            // if (!solution.getShortestPath().equals(solution2.getShortestPath())){
+            Collection<Vertex> dijkstraPath = new ArrayList<>(solution2.getShortestPath());
+            Collection<Vertex> shortcutPath = new ArrayList<>(solution.getShortestPath());
+
+            System.setOut(originalStream);
+            int diff = dijkstraPath.size() - shortcutPath.size();
+            //System.out.println("Reach path has  " + diff + "  fewer nodes");
+            if (diff > 25) {
+                System.out.println("  diff " + diff + " @ " + a + "->" + b);
+                GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Iceland);
+                vis.drawPath(solution.getShortestPath());
+                vis.drawVisited(solution.getVisited());
+                vis.visualize("Dijkstra reach");
+
+                GraphVisualiser vis2 = new GraphVisualiser(fullG, BoundingBox.Iceland);
+                vis2.drawPath(solution2.getShortestPath());
+                vis2.drawVisited(solution2.getVisited());
+                System.out.println("Nodes considered reach: " + solution.getVisited().size() + " vs normal dijkstra " + solution2.getVisited().size());
+                vis2.visualize("Dijkstra normal");
+                try {
+                    Thread.sleep(20000);
+                } catch (Exception e){
+                    
+                }
+            }
+            System.setOut(noopStream);
+
+            //if (! solution2.getShortestPath().equals(solution.getShortestPath())) {  
+            if (! dijkstraPath.containsAll(shortcutPath)){              
+
+                try {
+                    System.setOut(originalStream);
+
+                    System.out.println("Mistake found on :" + a + " -> " + b);
+
+                    GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Iceland);
+                    vis.drawPath(solution.getShortestPath());
+                    vis.drawVisited(solution.getVisited());
+                    vis.visualize("Dijkstra Reaches");
+
+
+                    GraphVisualiser vis2 = new GraphVisualiser(graph, BoundingBox.Iceland);
+                    vis2.drawPath(solution2.getShortestPath());
+                    vis2.drawVisited(solution2.getVisited());
+                    vis2.visualize("Dijkstra");
+
+                    Thread.sleep(100000);
+
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+
+            }
+        }
+        Random rnd = new Random(21);
+        Vertex a = GraphUtils.pickRandomVertexWithSeed(graph, rnd);
+        Vertex b = GraphUtils.pickRandomVertexWithSeed(graph, rnd);
+
 
         ALTReach d = new ALTReach(graph, landmarkSelector, r);
         Solution solution = d.shortestPath(a, b);
