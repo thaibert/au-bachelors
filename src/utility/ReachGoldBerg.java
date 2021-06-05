@@ -84,16 +84,14 @@ public class ReachGoldBerg {
                 }
                 Tree tree = partialTree(graphPrime, v, epsilon, outPenalties, inPenalties);
                 // We do not include v according to Goldberg
-                //tree.inner.remove(v);
 
                 // Modify tree according to the out-penalties
                 int x = 0;
                 int y = 0;
                 Set<Vertex> newClosed = new HashSet<>(tree.closed); // Can't modify closed while we loop over it 
                 Set<Vertex> iter = new HashSet<>(tree.dist.keySet());
-                //Set<Vertex> iter = new HashSet<>(tree.leafs);
-                // Can probably limit this to only iterate leafs!
-                //System.out.println("Adding psudoleafs");
+
+                // This part can be made way more effective
                 for (Vertex w: iter){ // TODO this is ugly
                     tree.leafs.remove(w);
                     Vertex wPrime = new Vertex(x,y); // This is the pseudo leafs
@@ -173,9 +171,7 @@ public class ReachGoldBerg {
                 for (Neighbor n: graph.getNeighboursOf(v)){
                     if (graphPrime.getAllVertices().contains(v) && graphPrime.getNeighboursOf(v).contains(n)) {
                         continue;
-                    } else {
-                        //System.out.println("Arc is no longer in graphprime: " +  v.toString() + n.v);
-                    }
+                    } 
                     // TODO check that penalty should only be added if they're not in the graph anymore
                     Edge edge = new Edge(v, n.v, n.distance);
                     outPenalties.put(v, Math.max(outPenalties.getOrDefault(v, 0.0), r.getOrDefault(edge, INF_DIST)));
@@ -234,14 +230,6 @@ public class ReachGoldBerg {
 
         // A better translation is described on page 13
         // https://www.microsoft.com/en-us/research/wp-content/uploads/2006/01/tr-2005-132.pdf
-        /*for (Vertex v: graph.getAllVertices()){
-            for (Neighbor n: graph.getNeighboursOf(v)){
-                Edge edge = new Edge(v, n.v, n.distance);
-
-                maxIncomming.put(n.v, Math.max(r.getOrDefault(edge, INF_DIST), maxIncomming.getOrDefault(n.v, 0.0)));
-                maxOutgoing.put(v, Math.max(r.getOrDefault(edge, INF_DIST), maxOutgoing.getOrDefault(v, 0.0)));
-            }
-        }*/
         
         for (Edge e: r.keySet()){
             maxIncomming.put(e.getEnd(), Math.max(r.getOrDefault(e, INF_DIST), maxIncomming.getOrDefault(e.getEnd(), 0.0)));

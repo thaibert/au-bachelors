@@ -249,17 +249,17 @@ public class BidirectionalDijkstra implements PathfindingAlgo {
 
     public static void main(String[] args) {
         // We need to be able to utilize the inverted graph, so for now we ignore space efficiency and just create 2 graphs
-        Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
-
+        Graph graph = GraphPopulator.populateGraph("iceland-latest-roads.csv");
+        Graph pruned = GraphUtils.pruneChains(graph);
 
         Vertex a = new Vertex(56.1570293,9.814296);
         Vertex b = new Vertex(56.1582726,9.8152893);
 
 
-        BidirectionalDijkstra d = new BidirectionalDijkstra(graph);
-        Solution solution = d.shortestPath(Location.Silkeborg, Location.Randersvej);
+        BidirectionalDijkstra d = new BidirectionalDijkstra(pruned);
+        Solution solution = d.shortestPath(GraphUtils.findNearestVertex(pruned, 64.25013,-15.190943), GraphUtils.findNearestVertex(pruned,65.528015,-24.455515));
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.AarhusSilkeborg);
+        GraphVisualiser vis = new GraphVisualiser(pruned, BoundingBox.Iceland);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.drawMeetingNode(solution.getMeetingNode());

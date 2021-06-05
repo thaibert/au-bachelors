@@ -97,7 +97,7 @@ public class TestDifferentLandmarks {
                 }
                 activeLandmarks[i][lms[i].getActiveLandmarks().size()] += 1;
 
-                efficiency[i] += solutions[i].getShortestPath().size()/solutions[i].getAmountOfScannedVertices();
+                efficiency[i] += solutions[i].getShortestPath().size();
                 nodeScanned[i] += solutions[i].getAmountOfScannedVertices();
 
                 // WRITE TO CSV
@@ -275,7 +275,7 @@ public class TestDifferentLandmarks {
         }
         System.out.println();
         for (int i = 0; i < numAlgos; i++) {
-            System.out.printf("     Efficiency for %s     %8.6f  \n", names[i], (double) (efficiency[i]*1.0/runs*1.0)*100);
+            System.out.printf("     Efficiency for %s     %8.6f  \n", names[i], (double) ((efficiency[i]*1.0)/(nodeScanned[i]*1.0))*100);
         }
         System.out.println();
         for (int i = 0; i < numAlgos; i++) {

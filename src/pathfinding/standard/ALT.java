@@ -182,22 +182,22 @@ public class ALT implements PathfindingAlgo {
 
     
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("denmark-latest-roads.csv");
+        Graph graph = GraphPopulator.populateGraph("iceland-latest-roads.csv");
         graph = GraphUtils.pruneChains(graph);
 
-        Vertex a = new Vertex(56.0440049,9.9025227);
-        Vertex b = new Vertex(56.0418177, 9.8967658); // 52 Skanderborg V 
+        //Vertex a = new Vertex(56.0440049,9.9025227);
+        //Vertex b = new Vertex(56.0418177, 9.8967658); // 52 Skanderborg V 
 
-        // a = GraphUtils.pickRandomVertex(graph);
-        // b = GraphUtils.pickRandomVertex(graph);
+        Vertex a = GraphUtils.pickRandomVertex(graph);
+        Vertex b = GraphUtils.pickRandomVertex(graph);
 
         LandmarkSelector landmarkSelector = new LandmarkSelector(graph, 16, 0);
-
+        // GraphUtils.findNearestVertex(graph, Location.CPH), GraphUtils.findNearestVertex(graph,Location.Skagen)
         ALT d = new ALT(graph, landmarkSelector);
-        Solution solution = d.shortestPath(GraphUtils.findNearestVertex(graph, Location.CPH), GraphUtils.findNearestVertex(graph,Location.Skagen));
+        Solution solution = d.shortestPath(a, b);
         // Solution solution = d.shortestPath(GraphUtils.pickRandomVertex(graph), GraphUtils.pickRandomVertex(graph));
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Iceland);
         vis.drawPoint(landmarkSelector.getAllLandmarks(), landmarkSelector.getActiveLandmarks());
         System.out.println("allLandmarks size:    " + landmarkSelector.getAllLandmarks().size());
         System.out.println("activeLandmarks size: " + landmarkSelector.getActiveLandmarks().size());

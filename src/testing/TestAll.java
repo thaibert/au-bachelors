@@ -18,16 +18,16 @@ public class TestAll {
     static final int ASTAR_BIDIRECTIONAL = 5;
     static final int ALT_BIDIRECTIONAL = 6;
     static final int REACH_DIJKSTRA = 7;
-    static final int REACH_ALT = 8;
+    static final int REACH_ALT = 0;
 
-    static String[] names = new String[]{"TradDijk   ", 
+    static String[] names = new String[]{/*"TradDijk   ", 
                                          "OurDijk    ", 
                                          "BidirecDijk", 
                                          "A*         ",
                                          "ALT        ",
                                          "BidrecAstar",
                                          "BidrecALT  ",
-                                         "ReachDijk  ",
+                                         "ReachDijk  ",*/
                                          "ReachALT   "};
     static int numAlgos = names.length;
 
@@ -163,7 +163,7 @@ public class TestAll {
 
     public static void main(String[] args) throws FileNotFoundException {
         String fileIn = "iceland-latest-roads.csv";
-        int runs = (int) 1000;
+        int runs = (int) 12000;
 
 
         Graph g = GraphPopulator.populateGraph(fileIn);
@@ -177,14 +177,14 @@ public class TestAll {
         LandmarkSelector ls = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
         LandmarkSelector ls2 = new LandmarkSelector(gReach, 16, 1);
 
-        algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g); //TODO change to DijkstraTraditional, its just slow to run
+        /*algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g); //TODO change to DijkstraTraditional, its just slow to run
         algos[DIJKSTRA_OURS] = new Dijkstra(g);
         algos[ASTAR] = new Astar(g);
         algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
         algos[ALT] = new ALT(g, ls); 
         algos[ASTAR_BIDIRECTIONAL] = new NBA(g);
         algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, ls);
-        algos[REACH_DIJKSTRA] = new DijkstraReach(gReach, r);
+        algos[REACH_DIJKSTRA] = new DijkstraReach(gReach, r);*/
         algos[REACH_ALT] = new ALTReach(gReach, ls2, r);
         
         // Prepare data logging file
@@ -192,7 +192,7 @@ public class TestAll {
         pw = new PrintWriter(csv);
         pw.write("algo,time,edges_expanded,no_nodes,driven_len,verticesScanned\n");
         
-        Random rnd = new Random(1);
+        Random rnd = new Random(2);
 
         System.out.println();
         for (int i = 0; i < runs; i++) {

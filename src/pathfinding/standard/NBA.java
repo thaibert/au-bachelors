@@ -232,7 +232,7 @@ public class NBA implements PathfindingAlgo{
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("iceland-latest-roads.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-latest-roads.csv");
         graph = GraphUtils.pruneChains(graph);
 
         //Vertex a = new Vertex(56.1336391,9.7235112);
@@ -240,12 +240,12 @@ public class NBA implements PathfindingAlgo{
 
         //56.0337, 56.2794, 9.4807, 10.259
 
-        Vertex a = GraphUtils.findNearestVertex(graph, 64.13637,-21.889263);
-        Vertex b = GraphUtils.findNearestVertex(graph, 63.432827,-20.300999);
+        //Vertex a = GraphUtils.findNearestVertex(graph, 64.13637,-21.889263);
+        //Vertex b = GraphUtils.findNearestVertex(graph, 63.432827,-20.300999);
         PathfindingAlgo d = new NBA(graph);
-        Solution solution = d.shortestPath(a,b);
+        Solution solution = d.shortestPath(GraphUtils.findNearestVertex(graph, Location.CPH), GraphUtils.findNearestVertex(graph, Location.Skagen));
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Iceland);
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
         vis.drawPath(solution.getShortestPath());
         vis.drawVisited(solution.getVisited());
         vis.drawMeetingNode(solution.getMeetingNode());
