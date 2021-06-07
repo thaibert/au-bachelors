@@ -263,11 +263,11 @@ public class DijkstraReach implements PathfindingAlgo {
         }*/
 
         // 63.615295,-20.239555 -> 63.606285,-20.230413
-        Vertex a = new Vertex(66.04895,-23.149605);
-        Vertex b = new Vertex(65.703186,-16.76588);
+        //Vertex a = new Vertex(66.04895,-23.149605);
+        //Vertex b = new Vertex(65.703186,-16.76588);
 
-        //Vertex a = GraphUtils.pickRandomVertex(fullG);
-        //Vertex b = GraphUtils.pickRandomVertex(fullG);
+        Vertex a = GraphUtils.pickRandomVertex(graph);
+        Vertex b = GraphUtils.pickRandomVertex(graph);
 
 
         DijkstraReach d = new DijkstraReach(graph, r);
