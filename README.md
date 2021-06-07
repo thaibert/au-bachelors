@@ -5,7 +5,7 @@ Download links to .csv files that can be used for testing:
 
 
 If you want to run the code from the terminal, here is a step by step guide how to.
-1) Generate a text file with all .java paths for easier compiling of the entire project
+1) Generate a text file with all .java paths for easier compiling of the entire project\\
 find -name "*.java" > paths.txt
 
 2) Compile the entire project including the libraries used (It may say something is wrong, this can be ignored as we've had no troubles doing that at least)
