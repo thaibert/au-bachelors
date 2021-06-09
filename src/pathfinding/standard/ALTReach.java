@@ -213,7 +213,7 @@ public class ALTReach implements PathfindingAlgo {
         Map<Vertex, Double> r = readReaches("iceland-reachV2");
         PrintStream originalStream = System.out;
 
-        PrintStream noopStream = new PrintStream(new OutputStream(){
+        /*PrintStream noopStream = new PrintStream(new OutputStream(){
             public void write(int b) {
                 // NO-OP
             }
@@ -293,7 +293,7 @@ public class ALTReach implements PathfindingAlgo {
                 }
 
             }
-        }
+        }*/
         Random rnd = new Random(21);
         Vertex a = GraphUtils.pickRandomVertexWithSeed(graph, rnd);
         Vertex b = GraphUtils.pickRandomVertexWithSeed(graph, rnd);
@@ -304,13 +304,14 @@ public class ALTReach implements PathfindingAlgo {
         // Solution solution = d.shortestPath(GraphUtils.pickRandomVertex(graph), GraphUtils.pickRandomVertex(graph));
 
         GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Iceland);
-        vis.drawPoint(landmarkSelector.getAllLandmarks(), landmarkSelector.getActiveLandmarks());
+        //vis.drawPoint(landmarkSelector.getAllLandmarks(), landmarkSelector.getActiveLandmarks());
         System.out.println("allLandmarks size:    " + landmarkSelector.getAllLandmarks().size());
         System.out.println("activeLandmarks size: " + landmarkSelector.getActiveLandmarks().size());
         System.out.println("Edges considered      " + solution.getVisited().size() );
         
-        vis.drawPath(solution.getShortestPath());
-        vis.drawVisited(solution.getVisited());
+        //vis.drawPath(solution.getShortestPath());
+        //vis.drawVisited(solution.getVisited());
+        vis.drawReach(r);
         vis.visualize("ALT");
 
     }

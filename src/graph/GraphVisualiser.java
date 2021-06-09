@@ -34,6 +34,7 @@ public class GraphVisualiser extends Canvas {
     private List<Vertex> shortestPath;
     private List<Edge> visited;
     private Vertex meetingNode;
+    private Map<Vertex,Double> reach;
 
     public GraphVisualiser(Graph graph, BoundingBox bbox) {
         this.graph = graph;
@@ -90,6 +91,10 @@ public class GraphVisualiser extends Canvas {
         this.shortestPath = path;
     }
 
+    public void drawReach(Map<Vertex, Double> reach){
+        this.reach = reach;
+    }
+
     public void drawVisited(List<Edge> visited){
         this.visited = visited;
     }
@@ -122,6 +127,10 @@ public class GraphVisualiser extends Canvas {
         if (this.shortestPath != null) {
             drawPath(g);
             drawStartGoal(g);
+        }
+
+        if (this.reach != null){
+            drawReaches(g, this.reach);
         }
     }
 
@@ -322,6 +331,64 @@ public class GraphVisualiser extends Canvas {
         int imgY = (int) (image_height - heightPadding - (y * globalRatio));
 
         return new int[]{imgX, imgY};
+    }
+
+
+    private void drawReaches(Graphics g, Map<Vertex, Double> reach){
+                // Calculate min/max distance to get the colors right
+                double minDist = Double.MAX_VALUE;
+                double maxDist = 0;
+        
+                if (reach.size() == 0) {
+                    return;
+                }
+        
+                for (Vertex v : reach.keySet()) {
+                    double dist = reach.get(v);
+                    if (dist > maxDist) {
+                        maxDist = dist;
+                    }
+                    if (dist < minDist) {
+                        minDist = dist;
+                    }
+                }
+        
+                // Actually color the edges!
+                int index = 0;
+                for (Vertex v: this.graph.getAllVertices()) {
+                    for (Neighbor n: this.graph.getNeighboursOf(v)){
+                    // Color according to when an edge was considered
+                    // float h = (index * 1.0f) / (this.visited.size() * 1.0f); // hue
+        
+                    // Color according to distance in algorithm
+                    double temp = Math.max(reach.get(n.v), reach.get(v));
+                    double hRaw = ((temp-minDist) / (maxDist - minDist));
+                    double hLoDist = 0.2; // 72 degrees: slightly yellowish green
+                    double hHiDist = 1.0; // 360 degrees: red
+                    double hTranslated = hLoDist + hRaw / (hLoDist + hHiDist);
+
+        
+                    float s = 1; // saturation
+                    float b = 1; // brightness
+                    float h = (float) hTranslated;
+                    Color ctemp = Color.getHSBColor(h, s, b); 
+                    g.setColor(new Color(0,0,0, 20)); // 20 alpha out of 255
+
+                    g.setColor(new Color(ctemp.getRed(), ctemp.getGreen(), ctemp.getBlue(), (int) ((temp/(maxDist*1.5))*255)+30) );
+                    
+                    Vertex node1 = v;
+                    Vertex node2 = n.v; 
+                    String node1_lat = Double.toString(node1.getLatitude());
+                    String node1_lon = Double.toString(node1.getLongitude());
+                    int[] node1_coords = convertToXAndY(new String[] { node1_lat, node1_lon });
+                    String node2_lat = Double.toString(node2.getLatitude());
+                    String node2_lon = Double.toString(node2.getLongitude());
+                    int[] node2_coords = convertToXAndY(new String[] { node2_lat, node2_lon });
+        
+                    g.drawLine(node1_coords[0], node1_coords[1], node2_coords[0], node2_coords[1]);
+                    index++;
+                    }
+                }
     }
 
     private static void drawThickLine(Graphics g, int x1, int y1, int x2, int y2) {
