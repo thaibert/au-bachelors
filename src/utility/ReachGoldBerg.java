@@ -49,7 +49,7 @@ public class ReachGoldBerg {
             }
             System.out.println("Number of edge in graph " + edgeNumber + " at iteration " + i);
 
-            GraphVisualiser vis2 = new GraphVisualiser(graphPrime, BoundingBox.Iceland);
+            GraphVisualiser vis2 = new GraphVisualiser(graphPrime, BoundingBox.Denmark);
             vis2.visualize("Iteration " + i);
 
             //Iterative step
@@ -86,13 +86,36 @@ public class ReachGoldBerg {
                 // We do not include v according to Goldberg
 
                 // Modify tree according to the out-penalties
-                int x = 0;
+                /*int x = 0;
                 int y = 0;
                 Set<Vertex> newClosed = new HashSet<>(tree.closed); // Can't modify closed while we loop over it 
-                Set<Vertex> iter = new HashSet<>(tree.dist.keySet());
+                Set<Vertex> iter = new HashSet<>(tree.dist.keySet());*/
+
+                // Calculate the depths of every node in the tree!
+                Queue<Vertex> tempName = new LinkedList<>();
+                Set<Vertex> inQueue = new HashSet<>();
+                Map<Vertex, Double> heightMap = new HashMap<>();
+
+                for(Vertex w: tree.leafs){
+                    tempName.add(w);
+                    inQueue.add(w);
+                }
+
+                while(tempName.size() > 0){
+                    Vertex w = tempName.poll();
+                    Vertex parent = tree.pred.get(w);
+                    inQueue.remove(w);
+                    double temp = Math.max(heightMap.getOrDefault(w, 0.0), outPenalties.getOrDefault(w, 0.0));
+                    heightMap.put(w, Math.max(temp, heightMap.getOrDefault(w, 0.0)));
+                    heightMap.put(parent, Math.max(temp + (tree.dist.get(w) - tree.dist.get(parent)), heightMap.getOrDefault(parent, 0.0)));
+                    if (!inQueue.contains(parent) && (!w.equals(parent))){
+                        inQueue.add(parent);
+                        tempName.add(parent);
+                    }
+                }
 
                 // This part can be made way more effective
-                for (Vertex w: iter){ // TODO this is ugly
+                /*for (Vertex w: iter){ // TODO this is ugly
                     tree.leafs.remove(w);
                     Vertex wPrime = new Vertex(x,y); // This is the pseudo leafs
                     x++; 
@@ -106,7 +129,7 @@ public class ReachGoldBerg {
                         newClosed.add(wPrime);
                     }
                 }
-                tree.closed = newClosed;
+                tree.closed = newClosed;*/
 
                 long timeBeforeReachCalc = System.currentTimeMillis();
                 //System.out.println("Calculating reaches psudoleafs");
@@ -122,7 +145,7 @@ public class ReachGoldBerg {
                             // We already know we're gonna keep this edge for next iteration, so it won't matter if we find something higher
                         }
 
-                        Double tempR = calcReach(u,n.v, tree, inPenalties.getOrDefault(v, 0.0));
+                        Double tempR = calcReach(u,n.v, tree, inPenalties.getOrDefault(v, 0.0), heightMap);
                         edgesConsidered.add(un);
 
                         if (r.getOrDefault(un, 0.0) < tempR){
@@ -181,7 +204,7 @@ public class ReachGoldBerg {
             }
 
             // Save graph and reach of this iteration
-            writeGraphToFile("iceland-shortcutV2"+i, graph);
+            writeGraphToFile("denmark-shortcutV2"+i, graph);
 
             // Arc into vertex
             Map<Vertex, Double> maxIncomming = new HashMap<>();
@@ -201,7 +224,7 @@ public class ReachGoldBerg {
                     rVertex.put(v, INF_DIST);
                 }
             }
-            saveReachArrayToFile("iceland-reachV2"+i, rVertex);
+            saveReachArrayToFile("denmark-reachV2"+i, rVertex);
 
 
             // Shortcuts    
@@ -248,14 +271,25 @@ public class ReachGoldBerg {
         }
 
 
-        writeGraphToFile("iceland-shortcutV2", graph);
+        writeGraphToFile("denmark-shortcutV2", graph);
 
         return rVertex;
     }
 
-    public static Double calcReach(Vertex v, Vertex u, Tree tree, double penalty){
-        double depth = depth(v,u, tree, penalty);
-        double height =  height(v,u,tree);
+    public static Double calcReach(Vertex v, Vertex u, Tree tree, double penalty, Map<Vertex, Double> heightMap){
+
+
+        //double depth = depth(v,u, tree, penalty);
+        double depth = tree.dist.get(u) + penalty ;
+        double height = tree.dist.get(u) - tree.dist.get(v) + heightMap.get(u);
+        /*double heightv1 =  height(v,u,tree);
+
+        if (heightv1 != height) {
+            System.out.println("");
+            System.out.println(heightv1);
+            System.out.println(height);
+
+        }*/
 
 
         return Math.min(depth, height);
@@ -549,7 +583,7 @@ public class ReachGoldBerg {
         //System.out.println("Dijkstra done");
         
         Map<Vertex, Set<Vertex>> paths = new HashMap<>(); // This may not scale idk
-        for (Vertex v: bestDist.keySet()){
+        /*for (Vertex v: bestDist.keySet()){
             Vertex curr = v;
             Set<Vertex> path = new HashSet<>();
             while (curr != x){
@@ -558,7 +592,7 @@ public class ReachGoldBerg {
             }
             path.add(x);
             paths.put(v, path);
-        }
+        }*/
 
         Tree tree = new Tree(bestDist, innerCircle, outerCircle, pred, leafT, paths, closed);
 
@@ -982,7 +1016,7 @@ public class ReachGoldBerg {
         // 56.1349785,9.7198848: with reach 240.59535364050208 wrong reach
 
         //Graph graph = makeExampleGraph();
-        Graph graph = GraphPopulator.populateGraph("iceland-latest-roads.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-latest-roads.csv");
         Graph prunedGraph = GraphUtils.pruneChains(graph);
         //Graph graph = makeSquareGraph(); 
 
@@ -1026,7 +1060,7 @@ public class ReachGoldBerg {
         }
         System.out.println("number of vertices with very high reach : " + counter);*/
 
-        saveReachArrayToFile("iceland-reachV2", r);
+        saveReachArrayToFile("denmark-reachV2", r);
 
     }
 
