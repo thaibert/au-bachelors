@@ -12,6 +12,9 @@ public class BoundingBox {
     public static BoundingBox Iceland = new BoundingBox(62.845530000000004, 67.50085, -25.740850000000002, -12.41708);
     public static BoundingBox ReachTest = new BoundingBox(56.1474, 56.1497, 9.8977, 9.9194);
 
+    // 55.324326,11.969144
+    public static BoundingBox ReachTest2 = new BoundingBox(55.31, 55.33, 11.95, 11.98);
+
     public final double SOUTH;
     public final double NORTH;
     public final double WEST;

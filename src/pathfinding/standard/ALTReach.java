@@ -294,7 +294,7 @@ public class ALTReach implements PathfindingAlgo {
 
             }
         }*/
-        Random rnd = new Random(21);
+        Random rnd = new Random(212);
         Vertex a = GraphUtils.pickRandomVertexWithSeed(graph, rnd);
         Vertex b = GraphUtils.pickRandomVertexWithSeed(graph, rnd);
 
@@ -309,9 +309,9 @@ public class ALTReach implements PathfindingAlgo {
         System.out.println("activeLandmarks size: " + landmarkSelector.getActiveLandmarks().size());
         System.out.println("Edges considered      " + solution.getVisited().size() );
         
-        //vis.drawPath(solution.getShortestPath());
-        //vis.drawVisited(solution.getVisited());
-        vis.drawReach(r);
+        vis.drawPath(solution.getShortestPath());
+        vis.drawVisited(solution.getVisited());
+        //vis.drawReach(r);
         vis.visualize("ALT");
 
     }

@@ -17,17 +17,17 @@ public class TestAll {
     static final int ALT = 4;
     static final int ASTAR_BIDIRECTIONAL = 5;
     static final int ALT_BIDIRECTIONAL = 6;
-    static final int REACH_DIJKSTRA = 7;
-    static final int REACH_ALT = 0;
+    static final int REACH_DIJKSTRA = 1;
+    static final int REACH_ALT = 2;
 
-    static String[] names = new String[]{/*"TradDijk   ", 
-                                         "OurDijk    ", 
+    static String[] names = new String[]{"TradDijk   ", 
+                                         /*"OurDijk    ", 
                                          "BidirecDijk", 
                                          "A*         ",
                                          "ALT        ",
                                          "BidrecAstar",
-                                         "BidrecALT  ",
-                                         "ReachDijk  ",*/
+                                         "BidrecALT  ",*/
+                                         "ReachDijk  ",
                                          "ReachALT   "};
     static int numAlgos = names.length;
 
@@ -162,33 +162,33 @@ public class TestAll {
 
 
     public static void main(String[] args) throws FileNotFoundException {
-        String fileIn = "iceland-latest-roads.csv";
-        int runs = (int) 12000;
+        String fileIn = "denmark-latest-roads.csv";
+        int runs = (int) 1000;
 
 
         Graph g = GraphPopulator.populateGraph(fileIn);
         g = GraphUtils.pruneChains(g);
-        Graph gReach = readShortcutGraph("iceland-shortcutV2");
-        Map<Vertex, Double> r = readReaches("iceland-reachV2");
+        Graph gReach = readShortcutGraph("denmark-shortcutV3");
+        Map<Vertex, Double> r = readReaches("denmark-reachV3");
 
 
         //Graph gpruned = GraphUtils.pruneGraphOfChains(g);
 
-        LandmarkSelector ls = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
+        //LandmarkSelector ls = new LandmarkSelector(g, 16, 1); // TODO how many landmarks
         LandmarkSelector ls2 = new LandmarkSelector(gReach, 16, 1);
 
-        /*algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g); //TODO change to DijkstraTraditional, its just slow to run
-        algos[DIJKSTRA_OURS] = new Dijkstra(g);
+        algos[DIJKSTRA_TRADITIONAL] = new DijkstraTraditional(g); //TODO change to DijkstraTraditional, its just slow to run
+        /*algos[DIJKSTRA_OURS] = new Dijkstra(g);
         algos[ASTAR] = new Astar(g);
         algos[DIJKSTRA_BIDIRECTIONAL] = new BidirectionalDijkstra(g);
         algos[ALT] = new ALT(g, ls); 
         algos[ASTAR_BIDIRECTIONAL] = new NBA(g);
-        algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, ls);
-        algos[REACH_DIJKSTRA] = new DijkstraReach(gReach, r);*/
+        algos[ALT_BIDIRECTIONAL] = new BidirectionalALT(g, ls);*/
+        algos[REACH_DIJKSTRA] = new DijkstraReach(gReach, r);
         algos[REACH_ALT] = new ALTReach(gReach, ls2, r);
         
         // Prepare data logging file
-        csv = new File("log-"+ runs + "-" +fileIn+"-pruned");
+        csv = new File("log-"+ runs + "-" +fileIn+"-pruned-reach");
         pw = new PrintWriter(csv);
         pw.write("algo,time,edges_expanded,no_nodes,driven_len,verticesScanned\n");
         
