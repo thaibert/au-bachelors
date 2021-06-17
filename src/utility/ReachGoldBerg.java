@@ -145,7 +145,7 @@ public class ReachGoldBerg {
                             // We already know we're gonna keep this edge for next iteration, so it won't matter if we find something higher
                         }
 
-                        Double tempR = calcReach(u,n.v, tree, inPenalties.getOrDefault(v, 0.0), heightMap);
+                        Double tempR = calcReach(u,n.v, tree, inPenalties.getOrDefault(v, 0.0), heightMap, epsilon);
                         edgesConsidered.add(un);
 
                         if (r.getOrDefault(un, 0.0) < tempR){
@@ -204,7 +204,7 @@ public class ReachGoldBerg {
             }
 
             // Save graph and reach of this iteration
-            writeGraphToFile("denmark-shortcutV2"+i, graph);
+            writeGraphToFile("denmark-shortcutV3"+i, graph);
 
             // Arc into vertex
             Map<Vertex, Double> maxIncomming = new HashMap<>();
@@ -224,7 +224,7 @@ public class ReachGoldBerg {
                     rVertex.put(v, INF_DIST);
                 }
             }
-            saveReachArrayToFile("denmark-reachV2"+i, rVertex);
+            saveReachArrayToFile("denmark-reachV3"+i, rVertex);
 
 
             // Shortcuts    
@@ -271,24 +271,27 @@ public class ReachGoldBerg {
         }
 
 
-        writeGraphToFile("denmark-shortcutV2", graph);
+        writeGraphToFile("denmark-shortcutV3", graph);
 
         return rVertex;
     }
 
-    public static Double calcReach(Vertex v, Vertex u, Tree tree, double penalty, Map<Vertex, Double> heightMap){
+    public static Double calcReach(Vertex v, Vertex u, Tree tree, double penalty, Map<Vertex, Double> heightMap, Double epsilon){
 
 
         //double depth = depth(v,u, tree, penalty);
         double depth = tree.dist.get(u) + penalty ;
-        double height = tree.dist.get(u) - tree.dist.get(v) + heightMap.get(u);
-        /*double heightv1 =  height(v,u,tree);
+        double height = heightMap.get(u) + tree.dist.get(u) - tree.dist.get(v);
+        //double heightv1 =  height(v,u,tree);
 
-        if (heightv1 != height) {
+        /*if (heightv1 - height > 0.1 || height - heightv1 > 0.1) {
             System.out.println("");
             System.out.println(heightv1);
             System.out.println(height);
+        }
 
+        if (heightv1 > epsilon && height < epsilon){
+            System.out.println("New version pruned something the old one didn't");
         }*/
 
 
@@ -334,7 +337,7 @@ public class ReachGoldBerg {
         Map<Vertex, Integer> pathsSize = new HashMap<>(); // This may not scale idk
         Map<Vertex, Double> xprimeDist = new HashMap<>();
 
-        Set<Vertex> leafTprime = new HashSet<>(); 
+        //Set<Vertex> leafTprime = new HashSet<>(); 
         Set<Vertex> leafT = new HashSet<>();
 
         DistComparator comp = new DistComparator();
@@ -459,9 +462,8 @@ public class ReachGoldBerg {
                 innerCircle.add(head.v);
             } else if (pred.get(head.v).equals(x)) { 
                 innerCircle.add(head.v);
-            } else if (xprimeDist.get(head.v) + inpen.getOrDefault(xPrimeVertex.get(head.v), 0.0) < epsilon && 
-                       bestDist.get(pred.get(head.v)) + inpen.getOrDefault(x, 0.0) >= 
-                       inpen.getOrDefault(pred.get(head.v), 0.0)){
+            } else if (xprimeDist.get(head.v) + inpen.getOrDefault(xPrimeVertex.get(head.v), 0.0) < 1.3 * epsilon && 
+                       bestDist.get(pred.get(head.v)) + inpen.getOrDefault(x, 0.0) >= inpen.getOrDefault(pred.get(head.v), 0.0)){
                 innerCircle.add(head.v);
             }
 
@@ -482,7 +484,8 @@ public class ReachGoldBerg {
             if (innerCircle.contains(head.v)){
                 relevant.add(head.v);
             } else if (relevant.contains(pred.get(head.v)) && 
-                        ext.get(pred.get(head.v)) + outpen.getOrDefault(pred.get(head.v), 0.0) <= epsilon) {
+                        ext.get(pred.get(head.v)) + outpen.getOrDefault(pred.get(head.v), 0.0) <= 1.5 * epsilon
+                        && ext.get(head.v) + outpen.getOrDefault(head.v, 0.0)  <= 1.6 * epsilon) {
                 relevant.add(head.v);
             }
 
@@ -493,9 +496,9 @@ public class ReachGoldBerg {
 
 
             //leafTprime.add(head.v);
-            if (xprimeDist.get(head.v) > bestxPrimeDist){
+            /*if (xprimeDist.get(head.v) > bestxPrimeDist){
                 bestxPrimeDist = xprimeDist.get(head.v);
-            }
+            }*/
             
             g.getNeighboursOf(head.v)
                 .forEach(n -> {
@@ -1060,7 +1063,7 @@ public class ReachGoldBerg {
         }
         System.out.println("number of vertices with very high reach : " + counter);*/
 
-        saveReachArrayToFile("denmark-reachV2", r);
+        saveReachArrayToFile("denmark-reachV3", r);
 
     }
 

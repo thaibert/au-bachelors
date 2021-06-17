@@ -72,7 +72,8 @@ public class DijkstraReach implements PathfindingAlgo {
         pq.add(new Pair(start, 0));
 
         //assert(pq.peek() != null && pq.peek().dist >= 0); // All weights are non-negative
-
+        Vertex h = GraphUtils.findNearestVertex(g, new Vertex(55.3206328, 11.9677193));
+        Vertex q = GraphUtils.findNearestVertex(g, new Vertex(55.3206976, 11.9675463));
         
         int iterations = 0;
         while (pq.size() > 0) {
@@ -107,7 +108,21 @@ public class DijkstraReach implements PathfindingAlgo {
                     double maybeNewBestDistance = head.dist + n.distance;
                     double previousBestDistance = bestDist.getOrDefault(n.v, INF_DIST);
 
-                    if (reaches.get(n.v)*1.0001 < maybeNewBestDistance && reaches.get(n.v)*1.0001 < GraphUtils.haversineDist(n.v, goal) ){
+
+
+                    if (n.v.equals(h)){
+                        System.out.println(maybeNewBestDistance);
+                        System.out.println(GraphUtils.haversineDist(n.v, goal));
+                        System.out.println(reaches.get(h));
+                    }
+                    if (n.v.equals(q)){
+                        System.out.println(maybeNewBestDistance);
+                        System.out.println(GraphUtils.haversineDist(n.v, goal));
+                        System.out.println(reaches.get(q));
+
+                    }
+
+                    if (reaches.getOrDefault(n.v, INF_DIST)*1.0001 < maybeNewBestDistance && reaches.getOrDefault(n.v, INF_DIST)*1.0001 < GraphUtils.haversineDist(n.v, goal) ){
                         //System.out.println("Node pruned with reaching");
                         prunedNodes.add(n.v);
                         nodesPruned++;
@@ -176,11 +191,11 @@ public class DijkstraReach implements PathfindingAlgo {
 
     public static void main(String[] args) {
         // Graph graph = GraphPopulator.populateGraph("aarhus-silkeborg-intersections.csv");
-        Graph graph = readShortcutGraph("iceland-shortcutV2");
+        Graph graph = readShortcutGraph("iceland-shortcutV3");
         Graph fullG = GraphPopulator.populateGraph("iceland-latest-roads.csv");
         Graph pruned = GraphUtils.pruneChains(fullG);
 
-        Map<Vertex, Double> r = readReaches("iceland-reachV2");
+        Map<Vertex, Double> r = readReaches("iceland-reachV3");
 
         
         PrintStream originalStream = System.out;
@@ -263,12 +278,14 @@ public class DijkstraReach implements PathfindingAlgo {
         }*/
 
         // 63.615295,-20.239555 -> 63.606285,-20.230413
-        //Vertex a = new Vertex(66.04895,-23.149605);
-        //Vertex b = new Vertex(65.703186,-16.76588);
+        Vertex a = new Vertex(64.73035,-20.912165);
+        Vertex b = new Vertex(63.595806,-18.463123);
 
-        Vertex a = GraphUtils.pickRandomVertex(graph);
-        Vertex b = GraphUtils.pickRandomVertex(graph);
+        //Vertex a = GraphUtils.pickRandomVertex(graph);
+        //Vertex b = GraphUtils.pickRandomVertex(graph);
 
+        //Vertex a = GraphUtils.findNearestVertex(pruned, Location.Viborgvej);
+        //Vertex b = GraphUtils.findNearestVertex(pruned, Location.Skagen);
 
         DijkstraReach d = new DijkstraReach(graph, r);
         Solution solution = d.shortestPath(a, b);
@@ -283,6 +300,11 @@ public class DijkstraReach implements PathfindingAlgo {
 
         PathfindingAlgo da = new DijkstraTraditional(pruned);
         Solution solution2 = da.shortestPath(a, b);
+
+        Vertex h = new Vertex(55.3206328, 11.9677193);
+        Vertex q = new Vertex(55.3206976, 11.9675463);
+        System.out.println(r.get(h));
+        System.out.println(r.get(q));
 
         for (Vertex v: solution2.getShortestPath()) {
             if (d.prunedNodes.contains(v)){

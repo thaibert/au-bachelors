@@ -96,7 +96,7 @@ public class Astar implements PathfindingAlgo {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphPopulator.populateGraph("iceland-latest-roads.csv");
+        Graph graph = GraphPopulator.populateGraph("denmark-latest-roads.csv");
         Graph pruned = GraphUtils.pruneChains(graph);
 
 
@@ -106,9 +106,9 @@ public class Astar implements PathfindingAlgo {
         Astar d = new Astar(graph);
         Solution solution = d.shortestPath(GraphUtils.findNearestVertex(pruned, 64.25013,-15.190943), GraphUtils.findNearestVertex(pruned,65.528015,-24.455515));
 
-        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Iceland);
-        vis.drawPath(solution.getShortestPath());
-        vis.drawVisited(solution.getVisited());
+        GraphVisualiser vis = new GraphVisualiser(graph, BoundingBox.Denmark);
+        //vis.drawPath(solution.getShortestPath());
+        //vis.drawVisited(solution.getVisited());
         vis.visualize("A*");
     }
 
