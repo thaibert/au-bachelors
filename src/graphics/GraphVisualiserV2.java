@@ -8,7 +8,6 @@ import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.image.*;
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
 
 import graph.*;
 import pathfinding.framework.*;
@@ -20,15 +19,13 @@ public class GraphVisualiserV2 {
 
     private int window_x, window_y;
     private int image_width, image_height;
-    private double currZoom;
+    private double currZoom, baseScale;
 
     ProjectionConstants pc;
 
     private BlockingQueue<Road> queue;
     private static int VIS_THREADS = 3; //TODO
-    private static int PIXELS = (int) 2e4; // 10^5 craps out
-    private static int SCALE_TYPE = Image.SCALE_AREA_AVERAGING; // fast
-    // private static int SCALE_TYPE = Image.SCALE_SMOOTH; // slow but pretty
+    private static int PIXELS = (int) 2e4; // How big the "full-size" picture should be.
     private static Color BACKGROUND_COLOR = new Color(240, 240, 240); // TODO doesn't work :(
 
 
@@ -100,6 +97,7 @@ public class GraphVisualiserV2 {
         drawVisited(s.getVisited());
         // TODO draw start/end
         drawPath(s.getShortestPath());
+        // TODO draw landmarks
     }
 
     public void showGUI(String windowName) {
@@ -107,13 +105,15 @@ public class GraphVisualiserV2 {
             // wait for drawing to finish
         }
 
-        currZoom = 1;
+        currZoom = 0.9; // 0.9 to fit within first window
+        baseScale = Math.min((1.0 * window_x) / (1.0 * img.getWidth()),
+                             (1.0 * window_y) / (1.0 * img.getHeight()) );
 
         JScrollPane scrollPane = new JScrollPane(); // Enable scrolling around
         scrollPane.setPreferredSize(new Dimension(window_x, window_y));
         scrollPane.setBackground(BACKGROUND_COLOR);
 
-        Image scaled = img.getScaledInstance(window_x - 100, window_y - 100, SCALE_TYPE);
+        BufferedImage scaled = GraphicsUtils.zoom(img, baseScale, currZoom);
         JLabel imgLabel = new JLabel(new ImageIcon(scaled));
 
         scrollPane.setViewportView(imgLabel);
@@ -153,28 +153,18 @@ public class GraphVisualiserV2 {
 
                 currZoom *= deltaZoom;
 
-                Image scaled = img.getScaledInstance((int) ((window_x - 100)*currZoom), 
-                                                     (int) ((window_y - 100)*currZoom), 
-                                                     SCALE_TYPE);
-
-
                 // Zoom in on another thread to enable scrolling while calculating!
                 // High-level: create new BufferedImage to make setViewportView() fast
                 //    (most time was taken here)
                 // Now most time is in creating the BufferedImage, which can be done async
                 new Thread(() -> {
-                    BufferedImage bufferedScaled = new BufferedImage(scaled.getWidth(null), 
-                                                                 scaled.getHeight(null), 
-                                                                 BufferedImage.TYPE_INT_RGB);
-                    Graphics2D g2d = bufferedScaled.createGraphics();
-                    g2d.drawImage(scaled, 0, 0, null);
-                    g2d.dispose();
+                    BufferedImage zoomed = GraphicsUtils.zoom(img, baseScale, currZoom);
 
                     double newHorizontal = deltaZoom * scrollPane.getHorizontalScrollBar().getValue();
                     double newVertical = deltaZoom * scrollPane.getVerticalScrollBar().getValue();
                     
                     // Actually show new zoomed-in image!
-                    scrollPane.setViewportView(new JLabel(new ImageIcon(bufferedScaled)));
+                    scrollPane.setViewportView(new JLabel(new ImageIcon(zoomed)));
 
                     // Zoom towards center of old zoom level
                     // The constants just work, don't question it :D
@@ -253,6 +243,10 @@ public class GraphVisualiserV2 {
                 queue.put(new Road(start_xy[0], start_xy[1], end_xy[0], end_xy[1], c));
             } catch (InterruptedException e) { e.printStackTrace(); }
         }
+    }
+
+    private static void drawLandmarks(LandmarkSelector ls) {
+        // TODO
     }
 
 
